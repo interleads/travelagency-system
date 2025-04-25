@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Plane, Calendar, Hotel, MapPin, Bed, Sun, Route, Umbrella, Utensils, CarFront, Wifi } from "lucide-react";
-import { generatePDF } from "@/utils/pdfGenerator";
 
 interface TravelPackage {
   title: string;
@@ -111,9 +110,8 @@ const TravelPackageForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (previewRef.current) {
-      generatePDF(previewRef.current);
-    }
+    // For now, just prevent default form submission
+    // PDF generation removed
   };
 
   return (
