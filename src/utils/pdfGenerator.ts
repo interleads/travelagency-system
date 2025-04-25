@@ -1,10 +1,9 @@
 
-import { usePDF } from 'react-to-pdf';
+import { generatePDF as reactToPdf } from 'react-to-pdf';
 
 export const generatePDF = async (element: HTMLElement) => {
   try {
-    const { toPDF } = usePDF();
-    await toPDF(element, {
+    await reactToPdf(element, {
       filename: 'pacote-viagem.pdf',
       page: {
         margin: 20,

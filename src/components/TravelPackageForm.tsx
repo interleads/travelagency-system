@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { Plane, Calendar, Hotel, MapPin, Bed, Clock, FileText, Users, Ticket } from "lucide-react";
+import { Plane, Calendar, Hotel, MapPin, Bed, Beach, Sun, Route } from "lucide-react";
 import { generatePDF } from "@/utils/pdfGenerator";
 
 interface TravelPackage {
@@ -88,7 +88,7 @@ const TravelPackageForm = () => {
 
             <Card className="p-4 space-y-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Plane className="w-5 h-5" />
+                <Plane className="w-5 h-5 text-sky-600" />
                 Voos
               </h3>
               <div className="grid grid-cols-2 gap-4">
@@ -129,7 +129,7 @@ const TravelPackageForm = () => {
 
             <Card className="p-4 space-y-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Hotel className="w-5 h-5" />
+                <Hotel className="w-5 h-5 text-sky-600" />
                 Hotel
               </h3>
               <Input
@@ -181,47 +181,71 @@ const TravelPackageForm = () => {
         </div>
 
         {/* Preview */}
-        <div ref={previewRef} className="bg-white p-8 rounded-lg shadow-lg">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-sky-600 mb-2">{packageData.title || "Título do Pacote"}</h1>
-            <p className="text-gray-600">Organizado por: {packageData.agency || "Nome da Agência"}</p>
+        <div ref={previewRef} className="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div className="relative h-64 overflow-hidden mb-6">
+            <img 
+              src="https://images.unsplash.com/photo-1482938289607-e9573fc25ebb"
+              alt="Destino" 
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+              <h1 className="text-3xl font-bold mb-2">{packageData.title || "Título do Pacote"}</h1>
+              <p className="flex items-center gap-2">
+                <MapPin className="w-5 h-5" />
+                Organizado por: {packageData.agency || "Nome da Agência"}
+              </p>
+            </div>
           </div>
 
-          <div className="space-y-8">
-            <section>
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Plane className="w-5 h-5 text-sky-600" />
+          <div className="p-6 space-y-8">
+            <section className="border-b border-gray-200 pb-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-sky-600">
+                <Plane className="w-5 h-5" />
                 Detalhes do Voo
               </h2>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="font-medium">Ida:</p>
-                  <p>{packageData.flights.departure} → {packageData.flights.arrival}</p>
-                  <p className="text-gray-600">{packageData.flights.departureTime}</p>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="bg-sky-50 p-4 rounded-lg">
+                  <p className="font-medium text-sky-900">Ida:</p>
+                  <p className="text-sky-800">{packageData.flights.departure} → {packageData.flights.arrival}</p>
+                  <p className="text-sky-600">{packageData.flights.departureTime}</p>
                 </div>
-                <div>
-                  <p className="font-medium">Volta:</p>
-                  <p>{packageData.flights.arrival} → {packageData.flights.departure}</p>
-                  <p className="text-gray-600">{packageData.flights.arrivalTime}</p>
+                <div className="bg-sky-50 p-4 rounded-lg">
+                  <p className="font-medium text-sky-900">Volta:</p>
+                  <p className="text-sky-800">{packageData.flights.arrival} → {packageData.flights.departure}</p>
+                  <p className="text-sky-600">{packageData.flights.arrivalTime}</p>
                 </div>
               </div>
             </section>
 
-            <section>
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Hotel className="w-5 h-5 text-sky-600" />
+            <section className="border-b border-gray-200 pb-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-sky-600">
+                <Hotel className="w-5 h-5" />
                 Hospedagem
               </h2>
-              <div className="space-y-2">
-                <p><strong>Hotel:</strong> {packageData.hotel.name}</p>
-                <p><strong>Localização:</strong> {packageData.hotel.location}</p>
-                <p><strong>Check-in:</strong> {packageData.hotel.checkin}</p>
-                <p><strong>Check-out:</strong> {packageData.hotel.checkout}</p>
-                <div className="mt-4">
-                  <p className="font-medium mb-2">Comodidades:</p>
+              <div className="space-y-4">
+                <div className="bg-sky-50 p-4 rounded-lg">
+                  <p className="flex items-center gap-2 mb-2">
+                    <MapPin className="w-4 h-4 text-sky-600" />
+                    <span className="font-medium text-sky-900">{packageData.hotel.name || "Nome do Hotel"}</span>
+                  </p>
+                  <p className="text-sky-800 ml-6">{packageData.hotel.location}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-sky-600" />
+                    <span>Check-in: {packageData.hotel.checkin}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-sky-600" />
+                    <span>Check-out: {packageData.hotel.checkout}</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="font-medium text-sky-900 mb-3">Comodidades:</p>
                   <ul className="grid grid-cols-2 gap-2">
                     {packageData.hotel.features.map((feature, index) => (
-                      <li key={index} className="flex items-center gap-2">
+                      <li key={index} className="flex items-center gap-2 text-sky-800">
                         <Bed className="w-4 h-4 text-sky-600" />
                         {feature}
                       </li>
