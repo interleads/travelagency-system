@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { Airplane, Calendar, Hotel, MapPin, Bed, Clock, FileText, Users, Ticket } from "lucide-react";
+import { Plane, Calendar, Hotel, MapPin, Bed, Clock, FileText, Users, Ticket } from "lucide-react";
 import { generatePDF } from "@/utils/pdfGenerator";
 
 interface TravelPackage {
@@ -88,7 +88,7 @@ const TravelPackageForm = () => {
 
             <Card className="p-4 space-y-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Airplane className="w-5 h-5" />
+                <Plane className="w-5 h-5" />
                 Voos
               </h3>
               <div className="grid grid-cols-2 gap-4">
@@ -190,7 +190,7 @@ const TravelPackageForm = () => {
           <div className="space-y-8">
             <section>
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Airplane className="w-5 h-5 text-sky-600" />
+                <Plane className="w-5 h-5 text-sky-600" />
                 Detalhes do Voo
               </h2>
               <div className="grid grid-cols-2 gap-4">
