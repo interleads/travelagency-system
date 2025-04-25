@@ -1,3 +1,4 @@
+
 import { Product, PaymentMethod } from '@/types/pos';
 
 export const PRODUCTS: Product[] = [
@@ -30,3 +31,4 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
   { id: 4, name: "Dinheiro" },
   { id: 5, name: "Transferência Bancária" }
 ];
+
