@@ -119,11 +119,9 @@ const TravelPackageForm = () => {
   return (
     <div className="container mx-auto p-4 max-w-6xl">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Form Section */}
         <div className="space-y-6">
           <h2 className="text-2xl font-bold mb-6">Dados do Pacote</h2>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Basic Info Card */}
             <Card className="p-4 space-y-4">
               <div>
                 <label className="block mb-2">Título do Pacote</label>
@@ -143,7 +141,6 @@ const TravelPackageForm = () => {
               </div>
             </Card>
 
-            {/* Flights Card */}
             <Card className="p-4 space-y-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <Plane className="w-5 h-5 text-sky-600" />
@@ -215,7 +212,6 @@ const TravelPackageForm = () => {
               </div>
             </Card>
 
-            {/* Hotel Card */}
             <Card className="p-4 space-y-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <Hotel className="w-5 h-5 text-sky-600" />
@@ -279,44 +275,27 @@ const TravelPackageForm = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Comodidades</label>
-                  {packageData.hotel.features.map((feature, index) => (
-                    <div key={index} className="flex items-center gap-2 mb-2">
-                      <select
-                        value={feature.icon}
-                        onChange={(e) => {
-                          const newFeatures = [...packageData.hotel.features];
-                          newFeatures[index] = { ...feature, icon: e.target.value };
-                          setPackageData({
-                            ...packageData,
-                            hotel: { ...packageData.hotel, features: newFeatures }
-                          });
-                        }}
-                        className="border rounded px-2 py-1"
-                      >
-                        <option value="wifi">Wi-Fi</option>
-                        <option value="utensils">Restaurante</option>
-                        <option value="car">Estacionamento</option>
-                        <option value="umbrella">Piscina</option>
-                      </select>
-                      <Input
-                        value={feature.text}
-                        onChange={(e) => {
-                          const newFeatures = [...packageData.hotel.features];
-                          newFeatures[index] = { ...feature, text: e.target.value };
-                          setPackageData({
-                            ...packageData,
-                            hotel: { ...packageData.hotel, features: newFeatures }
-                          });
-                        }}
-                        placeholder="Descrição"
-                      />
-                    </div>
-                  ))}
+                  {packageData.hotel.features.map((feature, index) => {
+                    const iconMapping = {
+                      wifi: Wifi,
+                      utensils: Utensils,
+                      car: CarFront,
+                      umbrella: Umbrella
+                    };
+                    
+                    const IconComponent = iconMapping[feature.icon as keyof typeof iconMapping] || Bed;
+                    
+                    return (
+                      <li key={index} className="flex items-center gap-2 text-sky-800">
+                        <IconComponent className="w-4 h-4 text-sky-600" />
+                        {feature.text}
+                      </li>
+                    );
+                  })}
                 </div>
               </div>
             </Card>
 
-            {/* Tours Card */}
             <Card className="p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -388,7 +367,6 @@ const TravelPackageForm = () => {
           </form>
         </div>
 
-        {/* Preview Section */}
         <div ref={previewRef} className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="relative h-64 overflow-hidden mb-6">
             <img 
@@ -407,7 +385,6 @@ const TravelPackageForm = () => {
           </div>
 
           <div className="p-6 space-y-8">
-            {/* Flight Details */}
             <section className="border-b border-gray-200 pb-6">
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-sky-600">
                 <Plane className="w-5 h-5" />
@@ -441,7 +418,6 @@ const TravelPackageForm = () => {
               </div>
             </section>
 
-            {/* Hotel Section */}
             <section className="border-b border-gray-200 pb-6">
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-sky-600">
                 <Hotel className="w-5 h-5" />
@@ -481,12 +457,14 @@ const TravelPackageForm = () => {
                   <p className="font-medium text-sky-900 mb-3">Comodidades:</p>
                   <ul className="grid grid-cols-2 gap-2">
                     {packageData.hotel.features.map((feature, index) => {
-                      const IconComponent = {
+                      const iconMapping = {
                         wifi: Wifi,
                         utensils: Utensils,
                         car: CarFront,
                         umbrella: Umbrella
-                      }[feature.icon as keyof typeof icons] || Bed;
+                      };
+                      
+                      const IconComponent = iconMapping[feature.icon as keyof typeof iconMapping] || Bed;
                       
                       return (
                         <li key={index} className="flex items-center gap-2 text-sky-800">
@@ -500,7 +478,6 @@ const TravelPackageForm = () => {
               </div>
             </section>
 
-            {/* Tours Section */}
             {packageData.tours.length > 0 && (
               <section className="border-b border-gray-200 pb-6">
                 <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-sky-600">
