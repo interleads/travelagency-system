@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { Plane, Calendar, Hotel, MapPin, Bed, Beach, Sun, Route } from "lucide-react";
+import { Plane, Calendar, Hotel, MapPin, Bed, Sun, Route, Umbrella } from "lucide-react";
 import { generatePDF } from "@/utils/pdfGenerator";
 
 interface TravelPackage {
