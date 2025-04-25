@@ -6,6 +6,7 @@ import { CartItem, Product, PaymentMethod } from '@/types/pos';
 import ProductSelection from '@/components/pos/ProductSelection';
 import CartTable from '@/components/pos/CartTable';
 import PaymentInfo from '@/components/pos/PaymentInfo';
+import { PRODUCTS, PAYMENT_METHODS } from '@/data/products';
 
 const POS = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -100,4 +101,3 @@ const POS = () => {
 };
 
 export default POS;
-
