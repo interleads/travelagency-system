@@ -1,15 +1,20 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Card, CardContent, CardHeader, CardTitle 
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Plus } from "lucide-react";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { 
-  CartesianGrid, XAxis, YAxis, Tooltip, Legend, 
-  LineChart, Line, ResponsiveContainer, BarChart, Bar 
-} from 'recharts';
+import { TransactionForm } from '@/components/finance/TransactionForm';
+import { useToast } from "@/hooks/use-toast";
 
 // Dados de exemplo para o gráfico
 const chartData = [
@@ -22,9 +27,37 @@ const chartData = [
 ];
 
 const Finance = () => {
+  const { toast } = useToast();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleTransactionSubmit = (data: any) => {
+    console.log('Nova transação:', data);
+    toast({
+      title: "Transação registrada com sucesso!",
+      description: `${data.type === 'receita' ? 'Receita' : 'Despesa'} de R$ ${data.value}`,
+    });
+    setIsDialogOpen(false);
+  };
+
   return (
     <DashboardLayout>
-      <h2 className="text-3xl font-bold mb-6 text-gray-800">Módulo Financeiro</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-3xl font-bold text-gray-800">Módulo Financeiro</h2>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2" />
+              Nova Transação
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Nova Transação</DialogTitle>
+            </DialogHeader>
+            <TransactionForm onSubmit={handleTransactionSubmit} />
+          </DialogContent>
+        </Dialog>
+      </div>
       
       <Tabs defaultValue="overview">
         <TabsList className="grid w-full grid-cols-4 mb-8">
@@ -67,7 +100,6 @@ const Finance = () => {
             </Card>
           </div>
           
-          {/* Novo gráfico de resultados */}
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>Resultados Financeiros</CardTitle>
