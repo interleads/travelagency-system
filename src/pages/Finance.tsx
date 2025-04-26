@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Card, CardContent, CardHeader, CardTitle 
@@ -11,6 +12,28 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
+} from "@/components/ui/table";
+import {
+  ResponsiveContainer,
+  LineChart,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  Line,
+  Bar
+} from "recharts";
 import { Plus } from "lucide-react";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { TransactionForm } from '@/components/finance/TransactionForm';
@@ -369,3 +392,4 @@ const Finance = () => {
 };
 
 export default Finance;
+
