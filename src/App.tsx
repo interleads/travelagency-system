@@ -11,6 +11,9 @@ import Finance from "./pages/Finance";
 import CRM from "./pages/CRM";
 import Packages from "./pages/Packages";
 import POS from "./pages/POS";
+import Operacional from "./pages/Operacional";
+import Configuracoes from "./pages/Configuracoes";
+import Relatorios from "./pages/Relatorios";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,10 +38,13 @@ const App = () => (
           
           {/* Protected routes */}
           <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />
+          <Route path="/operacional" element={<AuthGuard><Operacional /></AuthGuard>} />
           <Route path="/finance" element={<AuthGuard><Finance /></AuthGuard>} />
           <Route path="/crm" element={<AuthGuard><CRM /></AuthGuard>} />
           <Route path="/packages" element={<AuthGuard><Packages /></AuthGuard>} />
           <Route path="/pos" element={<AuthGuard><POS /></AuthGuard>} />
+          <Route path="/relatorios" element={<AuthGuard><Relatorios /></AuthGuard>} />
+          <Route path="/configuracoes" element={<AuthGuard><Configuracoes /></AuthGuard>} />
           
           {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />

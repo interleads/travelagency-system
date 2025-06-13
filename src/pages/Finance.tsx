@@ -15,33 +15,27 @@ import {
   Table,
   TableHeader,
   TableBody,
-  TableFooter,
   TableHead,
   TableRow,
   TableCell,
-  TableCaption,
 } from "@/components/ui/table";
 import {
   ResponsiveContainer,
   LineChart,
-  BarChart,
   CartesianGrid,
   XAxis,
   YAxis,
   Tooltip,
   Legend,
-  Line,
-  Bar
+  Line
 } from "recharts";
 import { Plus } from "lucide-react";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { TransactionForm } from '@/components/finance/TransactionForm';
 import { useToast } from "@/hooks/use-toast";
 import { CashFlowTable } from '@/components/finance/CashFlowTable';
-import { AirlineTicketsTable } from '@/components/finance/AirlineTicketsTable';
-import { SuppliersTable } from '@/components/finance/SuppliersTable';
 
-// Dados de exemplo para o gráfico
+// Dados simplificados para o gráfico
 const chartData = [
   { month: 'Jan', receitas: 45000, despesas: 32000 },
   { month: 'Fev', receitas: 52000, despesas: 38000 },
@@ -85,14 +79,11 @@ const Finance = () => {
       </div>
       
       <Tabs defaultValue="overview">
-        <TabsList className="grid w-full grid-cols-7 mb-8">
+        <TabsList className="grid w-full grid-cols-4 mb-8">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="cashflow">Fluxo de Caixa</TabsTrigger>
-          <TabsTrigger value="tickets">Passagens</TabsTrigger>
-          <TabsTrigger value="suppliers">Fornecedores</TabsTrigger>
           <TabsTrigger value="income">Contas a Receber</TabsTrigger>
           <TabsTrigger value="expenses">Contas a Pagar</TabsTrigger>
-          <TabsTrigger value="reports">Relatórios</TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview">
@@ -182,18 +173,6 @@ const Finance = () => {
                       description: "Venda - Pacote Orlando",
                       type: "Receita",
                       value: "R$ 8.740,00"
-                    },
-                    {
-                      date: "18/04/2025",
-                      description: "Aluguel do Escritório",
-                      type: "Despesa",
-                      value: "R$ 3.500,00"
-                    },
-                    {
-                      date: "15/04/2025",
-                      description: "Venda - Pacote Lisboa",
-                      type: "Receita",
-                      value: "R$ 7.890,00"
                     }
                   ].map((item, i) => (
                     <TableRow key={i}>
@@ -223,14 +202,6 @@ const Finance = () => {
         
         <TabsContent value="cashflow">
           <CashFlowTable />
-        </TabsContent>
-        
-        <TabsContent value="tickets">
-          <AirlineTicketsTable />
-        </TabsContent>
-        
-        <TabsContent value="suppliers">
-          <SuppliersTable />
         </TabsContent>
         
         <TabsContent value="income">
@@ -355,53 +326,6 @@ const Finance = () => {
               </Table>
             </CardContent>
           </Card>
-        </TabsContent>
-        
-        <TabsContent value="reports">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Receitas x Despesas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="receitas" fill="#10B981" name="Receitas" />
-                      <Bar dataKey="despesas" fill="#EF4444" name="Despesas" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Demonstrativo do Período</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between p-4 bg-gray-50 rounded-lg">
-                    <span className="font-medium">Total de Receitas:</span>
-                    <span className="text-emerald-600 font-bold">R$ 328.000,00</span>
-                  </div>
-                  <div className="flex justify-between p-4 bg-gray-50 rounded-lg">
-                    <span className="font-medium">Total de Despesas:</span>
-                    <span className="text-red-600 font-bold">R$ 231.000,00</span>
-                  </div>
-                  <div className="flex justify-between p-4 bg-gray-50 rounded-lg">
-                    <span className="font-medium">Resultado:</span>
-                    <span className="text-sky-600 font-bold">R$ 97.000,00</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </TabsContent>
       </Tabs>
     </DashboardLayout>

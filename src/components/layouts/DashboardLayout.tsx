@@ -1,10 +1,11 @@
 
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   Home, CreditCard, Users, Briefcase, 
-  LogOut, Menu, X, BarChart2
+  LogOut, Menu, X, BarChart2, Settings,
+  Plane, FileText
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -14,6 +15,7 @@ interface DashboardLayoutProps {
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -25,7 +27,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const user = userString ? JSON.parse(userString) : null;
   
   if (!user?.isAuthenticated) {
-    // Redirect to login if not authenticated
     navigate("/login");
     return null;
   }
@@ -33,6 +34,53 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+
+  const isActiveRoute = (path: string) => {
+    return location.pathname === path;
+  };
+
+  const navigationItems = [
+    {
+      path: "/dashboard",
+      icon: Home,
+      label: "Dashboard"
+    },
+    {
+      path: "/operacional",
+      icon: Plane,
+      label: "Operacional"
+    },
+    {
+      path: "/finance",
+      icon: CreditCard,
+      label: "Financeiro"
+    },
+    {
+      path: "/crm",
+      icon: Users,
+      label: "CRM"
+    },
+    {
+      path: "/packages",
+      icon: Briefcase,
+      label: "Pacotes"
+    },
+    {
+      path: "/pos",
+      icon: BarChart2,
+      label: "PDV"
+    },
+    {
+      path: "/relatorios",
+      icon: FileText,
+      label: "Relatórios"
+    },
+    {
+      path: "/configuracoes",
+      icon: Settings,
+      label: "Configurações"
+    }
+  ];
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -54,51 +102,26 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         
         <nav className="flex-1 pt-5">
           <ul className="space-y-2 px-2">
-            <li>
-              <Link
-                to="/dashboard"
-                className="flex items-center p-3 text-white rounded-lg hover:bg-sky-800"
-              >
-                <Home size={20} />
-                {isSidebarOpen && <span className="ml-3">Dashboard</span>}
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/finance"
-                className="flex items-center p-3 text-white rounded-lg hover:bg-sky-800"
-              >
-                <CreditCard size={20} />
-                {isSidebarOpen && <span className="ml-3">Financeiro</span>}
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/crm"
-                className="flex items-center p-3 text-white rounded-lg hover:bg-sky-800"
-              >
-                <Users size={20} />
-                {isSidebarOpen && <span className="ml-3">CRM</span>}
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/packages"
-                className="flex items-center p-3 text-white rounded-lg hover:bg-sky-800"
-              >
-                <Briefcase size={20} />
-                {isSidebarOpen && <span className="ml-3">Pacotes</span>}
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/pos"
-                className="flex items-center p-3 text-white rounded-lg hover:bg-sky-800"
-              >
-                <BarChart2 size={20} />
-                {isSidebarOpen && <span className="ml-3">PDV</span>}
-              </Link>
-            </li>
+            {navigationItems.map((item) => {
+              const IconComponent = item.icon;
+              const isActive = isActiveRoute(item.path);
+              
+              return (
+                <li key={item.path}>
+                  <Link
+                    to={item.path}
+                    className={`flex items-center p-3 rounded-lg transition-colors ${
+                      isActive 
+                        ? 'bg-sky-700 text-white' 
+                        : 'text-white hover:bg-sky-800'
+                    }`}
+                  >
+                    <IconComponent size={20} />
+                    {isSidebarOpen && <span className="ml-3">{item.label}</span>}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
         
