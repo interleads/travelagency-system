@@ -1,7 +1,5 @@
+
 import React, { useState } from 'react';
-import { 
-  Card, CardContent, CardHeader, CardTitle 
-} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,39 +9,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell,
-} from "@/components/ui/table";
-import {
-  ResponsiveContainer,
-  LineChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  Line
-} from "recharts";
 import { Plus } from "lucide-react";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { TransactionForm } from '@/components/finance/TransactionForm';
 import { useToast } from "@/hooks/use-toast";
 import { CashFlowTable } from '@/components/finance/CashFlowTable';
-
-// Dados simplificados para o gráfico
-const chartData = [
-  { month: 'Jan', receitas: 45000, despesas: 32000 },
-  { month: 'Fev', receitas: 52000, despesas: 38000 },
-  { month: 'Mar', receitas: 48000, despesas: 35000 },
-  { month: 'Abr', receitas: 61000, despesas: 42000 },
-  { month: 'Mai', receitas: 55000, despesas: 39000 },
-  { month: 'Jun', receitas: 67000, despesas: 45000 }
-];
+import { FinanceOverviewCards } from '@/components/finance/FinanceOverviewCards';
+import { FinanceChart } from '@/components/finance/FinanceChart';
+import { RecentTransactionsTable } from '@/components/finance/RecentTransactionsTable';
+import { AccountsReceivableTable } from '@/components/finance/AccountsReceivableTable';
+import { AccountsPayableTable } from '@/components/finance/AccountsPayableTable';
 
 const Finance = () => {
   const { toast } = useToast();
@@ -87,117 +62,9 @@ const Finance = () => {
         </TabsList>
         
         <TabsContent value="overview">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Balanço Total</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold text-emerald-600">R$ 125.780,45</p>
-                <p className="text-sm text-gray-500">Atualizado em 25/04/2025</p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Receitas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold text-sky-600">R$ 248.950,00</p>
-                <p className="text-sm text-gray-500">Total acumulado</p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Despesas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold text-red-600">R$ 123.169,55</p>
-                <p className="text-sm text-gray-500">Total acumulado</p>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Resultados Financeiros</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="receitas" stroke="#10B981" name="Receitas" />
-                    <Line type="monotone" dataKey="despesas" stroke="#EF4444" name="Despesas" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Últimas Transações</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {[
-                    {
-                      date: "25/04/2025",
-                      description: "Venda - Pacote Maldivas",
-                      type: "Receita",
-                      value: "R$ 12.350,00"
-                    },
-                    {
-                      date: "23/04/2025",
-                      description: "Pagamento de Fornecedor - Hotel",
-                      type: "Despesa",
-                      value: "R$ 5.820,00"
-                    },
-                    {
-                      date: "20/04/2025",
-                      description: "Venda - Pacote Orlando",
-                      type: "Receita",
-                      value: "R$ 8.740,00"
-                    }
-                  ].map((item, i) => (
-                    <TableRow key={i}>
-                      <TableCell>{item.date}</TableCell>
-                      <TableCell>{item.description}</TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          item.type === "Receita" 
-                            ? "bg-emerald-100 text-emerald-800" 
-                            : "bg-red-100 text-red-800"
-                        }`}>
-                          {item.type}
-                        </span>
-                      </TableCell>
-                      <TableCell className={`text-right ${
-                        item.type === "Receita" ? "text-emerald-600" : "text-red-600"
-                      }`}>
-                        {item.value}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <FinanceOverviewCards />
+          <FinanceChart />
+          <RecentTransactionsTable />
         </TabsContent>
         
         <TabsContent value="cashflow">
@@ -205,127 +72,11 @@ const Finance = () => {
         </TabsContent>
         
         <TabsContent value="income">
-          <Card>
-            <CardHeader>
-              <CardTitle>Contas a Receber</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Data Venc.</TableHead>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {[
-                    {
-                      date: "30/04/2025",
-                      client: "João Silva",
-                      description: "Pacote Paris - 2ª Parcela",
-                      status: "Pendente",
-                      value: "R$ 2.500,00"
-                    },
-                    {
-                      date: "05/05/2025",
-                      client: "Maria Santos",
-                      description: "Pacote Orlando - 3ª Parcela",
-                      status: "Pendente",
-                      value: "R$ 1.890,00"
-                    },
-                    {
-                      date: "10/05/2025",
-                      client: "Pedro Alves",
-                      description: "Pacote Cancún - Entrada",
-                      status: "Agendado",
-                      value: "R$ 3.250,00"
-                    }
-                  ].map((item, i) => (
-                    <TableRow key={i}>
-                      <TableCell>{item.date}</TableCell>
-                      <TableCell>{item.client}</TableCell>
-                      <TableCell>{item.description}</TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          item.status === "Pendente" 
-                            ? "bg-amber-100 text-amber-800" 
-                            : "bg-emerald-100 text-emerald-800"
-                        }`}>
-                          {item.status}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">{item.value}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <AccountsReceivableTable />
         </TabsContent>
         
         <TabsContent value="expenses">
-          <Card>
-            <CardHeader>
-              <CardTitle>Contas a Pagar</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Data Venc.</TableHead>
-                    <TableHead>Fornecedor</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {[
-                    {
-                      date: "28/04/2025",
-                      supplier: "Hotel Majestic",
-                      description: "Hospedagem - Grupo Maio",
-                      status: "Pendente",
-                      value: "R$ 12.800,00"
-                    },
-                    {
-                      date: "01/05/2025",
-                      supplier: "Cia Aérea Nacional",
-                      description: "Passagens - Lote 157",
-                      status: "Agendado",
-                      value: "R$ 18.450,00"
-                    },
-                    {
-                      date: "05/05/2025",
-                      supplier: "Seguradora Travel",
-                      description: "Seguros - Abril/2025",
-                      status: "Pendente",
-                      value: "R$ 3.890,00"
-                    }
-                  ].map((item, i) => (
-                    <TableRow key={i}>
-                      <TableCell>{item.date}</TableCell>
-                      <TableCell>{item.supplier}</TableCell>
-                      <TableCell>{item.description}</TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          item.status === "Pendente" 
-                            ? "bg-amber-100 text-amber-800" 
-                            : "bg-emerald-100 text-emerald-800"
-                        }`}>
-                          {item.status}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">{item.value}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <AccountsPayableTable />
         </TabsContent>
       </Tabs>
     </DashboardLayout>
