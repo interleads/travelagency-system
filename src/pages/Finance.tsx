@@ -38,6 +38,8 @@ import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { TransactionForm } from '@/components/finance/TransactionForm';
 import { useToast } from "@/hooks/use-toast";
 import { CashFlowTable } from '@/components/finance/CashFlowTable';
+import { AirlineTicketsTable } from '@/components/finance/AirlineTicketsTable';
+import { SuppliersTable } from '@/components/finance/SuppliersTable';
 
 // Dados de exemplo para o gráfico
 const chartData = [
@@ -83,9 +85,11 @@ const Finance = () => {
       </div>
       
       <Tabs defaultValue="overview">
-        <TabsList className="grid w-full grid-cols-5 mb-8">
+        <TabsList className="grid w-full grid-cols-7 mb-8">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="cashflow">Fluxo de Caixa</TabsTrigger>
+          <TabsTrigger value="tickets">Passagens</TabsTrigger>
+          <TabsTrigger value="suppliers">Fornecedores</TabsTrigger>
           <TabsTrigger value="income">Contas a Receber</TabsTrigger>
           <TabsTrigger value="expenses">Contas a Pagar</TabsTrigger>
           <TabsTrigger value="reports">Relatórios</TabsTrigger>
@@ -219,6 +223,14 @@ const Finance = () => {
         
         <TabsContent value="cashflow">
           <CashFlowTable />
+        </TabsContent>
+        
+        <TabsContent value="tickets">
+          <AirlineTicketsTable />
+        </TabsContent>
+        
+        <TabsContent value="suppliers">
+          <SuppliersTable />
         </TabsContent>
         
         <TabsContent value="income">
