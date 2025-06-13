@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Card, CardContent, CardHeader, CardTitle 
@@ -38,6 +37,7 @@ import { Plus } from "lucide-react";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { TransactionForm } from '@/components/finance/TransactionForm';
 import { useToast } from "@/hooks/use-toast";
+import { CashFlowTable } from '@/components/finance/CashFlowTable';
 
 // Dados de exemplo para o gráfico
 const chartData = [
@@ -57,7 +57,7 @@ const Finance = () => {
     console.log('Nova transação:', data);
     toast({
       title: "Transação registrada com sucesso!",
-      description: `${data.type === 'receita' ? 'Receita' : 'Despesa'} de R$ ${data.value}`,
+      description: `${data.type === 'receita' ? 'Receita' : 'Despesa'} de R$ ${data.value} - ${data.category}`,
     });
     setIsDialogOpen(false);
   };
@@ -83,8 +83,9 @@ const Finance = () => {
       </div>
       
       <Tabs defaultValue="overview">
-        <TabsList className="grid w-full grid-cols-4 mb-8">
+        <TabsList className="grid w-full grid-cols-5 mb-8">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+          <TabsTrigger value="cashflow">Fluxo de Caixa</TabsTrigger>
           <TabsTrigger value="income">Contas a Receber</TabsTrigger>
           <TabsTrigger value="expenses">Contas a Pagar</TabsTrigger>
           <TabsTrigger value="reports">Relatórios</TabsTrigger>
@@ -214,6 +215,10 @@ const Finance = () => {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+        
+        <TabsContent value="cashflow">
+          <CashFlowTable />
         </TabsContent>
         
         <TabsContent value="income">
@@ -392,4 +397,3 @@ const Finance = () => {
 };
 
 export default Finance;
-

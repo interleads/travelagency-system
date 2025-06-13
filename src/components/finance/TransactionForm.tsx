@@ -26,6 +26,8 @@ const formSchema = z.object({
   date: z.string().min(1, "Data é obrigatória"),
   description: z.string().min(3, "Descrição deve ter no mínimo 3 caracteres"),
   type: z.enum(["receita", "despesa"]),
+  category: z.string().min(1, "Categoria é obrigatória"),
+  subcategory: z.string().optional(),
   value: z.string().min(1, "Valor é obrigatório"),
 });
 
@@ -40,9 +42,44 @@ export function TransactionForm({ onSubmit }: TransactionFormProps) {
       date: new Date().toISOString().split('T')[0],
       description: "",
       type: "receita",
+      category: "",
+      subcategory: "",
       value: "",
     },
   });
+
+  const watchedType = form.watch('type');
+  const watchedCategory = form.watch('category');
+
+  const getCategories = (type: string) => {
+    if (type === 'receita') {
+      return [
+        { value: 'Vendas', label: 'Vendas' },
+        { value: 'Milhas', label: 'Milhas' },
+        { value: 'Outros', label: 'Outros' }
+      ];
+    } else {
+      return [
+        { value: 'Raphael', label: 'Raphael' },
+        { value: 'Talmo', label: 'Talmo' },
+        { value: 'Trafego', label: 'Tráfego' },
+        { value: 'Ferramentas', label: 'Ferramentas' },
+        { value: 'Milhas', label: 'Milhas' },
+        { value: 'Reserva', label: 'Reserva' },
+        { value: 'Outros', label: 'Outros' }
+      ];
+    }
+  };
+
+  const getSubcategories = (category: string) => {
+    if (category === 'Milhas') {
+      return [
+        { value: 'Compra', label: 'Compra' },
+        { value: 'Venda', label: 'Venda' }
+      ];
+    }
+    return [];
+  };
 
   return (
     <Form {...form}>
@@ -96,6 +133,58 @@ export function TransactionForm({ onSubmit }: TransactionFormProps) {
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="category"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Categoria</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a categoria" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {getCategories(watchedType).map((category) => (
+                    <SelectItem key={category.value} value={category.value}>
+                      {category.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {getSubcategories(watchedCategory).length > 0 && (
+          <FormField
+            control={form.control}
+            name="subcategory"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Subcategoria</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a subcategoria" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {getSubcategories(watchedCategory).map((subcategory) => (
+                      <SelectItem key={subcategory.value} value={subcategory.value}>
+                        {subcategory.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <FormField
           control={form.control}
