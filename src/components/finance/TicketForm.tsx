@@ -32,6 +32,7 @@ const formSchema = z.object({
   cardTx: z.string().min(1, "Cartão TX é obrigatório"),
   cost: z.string().min(1, "Custo é obrigatório"),
   status: z.enum(["PAGO", "PENDENTE", "CANCELADO"]),
+  profit: z.number().optional(),
 });
 
 interface TicketFormProps {
@@ -91,7 +92,7 @@ export function TicketForm({ onSubmit }: TicketFormProps) {
     const profit = calculateProfit();
     onSubmit({
       ...data,
-      profit: profit.toString()
+      profit: profit
     });
   };
 
