@@ -1,8 +1,20 @@
-
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+
+// Componente select reutilizável
+const airlines = [
+  "LATAM",
+  "GOL",
+  "Azul",
+  "Air France",
+  "TAP",
+  "Emirates",
+  "American Airlines",
+  "United",
+  "Delta"
+];
 
 export type ProductType = "passagem" | "hotel" | "veiculo" | "seguro" | "outros";
 
@@ -12,17 +24,39 @@ export interface SaleProduct {
   quantity: number;
   price: number;
   details: string;
-  // Dados especiais
+  // Campos só para passagem
+  airline?: string;
+  adults?: number;
+  children?: number;
+  origin?: string;
+  destination?: string;
+  trecho1?: string;
+  trecho2?: string;
+  cardTaxes?: string;
+  qtdMilhas?: number;
+  custoMil?: number;
+  profit?: number;
   [key: string]: any;
 }
 
-// EmptyProduct: type is optional/undefined initially
+// EmptyProduct atualizado
 export const EmptyProduct: SaleProduct = {
   type: undefined,
   name: "",
   quantity: 1,
   price: 0,
   details: "",
+  airline: "",
+  adults: 1,
+  children: 0,
+  origin: "",
+  destination: "",
+  trecho1: "",
+  trecho2: "",
+  cardTaxes: "",
+  qtdMilhas: 0,
+  custoMil: 0,
+  profit: 0,
 };
 
 const typeOptions = [
@@ -38,25 +72,114 @@ const DynamicProductForm: React.FC<{
   onChange: (product: SaleProduct) => void;
   onRemove?: () => void;
 }> = ({ value, onChange, onRemove }) => {
-  // Dynamic fields for each type
+
+  // Cálculo do lucro em tempo real (para passagem)
+  const computedProfit = React.useMemo(() => {
+    if (value.type !== "passagem") return undefined;
+    const venda = Number(value.price || 0) * Number(value.quantity || 1);
+    const milhas = Number(value.qtdMilhas || 0);
+    const custoMil = Number(value.custoMil || 0);
+    if (!milhas || !custoMil) return venda || 0;
+    const custoTotal = (milhas / 1000) * custoMil;
+    return venda - custoTotal;
+  }, [
+    value.price, value.quantity, value.qtdMilhas, value.custoMil, value.type
+  ]);
+
+  // Render extra fields REVISADO
   const renderExtraFields = () => {
     switch (value.type) {
       case "passagem":
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <div>
-              <Label>Localizador (PNR)</Label>
-              <Input value={value.localizador || ""} onChange={e => onChange({ ...value, localizador: e.target.value })} />
+              <Label>Companhia Aérea</Label>
+              <select
+                className="w-full mt-1 border rounded-md h-10"
+                value={value.airline ?? ""}
+                onChange={e => onChange({ ...value, airline: e.target.value })}
+                required
+              >
+                <option value="">Selecione</option>
+                {airlines.map(airline => (
+                  <option key={airline} value={airline}>{airline}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex gap-2">
+              <div className="w-1/2">
+                <Label>Adultos</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={value.adults ?? 1}
+                  onChange={e => onChange({ ...value, adults: Number(e.target.value) })}
+                  required
+                />
+              </div>
+              <div className="w-1/2">
+                <Label>Crianças</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={value.children ?? 0}
+                  onChange={e => onChange({ ...value, children: Number(e.target.value) })}
+                />
+              </div>
             </div>
             <div>
-              <Label>Bagagens</Label>
-              <Input value={value.bagagens || ""} onChange={e => onChange({ ...value, bagagens: e.target.value })} placeholder="Ex: 1x23kg" />
+              <Label>Origem</Label>
+              <Input value={value.origin || ""} onChange={e => onChange({ ...value, origin: e.target.value })} required />
+            </div>
+            <div>
+              <Label>Destino</Label>
+              <Input value={value.destination || ""} onChange={e => onChange({ ...value, destination: e.target.value })} required />
+            </div>
+            <div>
+              <Label>Data Trecho 1</Label>
+              <Input type="date" value={value.trecho1 || ""} onChange={e => onChange({ ...value, trecho1: e.target.value })} required />
+            </div>
+            <div>
+              <Label>Data Trecho 2</Label>
+              <Input type="date" value={value.trecho2 || ""} onChange={e => onChange({ ...value, trecho2: e.target.value })} />
+            </div>
+            <div>
+              <Label>Cartão das Taxas</Label>
+              <Input value={value.cardTaxes || ""} onChange={e => onChange({ ...value, cardTaxes: e.target.value })} />
+            </div>
+            <div className="flex gap-2">
+              <div className="w-1/2">
+                <Label>Qtd Milhas</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={value.qtdMilhas ?? 0}
+                  onChange={e => onChange({ ...value, qtdMilhas: Number(e.target.value) })}
+                />
+              </div>
+              <div className="w-1/2">
+                <Label>Custo por 1k</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={value.custoMil ?? 0}
+                  onChange={e => onChange({ ...value, custoMil: Number(e.target.value) })}
+                />
+              </div>
+            </div>
+            {/* Preview do lucro */}
+            <div className="md:col-span-2 rounded-md mt-1 bg-gray-50 px-2 py-1 flex items-center justify-between">
+              <span className="font-medium text-sm">Lucro Calculado:</span>
+              <span className={`text-base font-bold ${computedProfit >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                R$ {isNaN(computedProfit) ? "0,00" : computedProfit?.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+              </span>
             </div>
           </div>
         );
       case "hotel":
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <div>
               <Label>Check-in</Label>
               <Input type="date" value={value.checkin || ""} onChange={e => onChange({ ...value, checkin: e.target.value })} />
@@ -69,7 +192,7 @@ const DynamicProductForm: React.FC<{
         );
       case "veiculo":
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <div>
               <Label>Categoria do Veículo</Label>
               <Input value={value.categoria || ""} onChange={e => onChange({ ...value, categoria: e.target.value })} />
@@ -93,7 +216,7 @@ const DynamicProductForm: React.FC<{
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end border-b pb-4 mb-4">
+    <div className="grid grid-cols-1 md:grid-cols-6 gap-2 items-end border-b pb-2 mb-2">
       <div className="md:col-span-2">
         <Label>Tipo</Label>
         <select
@@ -137,7 +260,7 @@ const DynamicProductForm: React.FC<{
           placeholder="R$"
         />
       </div>
-      <div className="md:col-span-6 py-2">
+      <div className="md:col-span-6 py-1">
         {renderExtraFields()}
       </div>
       <div className="md:col-span-6">

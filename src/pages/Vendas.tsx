@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { useToast } from '@/components/ui/use-toast';
@@ -62,23 +63,23 @@ const Vendas = () => {
 
   return (
     <DashboardLayout>
-      <h2 className="text-3xl font-bold mb-6 text-gray-800">Vendas</h2>
-      <form onSubmit={handleSubmit} className="space-y-8 max-w-3xl mx-auto">
-        <Card>
-          <CardHeader>
+      <h2 className="text-3xl font-bold mb-4 text-gray-800">Vendas</h2>
+      <form onSubmit={handleSubmit} className="space-y-2 max-w-3xl mx-auto">
+        <Card className="mb-2">
+          <CardHeader className="pb-2">
             <CardTitle>Dados do Cliente</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-2 pb-2">
             <Label htmlFor="client">Nome do Cliente</Label>
             <Input id="client" value={client} onChange={e => setClient(e.target.value)} placeholder="Digite o nome do cliente" />
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
+        <Card className="mb-2">
+          <CardHeader className="pb-2">
             <CardTitle>Produtos / Serviços</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="pt-2 pb-2">
+            <div className="space-y-2">
               {products.map((product, idx) => (
                 <DynamicProductForm
                   key={idx}
@@ -91,11 +92,11 @@ const Vendas = () => {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
+        <Card className="mb-2">
+          <CardHeader className="pb-2">
             <CardTitle>Pagamento</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2 pb-2">
             <div>
               <Label htmlFor="payment">Método de Pagamento</Label>
               <select
@@ -120,7 +121,7 @@ const Vendas = () => {
         <SaleSummary total={total} />
         <Button
           type="submit"
-          className="w-full bg-emerald-600 hover:bg-emerald-700"
+          className="w-full bg-emerald-600 hover:bg-emerald-700 mt-2"
           disabled={createSale.isPending}
         >
           {createSale.isPending ? "Salvando..." : "Registrar Venda"}
