@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
@@ -39,8 +38,12 @@ export default function DailySalesChart() {
       <CardHeader className="flex flex-col md:flex-row gap-2 md:items-center md:justify-between">
         <CardTitle className="text-lg">Vendas Diárias</CardTitle>
         <div>
-          <label className="sr-only" htmlFor="month-selector">Mês</label>
-          <Select id="month-selector" value={selectedMonth} onValueChange={setSelectedMonth}>
+          <label className="sr-only">Mês</label>
+          <Select
+            value={selectedMonth}
+            onValueChange={setSelectedMonth}
+            aria-label="Selecionar mês"
+          >
             {months.map(m => (
               <option value={m.value} key={m.value}>{m.label}</option>
             ))}
