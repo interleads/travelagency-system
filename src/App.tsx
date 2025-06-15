@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,6 +14,7 @@ import Operacional from "./pages/Operacional";
 import Configuracoes from "./pages/Configuracoes";
 import Relatorios from "./pages/Relatorios";
 import NotFound from "./pages/NotFound";
+import SalesCenter from "./pages/SalesCenter";
 import { supabase } from "@/integrations/supabase/client";
 import React, { useEffect, useState } from "react";
 
@@ -69,6 +69,7 @@ const App = () => (
           <Route path="/pos" element={<POS />} />
           <Route path="/relatorios" element={<Relatorios />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
+          <Route path="/sales-center" element={<SalesCenter />} />
 
           {/* Catch-all */}
           <Route path="*" element={<NotFound />} />

@@ -67,6 +67,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       path: "/configuracoes",
       icon: Settings,
       label: "Configurações"
+    },
+    {
+      path: "/sales-center",
+      icon: Briefcase,
+      label: "Central de Vendas"
     }
   ];
 
