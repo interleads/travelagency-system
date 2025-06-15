@@ -9,7 +9,6 @@ import Dashboard from "./pages/Dashboard";
 import Finance from "./pages/Finance";
 import CRM from "./pages/CRM";
 import Packages from "./pages/Packages";
-import Operacional from "./pages/Operacional";
 import Configuracoes from "./pages/Configuracoes";
 import NotFound from "./pages/NotFound";
 import Vendas from "./pages/Vendas";
