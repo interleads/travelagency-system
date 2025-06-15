@@ -1,4 +1,3 @@
-
 // Renomeado de Operacional.tsx para Vendas.tsx
 import React, { useState } from 'react';
 import { 
@@ -94,9 +93,8 @@ const Vendas = () => {
       </div>
       
       <Tabs defaultValue="passagens">
-        <TabsList className="grid w-full grid-cols-4 mb-8">
+        <TabsList className="grid w-full grid-cols-3 mb-8">
           <TabsTrigger value="passagens">Passagens</TabsTrigger>
-          <TabsTrigger value="fornecedores">Fornecedores</TabsTrigger>
           <TabsTrigger value="milhas">Estoque de Milhas</TabsTrigger>
           <TabsTrigger value="vendas">Registrar Venda</TabsTrigger>
         </TabsList>
@@ -120,27 +118,6 @@ const Vendas = () => {
             </Dialog>
           </div>
           <AirlineTicketsTable />
-        </TabsContent>
-        
-        <TabsContent value="fornecedores">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold">Gestão de Fornecedores</h3>
-            <Dialog open={isSupplierDialogOpen} onOpenChange={setIsSupplierDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="mr-2" />
-                  Novo Fornecedor
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Novo Fornecedor</DialogTitle>
-                </DialogHeader>
-                <SupplierForm onSubmit={handleSupplierSubmit} />
-              </DialogContent>
-            </Dialog>
-          </div>
-          <SuppliersTable />
         </TabsContent>
         
         <TabsContent value="milhas">
@@ -176,4 +153,3 @@ const Vendas = () => {
 };
 
 export default Vendas;
-

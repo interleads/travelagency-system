@@ -20,15 +20,27 @@ import {
 } from "lucide-react";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { SupplierForm } from '@/components/finance/SupplierForm';
 
 const Configuracoes = () => {
   const { toast } = useToast();
+  const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false);
 
   const handleSaveSettings = () => {
     toast({
       title: "Configurações salvas!",
       description: "As configurações foram atualizadas com sucesso.",
     });
+  };
+
+  const handleSupplierSubmit = (data: any) => {
+    // Adapte para sua lógica, se necessário.
+    toast({
+      title: "Fornecedor cadastrado com sucesso!",
+      description: `${data.name} - ${data.category || data.program || ""}`,
+    });
+    setIsSupplierDialogOpen(false);
   };
 
   return (
@@ -118,7 +130,8 @@ const Configuracoes = () => {
                 <Building2 className="h-5 w-5" />
                 Fornecedores Padrão
               </CardTitle>
-              <Button>
+              {/* Botão que abre o modal */}
+              <Button onClick={() => setIsSupplierDialogOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Novo Fornecedor
               </Button>
@@ -151,6 +164,15 @@ const Configuracoes = () => {
               </div>
             </CardContent>
           </Card>
+          {/* Modal com SupplierForm */}
+          <Dialog open={isSupplierDialogOpen} onOpenChange={setIsSupplierDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Novo Fornecedor</DialogTitle>
+              </DialogHeader>
+              <SupplierForm onSubmit={handleSupplierSubmit} />
+            </DialogContent>
+          </Dialog>
         </TabsContent>
         
         <TabsContent value="categorias">
