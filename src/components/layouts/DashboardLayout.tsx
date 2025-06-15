@@ -25,11 +25,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const navigationItems = [
     { path: "/dashboard", icon: Home, label: "Dashboard" },
-    { path: "/operacional", icon: Plane, label: "Operacional" },
+    { path: "/vendas", icon: Plane, label: "Vendas" }, // Alterado Operacional para Vendas
     { path: "/finance", icon: CreditCard, label: "Financeiro" },
     { path: "/crm", icon: Users, label: "CRM" },
     { path: "/packages", icon: Briefcase, label: "Pacotes" },
-    // Retirado Vendas do menu lateral, pois agora está em uma tab de Operacional
+    // Retirado Vendas do menu lateral, pois agora está em uma tab de Vendas
     // { path: "/vendas", icon: BarChart2, label: "Vendas" },
     // { path: "/relatorios", icon: FileText, label: "Relatórios" },
   ];

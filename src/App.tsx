@@ -12,6 +12,7 @@ import Packages from "./pages/Packages";
 import Operacional from "./pages/Operacional";
 import Configuracoes from "./pages/Configuracoes";
 import NotFound from "./pages/NotFound";
+import Vendas from "./pages/Vendas";
 import { supabase } from "@/integrations/supabase/client";
 import React, { useEffect, useState } from "react";
 
@@ -58,7 +59,8 @@ const App = () => (
           <Route path="/login" element={<Navigate to="/dashboard" replace />} />
           {/* Rotas principais */}
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/operacional" element={<Operacional />} />
+          {/* Atualizando de Operacional para Vendas */}
+          <Route path="/vendas" element={<Vendas />} />
           <Route path="/finance" element={<Finance />} />
           <Route path="/crm" element={<CRM />} />
           <Route path="/packages" element={<Packages />} />

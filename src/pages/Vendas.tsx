@@ -1,3 +1,5 @@
+
+// Renomeado de Operacional.tsx para Vendas.tsx
 import React, { useState } from 'react';
 import { 
   Card, CardContent, CardHeader, CardTitle 
@@ -20,7 +22,7 @@ import { SupplierForm } from '@/components/finance/SupplierForm';
 import { useToast } from "@/hooks/use-toast";
 import VendasForm from "@/components/vendas/VendasForm";
 
-const Operacional = () => {
+const Vendas = () => {
   const { toast } = useToast();
   const [isTicketDialogOpen, setIsTicketDialogOpen] = useState(false);
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false);
@@ -46,7 +48,7 @@ const Operacional = () => {
   return (
     <DashboardLayout>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold text-gray-800">Módulo Operacional</h2>
+        <h2 className="text-3xl font-bold text-gray-800">Módulo Vendas</h2>
       </div>
       
       {/* Cards de resumo */}
@@ -96,7 +98,7 @@ const Operacional = () => {
           <TabsTrigger value="passagens">Passagens</TabsTrigger>
           <TabsTrigger value="fornecedores">Fornecedores</TabsTrigger>
           <TabsTrigger value="milhas">Estoque de Milhas</TabsTrigger>
-          <TabsTrigger value="vendas">Vendas</TabsTrigger>
+          <TabsTrigger value="vendas">Registrar Venda</TabsTrigger>
         </TabsList>
         
         <TabsContent value="passagens">
@@ -173,4 +175,5 @@ const Operacional = () => {
   );
 };
 
-export default Operacional;
+export default Vendas;
+
