@@ -4,12 +4,104 @@ import { Button } from "@/components/ui/button";
 import { Calendar as CalendarIcon, Download } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
+import { format, startOfMonth, endOfMonth, subDays, startOfYear, endOfYear, subMonths } from "date-fns";
 import { useDashboardDateRange } from "./useDashboardDateRange";
+
+const PRESETS = [
+  {
+    label: "Todo o período",
+    getRange: () => ({
+      from: undefined,
+      to: undefined,
+    }),
+  },
+  {
+    label: "Últimos 7 dias",
+    getRange: () => {
+      const today = new Date();
+      return {
+        from: subDays(today, 6),
+        to: today,
+      };
+    },
+  },
+  {
+    label: "Este mês",
+    getRange: () => {
+      const today = new Date();
+      return {
+        from: startOfMonth(today),
+        to: endOfMonth(today),
+      };
+    },
+  },
+  {
+    label: "Mês passado",
+    getRange: () => {
+      const today = new Date();
+      const lastMonthDate = subMonths(today, 1);
+      return {
+        from: startOfMonth(lastMonthDate),
+        to: endOfMonth(lastMonthDate),
+      };
+    },
+  },
+  {
+    label: "Este ano",
+    getRange: () => {
+      const today = new Date();
+      return {
+        from: startOfYear(today),
+        to: endOfYear(today),
+      };
+    },
+  },
+  {
+    label: "Personalizado",
+    getRange: null, // Marca que vai usar o seletor manual
+  },
+];
 
 export default function DashboardFilters() {
   const { dateRange, setDateRange } = useDashboardDateRange();
   const [open, setOpen] = React.useState(false);
+  const [custom, setCustom] = React.useState(
+    // Verifica se está em modo personalizado inicialmente
+    () =>
+      !PRESETS.some(
+        (preset) =>
+          preset.getRange &&
+          JSON.stringify(preset.getRange()) ===
+            JSON.stringify({ from: dateRange.from, to: dateRange.to })
+      )
+  );
+
+  const [selectedPreset, setSelectedPreset] = React.useState(() => {
+    const found = PRESETS.findIndex(
+      (preset) =>
+        preset.getRange &&
+        JSON.stringify(preset.getRange()) ===
+          JSON.stringify({ from: dateRange.from, to: dateRange.to })
+    );
+    return found === -1 ? PRESETS.length - 1 : found; // Personalizado se não bater
+  });
+
+  // Quando escolher um preset, atualize o intervalo
+  function handlePresetClick(idx: number) {
+    setSelectedPreset(idx);
+    setCustom(idx === PRESETS.length - 1);
+    const preset = PRESETS[idx];
+    if (preset.getRange) {
+      setDateRange(preset.getRange());
+    }
+  }
+
+  // Quando datas forem mudadas manualmente, marque como "Personalizado"
+  function handleCustomRange(range) {
+    setDateRange(range);
+    setSelectedPreset(PRESETS.length - 1);
+    setCustom(true);
+  }
 
   const formatted =
     dateRange.from && dateRange.to
@@ -22,7 +114,7 @@ export default function DashboardFilters() {
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="w-[220px] justify-start text-left font-normal"
+            className="w-[240px] justify-start text-left font-normal"
             aria-label="Selecionar período"
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
@@ -30,14 +122,31 @@ export default function DashboardFilters() {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="end">
-          <Calendar
-            initialFocus
-            mode="range"
-            selected={dateRange}
-            onSelect={range => setDateRange({ from: range?.from, to: range?.to })}
-            numberOfMonths={2}
-            className="p-3 pointer-events-auto"
-          />
+          <div className="flex flex-col md:flex-row gap-2 p-2">
+            <div className="flex flex-col gap-1 min-w-[140px]">
+              {PRESETS.map((preset, idx) => (
+                <Button
+                  key={preset.label}
+                  variant={idx === selectedPreset ? "default" : "ghost"}
+                  className="justify-start"
+                  onClick={() => handlePresetClick(idx)}
+                  tabIndex={0}
+                >
+                  {preset.label}
+                </Button>
+              ))}
+            </div>
+            <div className={`p-2 pt-0 md:pt-2 ${custom ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-50"} transition-all`}>
+              <Calendar
+                initialFocus
+                mode="range"
+                selected={dateRange}
+                onSelect={handleCustomRange}
+                numberOfMonths={2}
+                className="p-3 pointer-events-auto"
+              />
+            </div>
+          </div>
         </PopoverContent>
       </Popover>
       <Button>
