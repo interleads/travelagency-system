@@ -1,24 +1,29 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { Select } from "@/components/ui/select";
 import { format } from "date-fns";
+import { useDashboardDateRange } from "./useDashboardDateRange";
 
-// Mock de meses e dados de vendas diárias (em produção, use dados do backend)
-const months = [
-  { label: "Janeiro 2024", value: "2024-01" },
-  { label: "Fevereiro 2024", value: "2024-02" },
-  { label: "Março 2024", value: "2024-03" },
-  { label: "Abril 2024", value: "2024-04" },
-  { label: "Maio 2024", value: "2024-05" },
-  { label: "Junho 2024", value: "2024-06" },
-];
+// Mock de meses disponíveis, cobre dois anos
+const months = [];
+for (let y = 2023; y <= 2024; y++) {
+  for (let m = 1; m <= 12; m++) {
+    months.push({
+      label: `${format(new Date(y, m - 1, 1), "MMMM yyyy")}`,
+      value: `${y}-${String(m).padStart(2, "0")}`,
+    });
+  }
+}
 
+// Gera dados diários, igual aos do DashboardKPICards
 function generateMockSales(month: string) {
-  const days = new Date(Number(month.slice(0, 4)), Number(month.slice(5)), 0).getDate();
-  // Simula vendas diárias, alguns dias de fim de semana zerados
+  const year = Number(month.split("-")[0]);
+  const m = Number(month.split("-")[1]) - 1;
+  const days = new Date(year, m + 1, 0).getDate();
   return Array.from({ length: days }, (_, i) => {
-    const dt = new Date(`${month}-${String(i + 1).padStart(2, "0")}`);
+    const dt = new Date(year, m, i + 1);
     const isWeekend = dt.getDay() === 0 || dt.getDay() === 6;
     return {
       date: dt,
@@ -28,9 +33,67 @@ function generateMockSales(month: string) {
   });
 }
 
+// Gera dados de todos dias dos dois anos (para filtrar depois)
+function generateFullSalesData() {
+  const data = [];
+  for (let year = 2023; year <= 2024; year++) {
+    for (let month = 0; month < 12; month++) {
+      const days = new Date(year, month + 1, 0).getDate();
+      for (let day = 1; day <= days; day++) {
+        const dt = new Date(year, month, day);
+        const isWeekend = dt.getDay() === 0 || dt.getDay() === 6;
+        data.push({
+          date: dt,
+          day: day,
+          sales: isWeekend ? 0 : Math.floor(Math.random() * 7000) + 1200,
+          month: `${year}-${String(month + 1).padStart(2, "0")}`,
+        });
+      }
+    }
+  }
+  return data;
+}
+const allSalesData = generateFullSalesData();
+
+function isWithin(date, from, to) {
+  if (!from || !to) return true;
+  return date >= from && date <= to;
+}
+
 export default function DailySalesChart() {
-  const [selectedMonth, setSelectedMonth] = React.useState(months[months.length - 1].value);
-  const data = React.useMemo(() => generateMockSales(selectedMonth), [selectedMonth]);
+  const { dateRange } = useDashboardDateRange();
+
+  // Default: mês mais recente elegível dentro do filtro
+  const initialMonth = React.useMemo(() => {
+    if (!dateRange?.from || !dateRange?.to) return months[months.length - 1].value;
+    const relevantMonth = months.find(
+      (m) =>
+        new Date(m.value + "-01") >= dateRange.from &&
+        new Date(m.value + "-01") <= dateRange.to
+    );
+    return relevantMonth ? relevantMonth.value : months[months.length - 1].value;
+  }, [dateRange]);
+
+  const [selectedMonth, setSelectedMonth] = React.useState(initialMonth);
+
+  // Atualiza o mês quando mudam o filtro
+  React.useEffect(() => {
+    setSelectedMonth(initialMonth);
+  }, [initialMonth]);
+
+  // Dados do mês atual SELECIONADO, mas filtrados pelo dateRange global
+  const monthData = React.useMemo(() => {
+    // pega todos os dias do mês
+    let data = allSalesData.filter(
+      (d) => d.month === selectedMonth
+    );
+    // Aplica filtro do calendar
+    if (dateRange?.from && dateRange?.to) {
+      data = data.filter((d) => isWithin(d.date, dateRange.from, dateRange.to));
+    }
+    return data;
+  }, [selectedMonth, dateRange]);
+
   const monthLabel = months.find(m => m.value === selectedMonth)?.label ?? "";
 
   return (
@@ -53,7 +116,7 @@ export default function DailySalesChart() {
       <CardContent>
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data}>
+            <BarChart data={monthData}>
               <defs>
                 <linearGradient id="barColor" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.9}/>
