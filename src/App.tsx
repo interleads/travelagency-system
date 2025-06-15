@@ -56,20 +56,21 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<AuthPage />} />
-          
-          {/* Protected routes */}
-          <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />
-          <Route path="/operacional" element={<AuthGuard><Operacional /></AuthGuard>} />
-          <Route path="/finance" element={<AuthGuard><Finance /></AuthGuard>} />
-          <Route path="/crm" element={<AuthGuard><CRM /></AuthGuard>} />
-          <Route path="/packages" element={<AuthGuard><Packages /></AuthGuard>} />
-          <Route path="/pos" element={<AuthGuard><POS /></AuthGuard>} />
-          <Route path="/relatorios" element={<AuthGuard><Relatorios /></AuthGuard>} />
-          <Route path="/configuracoes" element={<AuthGuard><Configuracoes /></AuthGuard>} />
-          
-          {/* Catch-all route */}
+          {/* Redireciona raiz e /login para o dashboard, sem AuthGuard */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+
+          {/* Todas as rotas acessíveis sem autenticação */}
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/operacional" element={<Operacional />} />
+          <Route path="/finance" element={<Finance />} />
+          <Route path="/crm" element={<CRM />} />
+          <Route path="/packages" element={<Packages />} />
+          <Route path="/pos" element={<POS />} />
+          <Route path="/relatorios" element={<Relatorios />} />
+          <Route path="/configuracoes" element={<Configuracoes />} />
+
+          {/* Catch-all */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

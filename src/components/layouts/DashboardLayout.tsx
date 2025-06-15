@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,6 @@ import {
   LogOut, Menu, X, BarChart2, Settings,
   Plane, FileText
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -18,25 +16,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [userEmail, setUserEmail] = useState<string | null>(null);
-
-  // Fetch current authenticated user
-  useEffect(() => {
-    let mounted = true;
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (mounted) setUserEmail(user?.email ?? null);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUserEmail(session?.user?.email ?? null);
-    });
-    return () => { mounted = false; subscription.unsubscribe(); };
-  }, []);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setUserEmail(null);
-    navigate("/login");
-  };
+  // Modo desenvolvimento: usuário fixo
+  const userEmail = "Usuário de Desenvolvimento";
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -112,7 +93,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             {navigationItems.map((item) => {
               const IconComponent = item.icon;
               const isActive = isActiveRoute(item.path);
-              
               return (
                 <li key={item.path}>
                   <Link
@@ -132,15 +112,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           </ul>
         </nav>
         
+        {/* Botão de logout removido em modo desenvolvimento */}
         <div className="p-4 mt-auto">
-          <Button
-            variant="outline"
-            className="w-full bg-white text-sky-900 hover:bg-gray-100 flex items-center justify-center"
-            onClick={handleLogout}
-          >
-            <LogOut size={20} className="mr-2" />
-            {isSidebarOpen && "Sair"}
-          </Button>
+          {/* Nenhum botão de logout */}
         </div>
       </div>
       
@@ -150,7 +124,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <div className="flex justify-between items-center">
             <h1 className="text-xl font-semibold text-gray-800">Sistema de Gestão</h1>
             <div className="text-sm text-gray-600">
-              {userEmail ?? "Usuário"}
+              {userEmail}
             </div>
           </div>
         </header>
