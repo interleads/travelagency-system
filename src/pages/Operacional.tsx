@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Card, CardContent, CardHeader, CardTitle 
@@ -19,6 +18,7 @@ import { SuppliersTable } from '@/components/finance/SuppliersTable';
 import { TicketForm } from '@/components/finance/TicketForm';
 import { SupplierForm } from '@/components/finance/SupplierForm';
 import { useToast } from "@/hooks/use-toast";
+import VendasForm from "@/components/vendas/VendasForm";
 
 const Operacional = () => {
   const { toast } = useToast();
@@ -96,7 +96,7 @@ const Operacional = () => {
           <TabsTrigger value="passagens">Passagens</TabsTrigger>
           <TabsTrigger value="fornecedores">Fornecedores</TabsTrigger>
           <TabsTrigger value="milhas">Estoque de Milhas</TabsTrigger>
-          <TabsTrigger value="reservas">Reservas</TabsTrigger>
+          <TabsTrigger value="vendas">Vendas</TabsTrigger>
         </TabsList>
         
         <TabsContent value="passagens">
@@ -162,25 +162,11 @@ const Operacional = () => {
           </Card>
         </TabsContent>
         
-        <TabsContent value="reservas">
-          <Card>
-            <CardHeader>
-              <CardTitle>Reservas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <Plane className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-4 text-lg font-medium">Gestão de Reservas</h3>
-                <p className="mt-2 text-gray-500">
-                  Controle todas as reservas em andamento
-                </p>
-                <Button className="mt-4">
-                  <Plus className="mr-2" />
-                  Nova Reserva
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="vendas">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold">Registrar Venda</h3>
+          </div>
+          <VendasForm />
         </TabsContent>
       </Tabs>
     </DashboardLayout>

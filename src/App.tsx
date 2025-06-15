@@ -63,7 +63,8 @@ const App = () => (
           <Route path="/finance" element={<Finance />} />
           <Route path="/crm" element={<CRM />} />
           <Route path="/packages" element={<Packages />} />
-          <Route path="/vendas" element={<Vendas />} />
+          {/* Removi a rota de Vendas pois agora está embutida em Operacional */}
+          {/* <Route path="/vendas" element={<Vendas />} /> */}
           <Route path="/configuracoes" element={<Configuracoes />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
