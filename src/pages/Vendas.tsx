@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { useToast } from '@/components/ui/use-toast';
@@ -9,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import DynamicProductForm, { EmptyProduct, ProductType, SaleProduct } from "@/components/vendas/DynamicProductForm";
 import SaleSummary from "@/components/sales/SaleSummary";
 import { PAYMENT_METHODS } from '@/data/products';
+import { useCreateSale } from '@/hooks/useCreateSale';
 
 const Vendas = () => {
   const [client, setClient] = useState('');
@@ -17,23 +17,47 @@ const Vendas = () => {
   const [installments, setInstallments] = useState(1);
   const { toast } = useToast();
 
+  const createSale = useCreateSale();
+
   const addProduct = () => setProducts([...products, EmptyProduct]);
   const removeProduct = (idx: number) => setProducts(products.filter((_, i) => i !== idx));
   const updateProduct = (idx: number, product: SaleProduct) => setProducts(products.map((p, i) => i === idx ? product : p));
 
   const total = products.reduce((sum, p) => sum + (p.price || 0) * (p.quantity || 1), 0);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!client) {
       toast({ variant: "destructive", title: "Erro", description: "Informe o nome do cliente" });
       return;
     }
-    toast({ title: "Venda registrada!", description: `Total: R$ ${total.toFixed(2)}` });
-    setClient('');
-    setProducts([EmptyProduct]);
-    setPaymentMethod('');
-    setInstallments(1);
+    if (!paymentMethod) {
+      toast({ variant: "destructive", title: "Erro", description: "Escolha o método de pagamento" });
+      return;
+    }
+    if (!products.length || products.every(p => !p.name)) {
+      toast({ variant: "destructive", title: "Erro", description: "Adicione ao menos um produto." });
+      return;
+    }
+
+    createSale.mutate({
+      client,
+      products,
+      paymentMethod,
+      installments,
+      total,
+    }, {
+      onSuccess: () => {
+        toast({ title: "Venda registrada no banco com sucesso!", description: `Total: R$ ${total.toFixed(2)}` });
+        setClient('');
+        setProducts([EmptyProduct]);
+        setPaymentMethod('');
+        setInstallments(1);
+      },
+      onError: (err: any) => {
+        toast({ variant: "destructive", title: "Erro ao salvar no banco", description: err.message });
+      }
+    });
   };
 
   return (
@@ -94,8 +118,12 @@ const Vendas = () => {
           </CardContent>
         </Card>
         <SaleSummary total={total} />
-        <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
-          Registrar Venda
+        <Button
+          type="submit"
+          className="w-full bg-emerald-600 hover:bg-emerald-700"
+          disabled={createSale.isPending}
+        >
+          {createSale.isPending ? "Salvando..." : "Registrar Venda"}
         </Button>
       </form>
     </DashboardLayout>
