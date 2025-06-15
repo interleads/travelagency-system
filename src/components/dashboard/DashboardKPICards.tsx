@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, ListChecks, BarChart, Briefcase, Percent, DollarSign } from "lucide-react";
@@ -36,8 +35,16 @@ function calculateMetrics(filtered) {
   const numSales = filtered.filter(item => item.sales > 0).length;
   const avgTicket = numSales ? totalSales / numSales : 0;
   const totalPackages = filtered.reduce((acc, curr) => acc + curr.packages, 0);
-  const profitPercent = 0.296; // fixo, simulado
-  const profit = totalSales * profitPercent;
+  const profitPercentBase = 0.296; // valor base simulado usado para lucro
+
+  // Calcula o lucro bruto
+  const profit = totalSales * profitPercentBase;
+
+  // Margem de Lucro Dinâmica
+  // Se não houver vendas, margem = 0%
+  const marginPercent = totalSales > 0
+    ? (profit / totalSales) * 100
+    : 0;
 
   return [
     {
@@ -70,7 +77,7 @@ function calculateMetrics(filtered) {
     },
     {
       label: "Margem de Lucro",
-      value: "29.6%",
+      value: `${marginPercent.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`,
       icon: Percent,
       bg: "from-purple-500 to-indigo-400",
       description: "Percentual de lucro",
