@@ -9,7 +9,6 @@ import Dashboard from "./pages/Dashboard";
 import Finance from "./pages/Finance";
 import CRM from "./pages/CRM";
 import Packages from "./pages/Packages";
-import Vendas from "./pages/Vendas";
 import Operacional from "./pages/Operacional";
 import Configuracoes from "./pages/Configuracoes";
 import NotFound from "./pages/NotFound";
@@ -63,8 +62,7 @@ const App = () => (
           <Route path="/finance" element={<Finance />} />
           <Route path="/crm" element={<CRM />} />
           <Route path="/packages" element={<Packages />} />
-          {/* Removi a rota de Vendas pois agora está embutida em Operacional */}
-          {/* <Route path="/vendas" element={<Vendas />} /> */}
+          {/* <Route path="/vendas" element={<Vendas />} /> removido */}
           <Route path="/configuracoes" element={<Configuracoes />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
