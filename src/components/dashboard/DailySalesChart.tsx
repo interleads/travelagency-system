@@ -1,8 +1,22 @@
 
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
-import { Select } from "@/components/ui/select";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+} from "recharts";
 import { format } from "date-fns";
 import { useDashboardDateRange } from "./useDashboardDateRange";
 
@@ -65,7 +79,8 @@ export default function DailySalesChart() {
 
   // Default: mês mais recente elegível dentro do filtro
   const initialMonth = React.useMemo(() => {
-    if (!dateRange?.from || !dateRange?.to) return months[months.length - 1].value;
+    if (!dateRange?.from || !dateRange?.to)
+      return months[months.length - 1].value;
     const relevantMonth = months.find(
       (m) =>
         new Date(m.value + "-01") >= dateRange.from &&
@@ -84,9 +99,7 @@ export default function DailySalesChart() {
   // Dados do mês atual SELECIONADO, mas filtrados pelo dateRange global
   const monthData = React.useMemo(() => {
     // pega todos os dias do mês
-    let data = allSalesData.filter(
-      (d) => d.month === selectedMonth
-    );
+    let data = allSalesData.filter((d) => d.month === selectedMonth);
     // Aplica filtro do calendar
     if (dateRange?.from && dateRange?.to) {
       data = data.filter((d) => isWithin(d.date, dateRange.from, dateRange.to));
@@ -94,22 +107,31 @@ export default function DailySalesChart() {
     return data;
   }, [selectedMonth, dateRange]);
 
-  const monthLabel = months.find(m => m.value === selectedMonth)?.label ?? "";
+  const monthLabel =
+    months.find((m) => m.value === selectedMonth)?.label ?? "";
 
   return (
     <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-      <CardHeader className="flex flex-col md:flex-row gap-2 md:items-center md:justify-between">
-        <CardTitle className="text-lg">Vendas Diárias</CardTitle>
-        <div>
-          <label className="sr-only">Mês</label>
+      <CardHeader className="flex flex-row items-center justify-end gap-2 p-4">
+        <div className="w-52">
+          <label htmlFor="month-select" className="sr-only">
+            Mês
+          </label>
           <Select
             value={selectedMonth}
             onValueChange={setSelectedMonth}
             aria-label="Selecionar mês"
           >
-            {months.map(m => (
-              <option value={m.value} key={m.value}>{m.label}</option>
-            ))}
+            <SelectTrigger id="month-select" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {months.map((m) => (
+                <SelectItem value={m.value} key={m.value}>
+                  {m.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </div>
       </CardHeader>
@@ -118,9 +140,15 @@ export default function DailySalesChart() {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={monthData}>
               <defs>
-                <linearGradient id="barColor" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.9}/>
-                  <stop offset="100%" stopColor="#06b6d4" stopOpacity={0.2}/>
+                <linearGradient
+                  id="barColor"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.9} />
+                  <stop offset="100%" stopColor="#06b6d4" stopOpacity={0.2} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" />
@@ -132,11 +160,19 @@ export default function DailySalesChart() {
               />
               <YAxis
                 tick={{ fill: "#082f49", fontSize: 12 }}
-                label={{ value: "Vendas (R$)", angle: -90, position: "insideLeft", fill: "#082f49", dx: -10 }}
+                label={{
+                  value: "Vendas (R$)",
+                  angle: -90,
+                  position: "insideLeft",
+                  fill: "#082f49",
+                  dx: -10,
+                }}
               />
               <Tooltip
-                formatter={value => `R$ ${Number(value).toLocaleString("pt-BR")}`}
-                labelFormatter={label => `Dia ${label}`}
+                formatter={(value) =>
+                  `R$ ${Number(value).toLocaleString("pt-BR")}`
+                }
+                labelFormatter={(label) => `Dia ${label}`}
               />
               <Bar
                 dataKey="sales"
