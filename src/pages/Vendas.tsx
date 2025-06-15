@@ -1,46 +1,44 @@
 
 import React, { useState } from 'react';
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useToast } from '@/components/ui/use-toast';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import SaleProductForm, { SaleProductFormValues } from "@/components/sales/SaleProductForm";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import DynamicProductForm, { EmptyProduct, ProductType, SaleProduct } from "@/components/vendas/DynamicProductForm";
 import SaleSummary from "@/components/sales/SaleSummary";
+import { PAYMENT_METHODS } from '@/data/products';
 
-const initialProduct: SaleProductFormValues = {
-  type: "",
-  name: "",
-  quantity: 1,
-  details: "",
-  price: 0
-};
-
-export default function SalesCenter() {
+const Vendas = () => {
   const [client, setClient] = useState('');
-  const [products, setProducts] = useState<SaleProductFormValues[]>([initialProduct]);
+  const [products, setProducts] = useState<SaleProduct[]>([EmptyProduct]);
   const [paymentMethod, setPaymentMethod] = useState('');
   const [installments, setInstallments] = useState(1);
+  const { toast } = useToast();
 
-  const addProduct = () => setProducts([...products, initialProduct]);
+  const addProduct = () => setProducts([...products, EmptyProduct]);
   const removeProduct = (idx: number) => setProducts(products.filter((_, i) => i !== idx));
-  const updateProduct = (idx: number, product: SaleProductFormValues) => setProducts(products.map((p, i) => i === idx ? product : p));
+  const updateProduct = (idx: number, product: SaleProduct) => setProducts(products.map((p, i) => i === idx ? product : p));
 
   const total = products.reduce((sum, p) => sum + (p.price || 0) * (p.quantity || 1), 0);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Aqui você pode implementar a lógica de integração financeira (contas a receber, fluxo de caixa, etc)
-    alert("Venda registrada com sucesso.");
+    if (!client) {
+      toast({ variant: "destructive", title: "Erro", description: "Informe o nome do cliente" });
+      return;
+    }
+    toast({ title: "Venda registrada!", description: `Total: R$ ${total.toFixed(2)}` });
     setClient('');
-    setProducts([initialProduct]);
+    setProducts([EmptyProduct]);
     setPaymentMethod('');
     setInstallments(1);
   };
 
   return (
     <DashboardLayout>
-      <h2 className="text-3xl font-bold mb-6 text-gray-800">Central de Vendas</h2>
+      <h2 className="text-3xl font-bold mb-6 text-gray-800">Vendas</h2>
       <form onSubmit={handleSubmit} className="space-y-8 max-w-3xl mx-auto">
         <Card>
           <CardHeader>
@@ -51,7 +49,6 @@ export default function SalesCenter() {
             <Input id="client" value={client} onChange={e => setClient(e.target.value)} placeholder="Digite o nome do cliente" />
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader>
             <CardTitle>Produtos / Serviços</CardTitle>
@@ -59,7 +56,7 @@ export default function SalesCenter() {
           <CardContent>
             <div className="space-y-4">
               {products.map((product, idx) => (
-                <SaleProductForm
+                <DynamicProductForm
                   key={idx}
                   value={product}
                   onChange={prod => updateProduct(idx, prod)}
@@ -70,7 +67,6 @@ export default function SalesCenter() {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader>
             <CardTitle>Pagamento</CardTitle>
@@ -78,7 +74,18 @@ export default function SalesCenter() {
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="payment">Método de Pagamento</Label>
-              <Input id="payment" value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} placeholder="Ex: Cartão, PIX..." />
+              <select
+                className="w-full mt-1 border rounded-md h-10"
+                id="payment"
+                value={paymentMethod}
+                onChange={e => setPaymentMethod(e.target.value)}
+                required
+              >
+                <option value="">Selecione</option>
+                {PAYMENT_METHODS.map(pm =>
+                  <option key={pm.id} value={pm.name}>{pm.name}</option>
+                )}
+              </select>
             </div>
             <div>
               <Label htmlFor="inst">Parcelas</Label>
@@ -86,13 +93,13 @@ export default function SalesCenter() {
             </div>
           </CardContent>
         </Card>
-
         <SaleSummary total={total} />
-
         <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
           Registrar Venda
         </Button>
       </form>
     </DashboardLayout>
   );
-}
+};
+
+export default Vendas;

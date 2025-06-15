@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Card, CardContent, CardHeader, CardTitle 
@@ -42,7 +41,7 @@ const Configuracoes = () => {
         <TabsList className="grid w-full grid-cols-4 mb-8">
           <TabsTrigger value="usuarios">Usuários</TabsTrigger>
           <TabsTrigger value="fornecedores">Fornecedores Padrão</TabsTrigger>
-          <TabsTrigger value="categorias">Categorias</TabsTrigger>
+          <TabsTrigger value="categorias">Produtos & Categorias</TabsTrigger>
           <TabsTrigger value="sistema">Sistema</TabsTrigger>
         </TabsList>
         
@@ -159,38 +158,31 @@ const Configuracoes = () => {
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <Tags className="h-5 w-5" />
-                Categorias Financeiras
+                Produtos & Categorias
               </CardTitle>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Nova Categoria
+                Novo Produto
               </Button>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-medium mb-3">Categorias de Receita</h4>
+                  <h4 className="font-medium mb-3">Tipos de Produto</h4>
                   <div className="space-y-2">
-                    {["Venda de Passagens", "Pacotes Turísticos", "Seguro Viagem", "Assessoria"].map((category) => (
+                    {["Passagem Aérea", "Diária de Hotel", "Diária de Veículo", "Seguro Viagem", "Outros"].map((category) => (
                       <div key={category} className="flex items-center justify-between p-2 border rounded">
                         <span className="text-sm">{category}</span>
-                        <Button variant="ghost" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
                       </div>
                     ))}
                   </div>
                 </div>
-                
                 <div>
-                  <h4 className="font-medium mb-3">Categorias de Despesa</h4>
+                  <h4 className="font-medium mb-3">Formas de Pagamento</h4>
                   <div className="space-y-2">
-                    {["Fornecedores", "Aluguel", "Marketing", "Pessoal", "Operacional"].map((category) => (
-                      <div key={category} className="flex items-center justify-between p-2 border rounded">
-                        <span className="text-sm">{category}</span>
-                        <Button variant="ghost" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
+                    {["Cartão de Crédito", "Pix", "Dinheiro", "Transferência Bancária", "Outros"].map((pay) => (
+                      <div key={pay} className="flex items-center justify-between p-2 border rounded">
+                        <span className="text-sm">{pay}</span>
                       </div>
                     ))}
                   </div>

@@ -59,19 +59,17 @@ const App = () => (
           {/* Redireciona raiz e /login para o dashboard, sem AuthGuard */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/login" element={<Navigate to="/dashboard" replace />} />
-
-          {/* Todas as rotas acessíveis sem autenticação */}
+          {/* Rotas principais */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/operacional" element={<Operacional />} />
           <Route path="/finance" element={<Finance />} />
           <Route path="/crm" element={<CRM />} />
           <Route path="/packages" element={<Packages />} />
-          <Route path="/pos" element={<POS />} />
+          <Route path="/vendas" element={<React.Suspense fallback={<div>Loading...</div>}><Vendas /></React.Suspense>} />
           <Route path="/relatorios" element={<Relatorios />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
-          <Route path="/sales-center" element={<SalesCenter />} />
-
-          {/* Catch-all */}
+          {/* Remover Central de Vendas */}
+          {/* <Route path="/sales-center" element={<SalesCenter />} /> */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+
+import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   Home, CreditCard, Users, Briefcase, 
-  LogOut, Menu, X, BarChart2, Settings,
+  Menu, X, BarChart2, Settings,
   Plane, FileText
 } from "lucide-react";
 
@@ -16,63 +17,21 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Modo desenvolvimento: usuário fixo
   const userEmail = "Usuário de Desenvolvimento";
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-  const isActiveRoute = (path: string) => {
-    return location.pathname === path;
-  };
+  const isActiveRoute = (path: string) => location.pathname === path;
 
   const navigationItems = [
-    {
-      path: "/dashboard",
-      icon: Home,
-      label: "Dashboard"
-    },
-    {
-      path: "/operacional",
-      icon: Plane,
-      label: "Operacional"
-    },
-    {
-      path: "/finance",
-      icon: CreditCard,
-      label: "Financeiro"
-    },
-    {
-      path: "/crm",
-      icon: Users,
-      label: "CRM"
-    },
-    {
-      path: "/packages",
-      icon: Briefcase,
-      label: "Pacotes"
-    },
-    {
-      path: "/pos",
-      icon: BarChart2,
-      label: "PDV"
-    },
-    {
-      path: "/relatorios",
-      icon: FileText,
-      label: "Relatórios"
-    },
-    {
-      path: "/configuracoes",
-      icon: Settings,
-      label: "Configurações"
-    },
-    {
-      path: "/sales-center",
-      icon: Briefcase,
-      label: "Central de Vendas"
-    }
+    { path: "/dashboard", icon: Home, label: "Dashboard" },
+    { path: "/operacional", icon: Plane, label: "Operacional" },
+    { path: "/finance", icon: CreditCard, label: "Financeiro" },
+    { path: "/crm", icon: Users, label: "CRM" },
+    { path: "/packages", icon: Briefcase, label: "Pacotes" },
+    { path: "/vendas", icon: BarChart2, label: "Vendas" },
+    { path: "/relatorios", icon: FileText, label: "Relatórios" },
+    // Configurações removida deste ponto
   ];
 
   return (
@@ -116,21 +75,27 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             })}
           </ul>
         </nav>
-        
-        {/* Botão de logout removido em modo desenvolvimento */}
-        <div className="p-4 mt-auto">
-          {/* Nenhum botão de logout */}
+        {/* Configurações Fixa no Rodapé */}
+        <div className="p-4 mt-auto border-t border-sky-800">
+          <Link
+            to="/configuracoes"
+            className={`flex items-center p-3 rounded-lg transition-colors ${
+              isActiveRoute("/configuracoes")
+                ? "bg-sky-700 text-white"
+                : "text-white hover:bg-sky-800"
+            }`}
+          >
+            <Settings size={20} />
+            {isSidebarOpen && <span className="ml-3">Configurações</span>}
+          </Link>
         </div>
       </div>
-      
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         <header className="bg-white shadow-sm p-4">
           <div className="flex justify-between items-center">
             <h1 className="text-xl font-semibold text-gray-800">Sistema de Gestão</h1>
-            <div className="text-sm text-gray-600">
-              {userEmail}
-            </div>
+            <div className="text-sm text-gray-600">{userEmail}</div>
           </div>
         </header>
         <main className="p-6">{children}</main>
