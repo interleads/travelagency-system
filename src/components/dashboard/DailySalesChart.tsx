@@ -41,11 +41,20 @@ function isWithin(date, from, to) {
 export default function DailySalesChart() {
   const { dateRange } = useDashboardDateRange();
 
-  // Filtra apenas pelo período selecionado no calendário global
+  // Novo filtro: mostra todos dados se from e to indefinidos
   const chartData = React.useMemo(() => {
-    if (!dateRange?.from || !dateRange?.to) return [];
+    if (!dateRange?.from || !dateRange?.to) {
+      return allSalesData;
+    }
     return allSalesData.filter((d) => isWithin(d.date, dateRange.from, dateRange.to));
   }, [dateRange]);
+
+  // Intervalo dinâmico para o eixo X baseado na quantidade de pontos
+  const barCount = chartData.length;
+  let xAxisInterval: number | "preserveStartEnd" = "preserveStartEnd";
+  if (barCount > 60) {
+    xAxisInterval = Math.ceil(barCount / 16); // Reduz a quantidade de labels
+  }
 
   return (
     <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
@@ -75,8 +84,7 @@ export default function DailySalesChart() {
                   fill: "#082f49",
                   dy: 10,
                 }}
-                // O intervalo automático se adapta ao tamanho do range selecionado
-                interval="preserveStartEnd"
+                interval={xAxisInterval}
                 minTickGap={10}
               />
               <YAxis
