@@ -1,9 +1,10 @@
 
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { TrendingUp, BarChart, PieChart, Users } from "lucide-react";
+import { TrendingUp, BarChart, PieChart, Users, DollarSign, FileText, Calendar, ArrowUp, ArrowDown } from "lucide-react";
 
 const metrics = [
+  // KPIs do antigo Dashboard, adaptados
   {
     label: "Receita Mensal",
     value: "R$ 72.440",
@@ -31,6 +32,35 @@ const metrics = [
     change: "72% atingido",
     icon: PieChart,
     bg: "from-amber-400 to-yellow-300",
+  },
+  // KPIs adicionais do antigo Relatório
+  {
+    label: "Receita Total",
+    value: "R$ 328.000",
+    change: "+12% mês ant.",
+    icon: DollarSign,
+    bg: "from-lime-500 to-green-400",
+  },
+  {
+    label: "Vendas Realizadas",
+    value: "247",
+    change: "+8% mês ant.",
+    icon: ArrowUp,
+    bg: "from-sky-600 to-cyan-400",
+  },
+  {
+    label: "Clientes Únicos",
+    value: "189",
+    change: "+5% mês ant.",
+    icon: Users,
+    bg: "from-purple-500 to-indigo-400",
+  },
+  {
+    label: "Margem de Lucro",
+    value: "29.6%",
+    change: "+2.1% mês ant.",
+    icon: FileText,
+    bg: "from-orange-400 to-yellow-400",
   },
 ];
 

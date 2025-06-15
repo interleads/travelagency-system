@@ -12,7 +12,6 @@ import Packages from "./pages/Packages";
 import Vendas from "./pages/Vendas";
 import Operacional from "./pages/Operacional";
 import Configuracoes from "./pages/Configuracoes";
-import Relatorios from "./pages/Relatorios";
 import NotFound from "./pages/NotFound";
 import { supabase } from "@/integrations/supabase/client";
 import React, { useEffect, useState } from "react";
@@ -65,10 +64,7 @@ const App = () => (
           <Route path="/crm" element={<CRM />} />
           <Route path="/packages" element={<Packages />} />
           <Route path="/vendas" element={<Vendas />} />
-          <Route path="/relatorios" element={<Relatorios />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
-          {/* Remover Central de Vendas */}
-          {/* <Route path="/sales-center" element={<SalesCenter />} /> */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

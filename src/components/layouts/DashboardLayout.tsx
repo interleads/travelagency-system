@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -30,7 +29,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { path: "/crm", icon: Users, label: "CRM" },
     { path: "/packages", icon: Briefcase, label: "Pacotes" },
     { path: "/vendas", icon: BarChart2, label: "Vendas" },
-    { path: "/relatorios", icon: FileText, label: "Relatórios" },
+    // { path: "/relatorios", icon: FileText, label: "Relatórios" }, // removido
     // Configurações removida deste ponto
   ];
 
