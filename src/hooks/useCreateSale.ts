@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation } from "@tanstack/react-query";
 import { SaleProduct } from "@/components/vendas/DynamicProductForm";
@@ -20,7 +19,6 @@ export function useCreateSale() {
       const user_id = userData.user.id;
 
       // 2. Inserir venda (ignorando typing de Supabase client)
-      // @ts-expect-error - tabela 'sales' não tipada
       const { data: saleRows, error: saleErr } = await (supabase as any)
         .from("sales")
         .insert([{
@@ -51,7 +49,6 @@ export function useCreateSale() {
             )
           ) || null,
         }));
-        // @ts-expect-error - tabela 'sale_products' não tipada
         const { error: prodErr } = await (supabase as any)
           .from("sale_products")
           .insert(saleProducts);
@@ -62,4 +59,3 @@ export function useCreateSale() {
     }
   });
 }
-
