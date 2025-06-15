@@ -19,8 +19,9 @@ export function useCreateSale() {
       if (userErr || !userData.user) throw new Error("Usuário não autenticado.");
       const user_id = userData.user.id;
 
-      // 2. Inserir venda
-      const { data: saleRow, error: saleErr } = await supabase
+      // 2. Inserir venda (ignorando typing de Supabase client)
+      // @ts-expect-error - tabela 'sales' não tipada
+      const { data: saleRows, error: saleErr } = await (supabase as any)
         .from("sales")
         .insert([{
           user_id,
@@ -32,13 +33,13 @@ export function useCreateSale() {
         .select()
         .single();
 
-      if (saleErr || !saleRow) throw new Error("Erro ao registrar venda: " + (saleErr?.message || ""));
+      if (saleErr || !saleRows) throw new Error("Erro ao registrar venda: " + (saleErr?.message || ""));
 
       // 3. Inserir produtos da venda
       const productRows = sale.products.filter(p => !!p.name);
       if (productRows.length) {
         const saleProducts = productRows.map(prod => ({
-          sale_id: saleRow.id,
+          sale_id: saleRows.id,
           type: prod.type ?? null,
           name: prod.name,
           quantity: prod.quantity,
@@ -50,11 +51,15 @@ export function useCreateSale() {
             )
           ) || null,
         }));
-        const { error: prodErr } = await supabase.from("sale_products").insert(saleProducts);
+        // @ts-expect-error - tabela 'sale_products' não tipada
+        const { error: prodErr } = await (supabase as any)
+          .from("sale_products")
+          .insert(saleProducts);
         if (prodErr) throw new Error("Erro ao salvar produtos: " + prodErr.message);
       }
 
-      return saleRow;
+      return saleRows;
     }
   });
 }
+
