@@ -63,10 +63,12 @@ const PRESETS = [
 ];
 
 export default function DashboardFilters() {
-  const { dateRange, setDateRange } = useDashboardDateRange();
+  const dashRange = useDashboardDateRange();
+  const dateRange = dashRange?.dateRange || { from: undefined, to: undefined };
+  const setDateRange = dashRange?.setDateRange || (() => {});
+
   const [open, setOpen] = React.useState(false);
   const [custom, setCustom] = React.useState(
-    // Verifica se está em modo personalizado inicialmente
     () =>
       !PRESETS.some(
         (preset) =>
@@ -156,3 +158,4 @@ export default function DashboardFilters() {
     </div>
   );
 }
+
