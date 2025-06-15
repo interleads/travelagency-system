@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,7 +45,7 @@ const defaultFeatureIcons = [
   { icon: "umbrella", text: "Piscina" },
 ];
 
-const TravelPackageForm = () => {
+const TravelPackageForm = ({ templateData }: { templateData?: any }) => {
   const [packageData, setPackageData] = useState<TravelPackage>({
     title: '',
     agency: '',
@@ -70,6 +70,12 @@ const TravelPackageForm = () => {
     tours: [],
     inclusions: []
   });
+
+  // Atualiza formulário se templateData for recebido
+  useEffect(() => {
+    if (templateData) setPackageData({ ...packageData, ...templateData });
+    // eslint-disable-next-line
+  }, [templateData]);
 
   const previewRef = useRef<HTMLDivElement>(null);
 

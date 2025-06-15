@@ -1,11 +1,14 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import TravelPackageForm from '@/components/TravelPackageForm';
+import PackageTemplateGallery from "@/components/PackageTemplateGallery";
 
 const Packages = () => {
+  const [templateData, setTemplateData] = useState<any | null>(null);
+
   return (
     <DashboardLayout>
       <h2 className="text-3xl font-bold mb-6 text-gray-800">Gerenciamento de Pacotes</h2>
@@ -23,7 +26,7 @@ const Packages = () => {
               <CardTitle>Gerador de Pacotes de Viagem</CardTitle>
             </CardHeader>
             <CardContent>
-              <TravelPackageForm />
+              <TravelPackageForm templateData={templateData} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -47,9 +50,7 @@ const Packages = () => {
               <CardTitle>Templates de Pacotes</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-gray-500">
-                Templates de pacotes aparecerão aqui
-              </div>
+              <PackageTemplateGallery onSelectTemplate={td => setTemplateData(td)} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -59,3 +60,4 @@ const Packages = () => {
 };
 
 export default Packages;
+
