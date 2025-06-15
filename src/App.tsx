@@ -4,17 +4,16 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
-import AuthPage from "./pages/Auth"; // Use AuthPage here!
+import AuthPage from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Finance from "./pages/Finance";
 import CRM from "./pages/CRM";
 import Packages from "./pages/Packages";
-import POS from "./pages/POS";
+import Vendas from "./pages/Vendas";
 import Operacional from "./pages/Operacional";
 import Configuracoes from "./pages/Configuracoes";
 import Relatorios from "./pages/Relatorios";
 import NotFound from "./pages/NotFound";
-import SalesCenter from "./pages/SalesCenter";
 import { supabase } from "@/integrations/supabase/client";
 import React, { useEffect, useState } from "react";
 
@@ -65,7 +64,7 @@ const App = () => (
           <Route path="/finance" element={<Finance />} />
           <Route path="/crm" element={<CRM />} />
           <Route path="/packages" element={<Packages />} />
-          <Route path="/vendas" element={<React.Suspense fallback={<div>Loading...</div>}><Vendas /></React.Suspense>} />
+          <Route path="/vendas" element={<Vendas />} />
           <Route path="/relatorios" element={<Relatorios />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
           {/* Remover Central de Vendas */}

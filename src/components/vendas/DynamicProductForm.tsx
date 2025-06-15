@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 export type ProductType = "passagem" | "hotel" | "veiculo" | "seguro" | "outros";
 
 export interface SaleProduct {
-  type: ProductType;
+  type?: ProductType;
   name: string;
   quantity: number;
   price: number;
@@ -16,8 +16,9 @@ export interface SaleProduct {
   [key: string]: any;
 }
 
+// EmptyProduct: type is optional/undefined initially
 export const EmptyProduct: SaleProduct = {
-  type: "",
+  type: undefined,
   name: "",
   quantity: 1,
   price: 0,
@@ -97,8 +98,11 @@ const DynamicProductForm: React.FC<{
         <Label>Tipo</Label>
         <select
           className="w-full mt-1 border rounded-md h-10"
-          value={value.type}
-          onChange={e => onChange({ ...EmptyProduct, ...value, type: e.target.value })}
+          value={value.type ?? ""}
+          onChange={e => {
+            const newType = e.target.value === "" ? undefined : (e.target.value as ProductType);
+            onChange({ ...EmptyProduct, ...value, type: newType });
+          }}
           required
         >
           <option value="">Selecione</option>
