@@ -1,109 +1,25 @@
-
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CreditCard, Users, Briefcase, Ticket } from "lucide-react";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-
-const statCards = [
-  {
-    title: "Vendas do Mês",
-    value: "R$ 45.231,00",
-    change: "+12%",
-    icon: CreditCard,
-    color: "bg-sky-500"
-  },
-  {
-    title: "Novos Clientes",
-    value: "24",
-    change: "+3%",
-    icon: Users,
-    color: "bg-emerald-500"
-  },
-  {
-    title: "Pacotes Criados",
-    value: "12",
-    change: "-2%",
-    icon: Briefcase,
-    color: "bg-amber-500"
-  },
-  {
-    title: "Passeios Vendidos",
-    value: "86",
-    change: "+18%",
-    icon: Ticket,
-    color: "bg-indigo-500"
-  }
-];
+import DashboardKPICards from "@/components/dashboard/DashboardKPICards";
+import SalesChart from "@/components/dashboard/SalesChart";
+import TopProductsChart from "@/components/dashboard/TopProductsChart";
 
 const Dashboard = () => {
   return (
     <DashboardLayout>
-      <h2 className="text-3xl font-bold mb-6 text-gray-800">Bem-vindo ao Dashboard</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        {statCards.map((card, index) => (
-          <Card key={index}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
-              <div className={`p-2 rounded-full ${card.color}`}>
-                <card.icon className="h-5 w-5 text-white" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{card.value}</div>
-              <p className={`text-xs ${card.change.includes('+') ? 'text-green-500' : 'text-red-500'}`}>
-                {card.change} desde o último mês
-              </p>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+        <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Visão Geral do Dashboard</h2>
+        <div className="flex gap-2">
+          <button className="px-4 py-2 rounded-md border text-sm font-semibold bg-gradient-to-tr from-sky-500 to-emerald-400 text-white animate-fade-in shadow hover:scale-105 transition">Nova Venda</button>
+          <button className="px-4 py-2 rounded-md border text-sm font-semibold bg-white/70 text-gray-800 hover:bg-sky-50 transition">Exportar Dados</button>
+        </div>
       </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Vendas Recentes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex justify-between items-center border-b pb-2">
-                  <div>
-                    <div className="font-medium">Pacote Cancún Premium</div>
-                    <div className="text-sm text-gray-500">Cliente: Maria Silva</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-medium">R$ 4.750,00</div>
-                    <div className="text-sm text-gray-500">12/04/2025</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Próximas Viagens</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex justify-between items-center border-b pb-2">
-                  <div>
-                    <div className="font-medium">Paris - França</div>
-                    <div className="text-sm text-gray-500">15/05/2025 - 22/05/2025</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-medium">3 passageiros</div>
-                    <div className="text-sm text-gray-500">Confirmado</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      <DashboardKPICards />
+      <div className="grid mt-6 gap-6 grid-cols-1 lg:grid-cols-2">
+        <SalesChart />
+        <TopProductsChart />
       </div>
+      {/* Outras widgets podem ser adicionadas aqui futuramente */}
     </DashboardLayout>
   );
 };
