@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
-import Login from "./pages/Login";
+import AuthPage from "./pages/Auth"; // Use AuthPage here!
 import Dashboard from "./pages/Dashboard";
 import Finance from "./pages/Finance";
 import CRM from "./pages/CRM";
@@ -15,16 +15,39 @@ import Operacional from "./pages/Operacional";
 import Configuracoes from "./pages/Configuracoes";
 import Relatorios from "./pages/Relatorios";
 import NotFound from "./pages/NotFound";
+import { supabase } from "@/integrations/supabase/client";
+import React, { useEffect, useState } from "react";
 
-const queryClient = new QueryClient();
-
-// Auth guard component
+// Auth guard for Supabase sessions
 const AuthGuard = ({ children }: { children: JSX.Element }) => {
-  const isAuthenticated = localStorage.getItem("user") ? 
-    JSON.parse(localStorage.getItem("user") as string).isAuthenticated : false;
+  const [loading, setLoading] = React.useState(true);
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      setIsAuthenticated(!!session);
+      setLoading(false);
+    });
+    // Listen for changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
   
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
+  }
+
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
+
+const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -34,7 +57,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<AuthPage />} />
           
           {/* Protected routes */}
           <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />

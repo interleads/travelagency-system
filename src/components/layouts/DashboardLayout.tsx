@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
@@ -7,6 +7,7 @@ import {
   LogOut, Menu, X, BarChart2, Settings,
   Plane, FileText
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -17,19 +18,25 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  // Fetch current authenticated user
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (mounted) setUserEmail(user?.email ?? null);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserEmail(session?.user?.email ?? null);
+    });
+    return () => { mounted = false; subscription.unsubscribe(); };
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUserEmail(null);
     navigate("/login");
   };
-
-  // Get current user from localStorage
-  const userString = localStorage.getItem("user");
-  const user = userString ? JSON.parse(userString) : null;
-  
-  if (!user?.isAuthenticated) {
-    navigate("/login");
-    return null;
-  }
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -143,7 +150,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <div className="flex justify-between items-center">
             <h1 className="text-xl font-semibold text-gray-800">Sistema de Gestão</h1>
             <div className="text-sm text-gray-600">
-              {user?.email} | {user?.role === 'admin' ? 'Administrador' : 'Vendedor'}
+              {userEmail ?? "Usuário"}
             </div>
           </div>
         </header>
