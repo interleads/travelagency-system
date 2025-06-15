@@ -22,10 +22,28 @@ import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SupplierForm } from '@/components/finance/SupplierForm';
+import { useCategories, useAddCategory } from "@/hooks/useCategories";
+import { useProducts, useAddProduct } from "@/hooks/useProducts";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
 
 const Configuracoes = () => {
   const { toast } = useToast();
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false);
+
+  // Novos estados para categorias/produtos
+  const [newCategory, setNewCategory] = useState("");
+  const [catLoading, setCatLoading] = useState(false);
+
+  const [newProduct, setNewProduct] = useState("");
+  const [productCategory, setProductCategory] = useState("");
+  const [prodLoading, setProdLoading] = useState(false);
+
+  // Hooks dos dados
+  const { data: categories = [], isLoading: loadingCategories } = useCategories();
+  const { data: products = [], isLoading: loadingProducts } = useProducts();
+  const addCategory = useAddCategory();
+  const addProduct = useAddProduct();
 
   const handleSaveSettings = () => {
     toast({
@@ -41,6 +59,53 @@ const Configuracoes = () => {
       description: `${data.name} - ${data.category || data.program || ""}`,
     });
     setIsSupplierDialogOpen(false);
+  };
+
+  const handleAddCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCategory.trim()) return;
+    setCatLoading(true);
+    addCategory.mutate(newCategory, {
+      onSuccess: () => {
+        toast({
+          title: "Categoria criada!",
+          description: `Categoria "${newCategory}" cadastrada com sucesso.`,
+        });
+        setNewCategory("");
+      },
+      onError: (err) => {
+        toast({
+          title: "Erro ao salvar categoria",
+          description: (err as any).message,
+          variant: "destructive",
+        });
+      },
+      onSettled: () => setCatLoading(false),
+    });
+  };
+
+  const handleAddProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newProduct.trim() || !productCategory) return;
+    setProdLoading(true);
+    addProduct.mutate({ name: newProduct, category_id: productCategory }, {
+      onSuccess: () => {
+        toast({
+          title: "Produto criado!",
+          description: `Produto "${newProduct}" cadastrado com sucesso.`,
+        });
+        setNewProduct("");
+        setProductCategory("");
+      },
+      onError: (err) => {
+        toast({
+          title: "Erro ao salvar produto",
+          description: (err as any).message,
+          variant: "destructive",
+        });
+      },
+      onSettled: () => setProdLoading(false),
+    });
   };
 
   return (
@@ -182,31 +247,83 @@ const Configuracoes = () => {
                 <Tags className="h-5 w-5" />
                 Produtos & Categorias
               </CardTitle>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Novo Produto
-              </Button>
+              <div className="flex flex-row gap-2">
+                {/* Botão de exemplo: formulários são integrados abaixo */}
+              </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Formulário de Categoria */}
                 <div>
-                  <h4 className="font-medium mb-3">Tipos de Produto</h4>
+                  <h4 className="font-medium mb-3">Cadastrar Nova Categoria</h4>
+                  <form onSubmit={handleAddCategory} className="flex flex-row gap-2 mb-4">
+                    <Input
+                      placeholder="Nome da Categoria"
+                      value={newCategory}
+                      onChange={(e) => setNewCategory(e.target.value)}
+                      disabled={catLoading}
+                    />
+                    <Button type="submit" disabled={catLoading || !newCategory}>
+                      {catLoading ? <Loader2 className="animate-spin w-4 h-4"/> : <Save className="mr-2 h-4 w-4" />}
+                      Salvar
+                    </Button>
+                  </form>
+                  <h4 className="font-normal mb-2">Categorias Cadastradas</h4>
                   <div className="space-y-2">
-                    {["Passagem Aérea", "Diária de Hotel", "Diária de Veículo", "Seguro Viagem", "Outros"].map((category) => (
-                      <div key={category} className="flex items-center justify-between p-2 border rounded">
-                        <span className="text-sm">{category}</span>
-                      </div>
-                    ))}
+                    {loadingCategories ? (
+                      <div className="flex items-center text-gray-500"><Loader2 className="animate-spin w-4 h-4 mr-2" />Carregando...</div>
+                    ) : (
+                      categories.map((cat: any) => (
+                        <div key={cat.id} className="flex items-center px-3 py-2 border rounded text-sm bg-muted justify-between">
+                          <span>{cat.name}</span>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
+                {/* Formulário de Produto */}
                 <div>
-                  <h4 className="font-medium mb-3">Formas de Pagamento</h4>
+                  <h4 className="font-medium mb-3">Cadastrar Novo Produto</h4>
+                  <form onSubmit={handleAddProduct} className="flex flex-col gap-2 mb-4">
+                    <Input
+                      placeholder="Nome do Produto"
+                      value={newProduct}
+                      onChange={(e) => setNewProduct(e.target.value)}
+                      disabled={prodLoading}
+                    />
+                    <Select value={productCategory} onValueChange={setProductCategory} disabled={prodLoading}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Selecione uma categoria" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((cat: any) => (
+                          <SelectItem value={cat.id} key={cat.id}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button type="submit" disabled={prodLoading || !newProduct || !productCategory}>
+                      {prodLoading ? <Loader2 className="animate-spin w-4 h-4"/> : <Save className="mr-2 h-4 w-4" />}
+                      Salvar
+                    </Button>
+                  </form>
+                  <h4 className="font-normal mb-2">Produtos Cadastrados</h4>
                   <div className="space-y-2">
-                    {["Cartão de Crédito", "Pix", "Dinheiro", "Transferência Bancária", "Outros"].map((pay) => (
-                      <div key={pay} className="flex items-center justify-between p-2 border rounded">
-                        <span className="text-sm">{pay}</span>
-                      </div>
-                    ))}
+                    {loadingProducts ? (
+                      <div className="flex items-center text-gray-500"><Loader2 className="animate-spin w-4 h-4 mr-2" />Carregando...</div>
+                    ) : (
+                      products.map((prod: any) => (
+                        <div key={prod.id} className="flex items-center px-3 py-2 border rounded text-sm bg-muted justify-between">
+                          <span>
+                            {prod.name}{" "}
+                            <span className="text-xs text-muted-foreground">
+                              ({prod.categories?.name || "Sem categoria"})
+                            </span>
+                          </span>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
