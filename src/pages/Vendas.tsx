@@ -25,6 +25,7 @@ const Vendas = () => {
   const { toast } = useToast();
   const [isTicketDialogOpen, setIsTicketDialogOpen] = useState(false);
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false);
+  const [isSaleDialogOpen, setIsSaleDialogOpen] = useState(false);
 
   const handleTicketSubmit = (data: any) => {
     console.log('Nova passagem:', data);
@@ -44,10 +45,33 @@ const Vendas = () => {
     setIsSupplierDialogOpen(false);
   };
 
+  const handleSaleSubmit = (data: any) => {
+    console.log('Nova venda:', data);
+    toast({
+      title: "Venda registrada com sucesso!",
+      description: `Cliente: ${data.client} - R$ ${data.total}`,
+    });
+    setIsSaleDialogOpen(false);
+  };
+
   return (
     <DashboardLayout>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold text-gray-800">Módulo Vendas</h2>
+        <Dialog open={isSaleDialogOpen} onOpenChange={setIsSaleDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2" />
+              Registrar Venda
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Registrar Nova Venda</DialogTitle>
+            </DialogHeader>
+            <VendasForm />
+          </DialogContent>
+        </Dialog>
       </div>
       
       {/* Cards de resumo */}
@@ -93,59 +117,28 @@ const Vendas = () => {
       </div>
       
       <Tabs defaultValue="passagens">
-        <TabsList className="grid w-full grid-cols-3 mb-8">
-          <TabsTrigger value="passagens">Passagens</TabsTrigger>
-          <TabsTrigger value="milhas">Estoque de Milhas</TabsTrigger>
-          <TabsTrigger value="vendas">Registrar Venda</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-1 mb-8">
+          <TabsTrigger value="passagens">Histórico de Vendas</TabsTrigger>
         </TabsList>
         
         <TabsContent value="passagens">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold">Gestão de Passagens</h3>
-            <Dialog open={isTicketDialogOpen} onOpenChange={setIsTicketDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="mr-2" />
-                  Nova Passagem
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Nova Passagem</DialogTitle>
-                </DialogHeader>
-                <TicketForm onSubmit={handleTicketSubmit} />
-              </DialogContent>
-            </Dialog>
+            <h3 className="text-xl font-semibold">Histórico de Vendas</h3>
           </div>
-          <AirlineTicketsTable />
-        </TabsContent>
-        
-        <TabsContent value="milhas">
           <Card>
             <CardHeader>
-              <CardTitle>Estoque de Milhas</CardTitle>
+              <CardTitle>Vendas Recentes</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-center py-8">
-                <Package className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-4 text-lg font-medium">Controle de Milhas</h3>
+                <Plane className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-4 text-lg font-medium">Histórico de Vendas</h3>
                 <p className="mt-2 text-gray-500">
-                  Gerencie o estoque de milhas por programa de fidelidade
+                  Visualize todas as vendas realizadas
                 </p>
-                <Button className="mt-4">
-                  <Plus className="mr-2" />
-                  Adicionar Saldo
-                </Button>
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-        
-        <TabsContent value="vendas">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold">Registrar Venda</h3>
-          </div>
-          <VendasForm />
         </TabsContent>
       </Tabs>
     </DashboardLayout>

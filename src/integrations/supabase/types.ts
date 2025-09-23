@@ -14,6 +14,258 @@ export type Database = {
   }
   public: {
     Tables: {
+      miles_inventory: {
+        Row: {
+          cost_per_thousand: number
+          created_at: string
+          id: string
+          program_id: string
+          purchase_date: string
+          purchase_value: number
+          quantity: number
+          remaining_quantity: number
+          status: string
+          supplier_id: string
+          updated_at: string
+        }
+        Insert: {
+          cost_per_thousand: number
+          created_at?: string
+          id?: string
+          program_id: string
+          purchase_date?: string
+          purchase_value: number
+          quantity: number
+          remaining_quantity?: number
+          status?: string
+          supplier_id: string
+          updated_at?: string
+        }
+        Update: {
+          cost_per_thousand?: number
+          created_at?: string
+          id?: string
+          program_id?: string
+          purchase_date?: string
+          purchase_value?: number
+          quantity?: number
+          remaining_quantity?: number
+          status?: string
+          supplier_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "miles_inventory_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "miles_programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "miles_inventory_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      miles_programs: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      miles_transactions: {
+        Row: {
+          cost_per_thousand: number
+          created_at: string
+          description: string | null
+          id: string
+          miles_inventory_id: string | null
+          quantity: number
+          sale_id: string | null
+          total_value: number
+          type: string
+        }
+        Insert: {
+          cost_per_thousand: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          miles_inventory_id?: string | null
+          quantity: number
+          sale_id?: string | null
+          total_value: number
+          type: string
+        }
+        Update: {
+          cost_per_thousand?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          miles_inventory_id?: string | null
+          quantity?: number
+          sale_id?: string | null
+          total_value?: number
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "miles_transactions_miles_inventory_id_fkey"
+            columns: ["miles_inventory_id"]
+            isOneToOne: false
+            referencedRelation: "miles_inventory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sale_products: {
+        Row: {
+          airline: string | null
+          checkin_date: string | null
+          checkout_date: string | null
+          coverage_type: string | null
+          created_at: string
+          departure_date: string | null
+          destination: string | null
+          details: string | null
+          id: string
+          miles: number | null
+          miles_cost: number | null
+          name: string
+          origin: string | null
+          passengers: string | null
+          price: number
+          quantity: number
+          rental_period: string | null
+          return_date: string | null
+          sale_id: string
+          type: string
+          vehicle_category: string | null
+        }
+        Insert: {
+          airline?: string | null
+          checkin_date?: string | null
+          checkout_date?: string | null
+          coverage_type?: string | null
+          created_at?: string
+          departure_date?: string | null
+          destination?: string | null
+          details?: string | null
+          id?: string
+          miles?: number | null
+          miles_cost?: number | null
+          name: string
+          origin?: string | null
+          passengers?: string | null
+          price: number
+          quantity?: number
+          rental_period?: string | null
+          return_date?: string | null
+          sale_id: string
+          type: string
+          vehicle_category?: string | null
+        }
+        Update: {
+          airline?: string | null
+          checkin_date?: string | null
+          checkout_date?: string | null
+          coverage_type?: string | null
+          created_at?: string
+          departure_date?: string | null
+          destination?: string | null
+          details?: string | null
+          id?: string
+          miles?: number | null
+          miles_cost?: number | null
+          name?: string
+          origin?: string | null
+          passengers?: string | null
+          price?: number
+          quantity?: number
+          rental_period?: string | null
+          return_date?: string | null
+          sale_id?: string
+          type?: string
+          vehicle_category?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_products_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales: {
+        Row: {
+          client_name: string
+          created_at: string
+          gross_profit: number | null
+          id: string
+          installments: number | null
+          miles_cost: number | null
+          miles_used: number | null
+          payment_method: string
+          supplier_id: string | null
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          client_name: string
+          created_at?: string
+          gross_profit?: number | null
+          id?: string
+          installments?: number | null
+          miles_cost?: number | null
+          miles_used?: number | null
+          payment_method: string
+          supplier_id?: string | null
+          total_amount: number
+          updated_at?: string
+        }
+        Update: {
+          client_name?: string
+          created_at?: string
+          gross_profit?: number | null
+          id?: string
+          installments?: number | null
+          miles_cost?: number | null
+          miles_used?: number | null
+          payment_method?: string
+          supplier_id?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           account_type: string
@@ -50,6 +302,42 @@ export type Database = {
           program?: string
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          category: string
+          created_at: string
+          date: string
+          description: string
+          id: string
+          subcategory: string | null
+          type: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          date: string
+          description: string
+          id?: string
+          subcategory?: string | null
+          type: string
+          updated_at?: string
+          value: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          subcategory?: string | null
+          type?: string
+          updated_at?: string
+          value?: number
         }
         Relationships: []
       }

@@ -12,6 +12,7 @@ import Packages from "./pages/Packages";
 import Configuracoes from "./pages/Configuracoes";
 import NotFound from "./pages/NotFound";
 import Vendas from "./pages/Vendas";
+import MilesManagement from "./pages/MilesManagement";
 import { Building2 } from "lucide-react";
 import Fornecedores from "./pages/Fornecedores";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,6 +63,7 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           {/* Atualizando de Operacional para Vendas */}
           <Route path="/vendas" element={<Vendas />} />
+          <Route path="/milhas" element={<MilesManagement />} />
           <Route path="/finance" element={<Finance />} />
           <Route path="/crm" element={<CRM />} />
           <Route path="/packages" element={<Packages />} />

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { 
   Home, CreditCard, Users, Briefcase, 
   Menu, X, BarChart2, Settings,
-  Plane, FileText, Building2
+  Plane, FileText, Building2, Package
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -26,6 +26,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const navigationItems = [
     { path: "/dashboard", icon: Home, label: "Dashboard" },
     { path: "/vendas", icon: Plane, label: "Vendas" }, // Alterado Operacional para Vendas
+    { path: "/milhas", icon: Package, label: "Gestão de Milhas" },
     { path: "/finance", icon: CreditCard, label: "Financeiro" },
     { path: "/crm", icon: Users, label: "CRM" },
     { path: "/packages", icon: Briefcase, label: "Pacotes" },
