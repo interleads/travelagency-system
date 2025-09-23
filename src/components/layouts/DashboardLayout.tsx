@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { 
   Home, CreditCard, Users, Briefcase, 
   Menu, X, BarChart2, Settings,
-  Plane, FileText
+  Plane, FileText, Building2
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -29,6 +29,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { path: "/finance", icon: CreditCard, label: "Financeiro" },
     { path: "/crm", icon: Users, label: "CRM" },
     { path: "/packages", icon: Briefcase, label: "Pacotes" },
+    { path: "/fornecedores", icon: Building2, label: "Fornecedores" },
     // Retirado Vendas do menu lateral, pois agora está em uma tab de Vendas
     // { path: "/vendas", icon: BarChart2, label: "Vendas" },
     // { path: "/relatorios", icon: FileText, label: "Relatórios" },

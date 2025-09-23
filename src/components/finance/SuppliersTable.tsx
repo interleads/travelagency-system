@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Card, CardContent, CardHeader, CardTitle 
@@ -19,76 +18,47 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, User } from "lucide-react";
+import { Plus, User, Loader2 } from "lucide-react";
 import { SupplierForm } from './SupplierForm';
 import { useToast } from "@/hooks/use-toast";
-
-interface Supplier {
-  id: string;
-  name: string;
-  contact: string;
-  accountType: string;
-  program: string;
-  status: 'Ativo' | 'Inativo';
-  notes: string;
-  lastUsed: string;
-}
-
-const mockSuppliers: Supplier[] = [
-  {
-    id: '1',
-    name: 'João Silva',
-    contact: '(11) 99999-9999',
-    accountType: 'Conta Azul',
-    program: 'TudoAzul',
-    status: 'Ativo',
-    notes: 'Conta com bom saldo de milhas',
-    lastUsed: '2025-01-10'
-  },
-  {
-    id: '2',
-    name: 'Ana Costa',
-    contact: '(21) 88888-8888',
-    accountType: 'Conta SMILES',
-    program: 'SMILES',
-    status: 'Ativo',
-    notes: 'Parceira de longa data',
-    lastUsed: '2025-01-08'
-  },
-  {
-    id: '3',
-    name: 'Carlos Mendes',
-    contact: '(31) 77777-7777',
-    accountType: 'Conta TudoAzul',
-    program: 'TudoAzul',
-    status: 'Ativo',
-    notes: 'Especialista em rotas internacionais',
-    lastUsed: '2025-01-05'
-  },
-  {
-    id: '4',
-    name: 'Maria Oliveira',
-    contact: '(41) 66666-6666',
-    accountType: 'Conta Livelo',
-    program: 'Livelo',
-    status: 'Inativo',
-    notes: 'Conta temporariamente indisponível',
-    lastUsed: '2024-12-20'
-  }
-];
+import { useSuppliers, useAddSupplier, type Supplier } from '@/hooks/useSuppliers';
 
 export function SuppliersTable() {
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [suppliers] = useState<Supplier[]>(mockSuppliers);
+  
+  const { data: suppliers = [], isLoading } = useSuppliers();
+  const addSupplier = useAddSupplier();
 
-  const handleSupplierSubmit = (data: any) => {
+  const handleSupplierSubmit = async (data: any) => {
     console.log('Novo fornecedor:', data);
-    toast({
-      title: "Fornecedor cadastrado com sucesso!",
-      description: `${data.name} - ${data.accountType}`,
+    
+    const supplierData = {
+      name: data.name,
+      contact: data.contact,
+      account_type: data.accountType || data.account_type,
+      program: data.program,
+      status: data.status || 'Ativo',
+      notes: data.notes || '',
+    };
+
+    addSupplier.mutate(supplierData, {
+      onSuccess: () => {
+        toast({
+          title: "Fornecedor cadastrado com sucesso!",
+          description: `${data.name} - ${data.accountType || data.account_type}`,
+        });
+        setIsDialogOpen(false);
+      },
+      onError: (error) => {
+        toast({
+          title: "Erro ao cadastrar fornecedor",
+          description: "Tente novamente em alguns instantes.",
+          variant: "destructive",
+        });
+        console.error('Erro:', error);
+      },
     });
-    setIsDialogOpen(false);
   };
 
   const getStatusColor = (status: string) => {
@@ -97,7 +67,16 @@ export function SuppliersTable() {
       : 'bg-red-100 text-red-800';
   };
 
-  const activeSuppliers = suppliers.filter(s => s.status === 'Ativo').length;
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="ml-2">Carregando fornecedores...</span>
+      </div>
+    );
+  }
+
+  const activeSuppliers = suppliers.filter((s: any) => s.status === 'Ativo').length;
   const totalSuppliers = suppliers.length;
 
   return (
@@ -131,7 +110,7 @@ export function SuppliersTable() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-blue-600">
-              {[...new Set(suppliers.map(s => s.program))].length}
+              {[...new Set(suppliers.map((s: any) => s.program))].length}
             </p>
           </CardContent>
         </Card>
@@ -159,40 +138,50 @@ export function SuppliersTable() {
       {/* Tabela */}
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Contato</TableHead>
-                <TableHead>Tipo de Conta</TableHead>
-                <TableHead>Programa</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Último Uso</TableHead>
-                <TableHead>Observações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {suppliers.map((supplier) => (
-                <TableRow key={supplier.id}>
-                  <TableCell className="font-medium">{supplier.name}</TableCell>
-                  <TableCell>{supplier.contact}</TableCell>
-                  <TableCell>{supplier.accountType}</TableCell>
-                  <TableCell>
-                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                      {supplier.program}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(supplier.status)}`}>
-                      {supplier.status}
-                    </span>
-                  </TableCell>
-                  <TableCell>{new Date(supplier.lastUsed).toLocaleDateString()}</TableCell>
-                  <TableCell className="max-w-xs truncate">{supplier.notes}</TableCell>
+          {suppliers.length === 0 ? (
+            <div className="p-8 text-center text-gray-500">
+              <User className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <p className="text-lg font-medium">Nenhum fornecedor cadastrado</p>
+              <p className="text-sm">Clique no botão "Novo Fornecedor" para começar</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Contato</TableHead>
+                  <TableHead>Tipo de Conta</TableHead>
+                  <TableHead>Programa</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Último Uso</TableHead>
+                  <TableHead>Observações</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {suppliers.map((supplier: any) => (
+                  <TableRow key={supplier.id}>
+                    <TableCell className="font-medium">{supplier.name}</TableCell>
+                    <TableCell>{supplier.contact}</TableCell>
+                    <TableCell>{supplier.account_type}</TableCell>
+                    <TableCell>
+                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                        {supplier.program}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(supplier.status)}`}>
+                        {supplier.status}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      {supplier.last_used ? new Date(supplier.last_used).toLocaleDateString() : 'Nunca'}
+                    </TableCell>
+                    <TableCell className="max-w-xs truncate">{supplier.notes || '-'}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>

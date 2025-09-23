@@ -12,6 +12,8 @@ import Packages from "./pages/Packages";
 import Configuracoes from "./pages/Configuracoes";
 import NotFound from "./pages/NotFound";
 import Vendas from "./pages/Vendas";
+import { Building2 } from "lucide-react";
+import Fornecedores from "./pages/Fornecedores";
 import { supabase } from "@/integrations/supabase/client";
 import React, { useEffect, useState } from "react";
 
@@ -65,6 +67,7 @@ const App = () => (
           <Route path="/packages" element={<Packages />} />
           {/* <Route path="/vendas" element={<Vendas />} /> removido */}
           <Route path="/configuracoes" element={<Configuracoes />} />
+          <Route path="/fornecedores" element={<Fornecedores />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
