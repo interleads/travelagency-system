@@ -2,49 +2,38 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, ListChecks, BarChart, Briefcase, Percent, DollarSign } from "lucide-react";
 import { useDashboardDateRange } from "./useDashboardDateRange";
+import { useSales } from "@/hooks/useSales";
+import { useTransactions } from "@/hooks/useTransactions";
 
-// Gera dados simulado de vendas diárias cobrindo 2 anos
-function generateMockData() {
-  const data = [];
-  const start = new Date("2023-01-01");
-  const end = new Date("2024-12-31");
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    const isWeekend = d.getDay() === 0 || d.getDay() === 6;
-    data.push({
-      date: new Date(d),
-      sales: isWeekend ? 0 : Math.floor(Math.random() * 7000) + 1200,
-      packages: isWeekend ? 0 : Math.floor(Math.random() * 5) + 1,
-    });
-  }
-  return data;
-}
-// Dados simulados "globais"
-const allData = generateMockData();
-
-function filterDataByRange(data, range) {
+function filterDataByRange(data: any[], range: any) {
   if (!range?.from || !range?.to) return data;
   return data.filter(
-    (item) =>
-      item.date >= range.from &&
-      item.date <= range.to
+    (item) => {
+      const itemDate = new Date(item.created_at || item.date);
+      return itemDate >= range.from && itemDate <= range.to;
+    }
   );
 }
 
-function calculateMetrics(filtered) {
-  const totalSales = filtered.reduce((acc, curr) => acc + curr.sales, 0);
-  const numSales = filtered.filter(item => item.sales > 0).length;
+function calculateMetrics(filteredSales: any[], filteredTransactions: any[]) {
+  const totalSales = filteredSales.reduce((acc, sale) => acc + Number(sale.total_amount), 0);
+  const numSales = filteredSales.length;
   const avgTicket = numSales ? totalSales / numSales : 0;
-  const totalPackages = filtered.reduce((acc, curr) => acc + curr.packages, 0);
-  const profitPercentBase = 0.296; // valor base simulado usado para lucro
-
-  // Calcula o lucro bruto
-  const profit = totalSales * profitPercentBase;
-
-  // Margem de Lucro Dinâmica
-  // Se não houver vendas, margem = 0%
-  const marginPercent = totalSales > 0
-    ? (profit / totalSales) * 100
-    : 0;
+  
+  // Get packages count from sale products
+  const totalPackages = filteredSales.length; // Each sale is considered a package for now
+  
+  // Calculate profit from transactions
+  const receitas = filteredTransactions
+    .filter(t => t.type === 'receita')
+    .reduce((acc, t) => acc + Number(t.value), 0);
+  const despesas = filteredTransactions
+    .filter(t => t.type === 'despesa')
+    .reduce((acc, t) => acc + Number(t.value), 0);
+  const profit = receitas - despesas;
+  
+  // Profit margin calculation
+  const marginPercent = receitas > 0 ? (profit / receitas) * 100 : 0;
 
   return [
     {
@@ -83,22 +72,52 @@ function calculateMetrics(filtered) {
       description: "Percentual de lucro",
     },
     {
-      label: "Receita Bruta (Lucro)",
+      label: "Lucro Líquido",
       value: `R$ ${profit.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`,
       icon: DollarSign,
       bg: "from-lime-500 to-green-400",
-      description: "Valor total do lucro",
+      description: "Receitas menos despesas",
     },
   ];
 }
 
 export default function DashboardKPICards() {
   const { dateRange } = useDashboardDateRange();
-  const filtered = React.useMemo(
-    () => filterDataByRange(allData, dateRange),
-    [dateRange]
+  const { data: sales = [], isLoading: salesLoading } = useSales();
+  const { data: transactions = [], isLoading: transactionsLoading } = useTransactions();
+  
+  const filteredSales = React.useMemo(
+    () => filterDataByRange(sales, dateRange),
+    [sales, dateRange]
   );
-  const metrics = React.useMemo(() => calculateMetrics(filtered), [filtered]);
+  
+  const filteredTransactions = React.useMemo(
+    () => filterDataByRange(transactions, dateRange),
+    [transactions, dateRange]
+  );
+  
+  const metrics = React.useMemo(
+    () => calculateMetrics(filteredSales, filteredTransactions),
+    [filteredSales, filteredTransactions]
+  );
+
+  if (salesLoading || transactionsLoading) {
+    return (
+      <div className="grid gap-6 mb-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <Card key={i} className="h-32">
+            <CardContent className="p-6">
+              <div className="animate-pulse">
+                <div className="h-4 bg-gray-200 rounded mb-2" />
+                <div className="h-8 bg-gray-200 rounded mb-2" />
+                <div className="h-3 bg-gray-200 rounded w-24" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-6 mb-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">

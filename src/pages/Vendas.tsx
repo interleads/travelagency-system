@@ -20,6 +20,8 @@ import { TicketForm } from '@/components/finance/TicketForm';
 import { SupplierForm } from '@/components/finance/SupplierForm';
 import { useToast } from "@/hooks/use-toast";
 import VendasForm from "@/components/vendas/VendasForm";
+import { SalesOverviewCards } from "@/components/vendas/SalesOverviewCards";
+import { SalesHistoryTable } from "@/components/vendas/SalesHistoryTable";
 
 const Vendas = () => {
   const { toast } = useToast();
@@ -74,47 +76,7 @@ const Vendas = () => {
         </Dialog>
       </div>
       
-      {/* Cards de resumo */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Passagens Ativas</CardTitle>
-            <Plane className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">24</div>
-            <p className="text-xs text-muted-foreground">
-              +2 desde ontem
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Fornecedores Ativos</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">
-              +1 este mês
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Reservas Pendentes</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground">
-              -3 desde ontem
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <SalesOverviewCards />
       
       <Tabs defaultValue="passagens">
         <TabsList className="grid w-full grid-cols-1 mb-8">
@@ -122,23 +84,7 @@ const Vendas = () => {
         </TabsList>
         
         <TabsContent value="passagens">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold">Histórico de Vendas</h3>
-          </div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Vendas Recentes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <Plane className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-4 text-lg font-medium">Histórico de Vendas</h3>
-                <p className="mt-2 text-gray-500">
-                  Visualize todas as vendas realizadas
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <SalesHistoryTable />
         </TabsContent>
       </Tabs>
     </DashboardLayout>
