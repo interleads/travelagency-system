@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import DynamicProductForm, { EmptyProduct, SaleProduct } from "@/components/vendas/DynamicProductForm";
+import DynamicProductForm, { EmptyProduct } from "@/components/vendas/DynamicProductForm";
 import SaleSummary from "@/components/sales/SaleSummary";
 import { PAYMENT_METHODS } from '@/data/products';
-import { useCreateSale } from '@/hooks/useCreateSale';
+import { useCreateSale, SaleProduct } from '@/hooks/useSales';
 
 const VendasForm = () => {
   const [client, setClient] = useState('');
@@ -40,11 +40,11 @@ const VendasForm = () => {
     }
 
     createSale.mutate({
-      client,
+      client_name: client,
       products,
-      paymentMethod,
+      payment_method: paymentMethod,
       installments,
-      total,
+      total_amount: total,
     }, {
       onSuccess: () => {
         toast({ title: "Venda registrada no banco com sucesso!", description: `Total: R$ ${total.toFixed(2)}` });

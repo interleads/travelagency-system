@@ -1,5 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { SaleProduct } from "@/components/vendas/DynamicProductForm";
+
+// Re-export SaleProduct for convenience
+export type { SaleProduct };
 
 export interface Sale {
   id: string;
@@ -14,29 +18,6 @@ export interface Sale {
   created_at: string;
   updated_at: string;
   suppliers?: { name: string };
-}
-
-export interface SaleProduct {
-  id?: string;
-  sale_id?: string;
-  type: string;
-  name: string;
-  quantity: number;
-  price: number;
-  airline?: string;
-  passengers?: string;
-  origin?: string;
-  destination?: string;
-  departure_date?: string;
-  return_date?: string;
-  miles?: number;
-  miles_cost?: number;
-  checkin_date?: string;
-  checkout_date?: string;
-  vehicle_category?: string;
-  rental_period?: string;
-  coverage_type?: string;
-  details?: string;
 }
 
 export interface SaleInput {
@@ -90,15 +71,33 @@ export const useCreateSale = () => {
 
       if (saleError) throw saleError;
 
-      // Insert products
-      const productsWithSaleId = saleData.products.map(product => ({
-        ...product,
-        sale_id: sale.id
+      // Insert products - map the form fields to database fields
+      const productsForDb = saleData.products.map(product => ({
+        sale_id: sale.id,
+        type: product.type || 'outros',
+        name: product.name,
+        quantity: product.quantity,
+        price: product.price,
+        details: product.details || '',
+        // Map form fields to database fields
+        airline: product.airline,
+        passengers: product.adults && product.children ? `${product.adults} adultos, ${product.children} crianças` : '',
+        origin: product.origin,
+        destination: product.destination,
+        departure_date: product.trecho1,
+        return_date: product.trecho2,
+        miles: product.qtdMilhas,
+        miles_cost: product.custoMil,
+        checkin_date: product.checkin,
+        checkout_date: product.checkout,
+        vehicle_category: product.categoria,
+        rental_period: product.periodo,
+        coverage_type: product.cobertura
       }));
 
       const { error: productsError } = await supabase
         .from("sale_products")
-        .insert(productsWithSaleId);
+        .insert(productsForDb);
 
       if (productsError) throw productsError;
 
