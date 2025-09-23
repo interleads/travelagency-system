@@ -8,7 +8,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useTransactions } from '@/hooks/useTransactions';
+import { useTransactions, Transaction } from '@/hooks/useTransactions';
+import { TransactionActions } from './TransactionActions';
 
 const getCategoryColor = (category: string, subcategory?: string) => {
   switch (category) {
@@ -108,6 +109,7 @@ export function CashFlowTableReal() {
                 <TableHead>Descrição</TableHead>
                 <TableHead>Categoria</TableHead>
                 <TableHead className="text-right">Valor</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -127,6 +129,9 @@ export function CashFlowTableReal() {
                     transaction.type === 'receita' ? 'text-emerald-600' : 'text-red-600'
                   }`}>
                     {transaction.type === 'receita' ? '+' : '-'}R$ {transaction.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <TransactionActions transaction={transaction as Transaction} />
                   </TableCell>
                 </TableRow>
               ))}

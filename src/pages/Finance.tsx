@@ -18,8 +18,7 @@ import { useAddTransaction } from '@/hooks/useTransactions';
 import { FinanceOverviewCards } from '@/components/finance/FinanceOverviewCards';
 import { FinanceChart } from '@/components/finance/FinanceChart';
 import { RecentTransactionsTable } from '@/components/finance/RecentTransactionsTable';
-import { AccountsReceivableTable } from '@/components/finance/AccountsReceivableTable';
-import { AccountsPayableTable } from '@/components/finance/AccountsPayableTable';
+import { AccountsManagement } from '@/components/finance/AccountsManagement';
 
 const Finance = () => {
   const { toast } = useToast();
@@ -63,30 +62,25 @@ const Finance = () => {
         </Dialog>
       </div>
       
-      <Tabs defaultValue="overview">
-        <TabsList className="grid w-full grid-cols-4 mb-8">
-          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-          <TabsTrigger value="cashflow">Fluxo de Caixa</TabsTrigger>
-          <TabsTrigger value="income">Contas a Receber</TabsTrigger>
-          <TabsTrigger value="expenses">Contas a Pagar</TabsTrigger>
+      <Tabs defaultValue="financial">
+        <TabsList className="grid w-full grid-cols-2 mb-8">
+          <TabsTrigger value="financial">Financeiro</TabsTrigger>
+          <TabsTrigger value="accounts">Contas</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="overview">
+        <TabsContent value="financial" className="space-y-6">
           <FinanceOverviewCards />
           <FinanceChart />
-          <RecentTransactionsTable />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <RecentTransactionsTable />
+            <div>
+              <CashFlowTableReal />
+            </div>
+          </div>
         </TabsContent>
         
-        <TabsContent value="cashflow">
-          <CashFlowTableReal />
-        </TabsContent>
-        
-        <TabsContent value="income">
-          <AccountsReceivableTable />
-        </TabsContent>
-        
-        <TabsContent value="expenses">
-          <AccountsPayableTable />
+        <TabsContent value="accounts">
+          <AccountsManagement />
         </TabsContent>
       </Tabs>
     </DashboardLayout>

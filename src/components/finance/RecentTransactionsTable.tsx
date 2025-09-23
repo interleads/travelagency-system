@@ -9,29 +9,54 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
+import { useTransactions, Transaction } from '@/hooks/useTransactions';
+import { TransactionActions } from './TransactionActions';
+import { Skeleton } from "@/components/ui/skeleton";
 
-const recentTransactions = [
-  {
-    date: "25/04/2025",
-    description: "Venda - Pacote Maldivas",
-    type: "Receita",
-    value: "R$ 12.350,00"
-  },
-  {
-    date: "23/04/2025",
-    description: "Pagamento de Fornecedor - Hotel",
-    type: "Despesa",
-    value: "R$ 5.820,00"
-  },
-  {
-    date: "20/04/2025",
-    description: "Venda - Pacote Orlando",
-    type: "Receita",
-    value: "R$ 8.740,00"
+const getCategoryColor = (category: string, subcategory?: string) => {
+  switch (category) {
+    case 'Vendas':
+      return 'text-emerald-600 bg-emerald-50';
+    case 'Milhas':
+      if (subcategory === 'Compra') return 'text-red-600 bg-red-50';
+      if (subcategory === 'Venda') return 'text-gray-600 bg-gray-50';
+      return 'text-red-600 bg-red-50';
+    case 'Retiradas Sócios':
+      return 'text-blue-600 bg-blue-50';
+    case 'Trafego':
+      return 'text-orange-600 bg-orange-50';
+    case 'Ferramentas':
+      return 'text-indigo-600 bg-indigo-50';
+    case 'Outros':
+      return 'text-gray-600 bg-gray-50';
+    default:
+      return 'text-gray-600 bg-gray-50';
   }
-];
+};
 
 export function RecentTransactionsTable() {
+  const { data: transactions = [], isLoading } = useTransactions();
+  
+  // Get last 10 transactions
+  const recentTransactions = transactions.slice(0, 10);
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Últimas Transações</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <Skeleton key={i} className="h-12 w-full" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -43,33 +68,41 @@ export function RecentTransactionsTable() {
             <TableRow>
               <TableHead>Data</TableHead>
               <TableHead>Descrição</TableHead>
-              <TableHead>Tipo</TableHead>
+              <TableHead>Categoria</TableHead>
               <TableHead className="text-right">Valor</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {recentTransactions.map((item, i) => (
-              <TableRow key={i}>
-                <TableCell>{item.date}</TableCell>
-                <TableCell>{item.description}</TableCell>
+            {recentTransactions.map((transaction) => (
+              <TableRow key={transaction.id}>
+                <TableCell className="font-medium">
+                  {new Date(transaction.date).toLocaleDateString('pt-BR')}
+                </TableCell>
+                <TableCell>{transaction.description}</TableCell>
                 <TableCell>
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    item.type === "Receita" 
-                      ? "bg-emerald-100 text-emerald-800" 
-                      : "bg-red-100 text-red-800"
-                  }`}>
-                    {item.type}
+                  <span className={`px-2 py-1 rounded-full text-xs ${getCategoryColor(transaction.category, transaction.subcategory)}`}>
+                    {transaction.category}
+                    {transaction.subcategory && ` - ${transaction.subcategory}`}
                   </span>
                 </TableCell>
-                <TableCell className={`text-right ${
-                  item.type === "Receita" ? "text-emerald-600" : "text-red-600"
+                <TableCell className={`text-right font-medium ${
+                  transaction.type === 'receita' ? 'text-emerald-600' : 'text-red-600'
                 }`}>
-                  {item.value}
+                  {transaction.type === 'receita' ? '+' : '-'}R$ {transaction.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </TableCell>
+                <TableCell className="text-right">
+                  <TransactionActions transaction={transaction as Transaction} />
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+        {recentTransactions.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            Nenhuma transação encontrada
+          </div>
+        )}
       </CardContent>
     </Card>
   );

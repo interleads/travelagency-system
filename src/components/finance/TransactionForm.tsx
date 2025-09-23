@@ -33,18 +33,26 @@ const formSchema = z.object({
 
 interface TransactionFormProps {
   onSubmit: (data: z.infer<typeof formSchema>) => void;
+  defaultValues?: {
+    date?: string;
+    description?: string;
+    type?: "receita" | "despesa";
+    category?: string;
+    subcategory?: string;
+    value?: number;
+  };
 }
 
-export function TransactionForm({ onSubmit }: TransactionFormProps) {
+export function TransactionForm({ onSubmit, defaultValues }: TransactionFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      date: new Date().toISOString().split('T')[0],
-      description: "",
-      type: "receita",
-      category: "",
-      subcategory: "",
-      value: "",
+      date: defaultValues?.date || new Date().toISOString().split('T')[0],
+      description: defaultValues?.description || "",
+      type: defaultValues?.type || "receita",
+      category: defaultValues?.category || "",
+      subcategory: defaultValues?.subcategory || "",
+      value: defaultValues?.value ? defaultValues.value.toString() : "",
     },
   });
 
