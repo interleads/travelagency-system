@@ -84,12 +84,13 @@ export const useCreateSale = () => {
         passengers: product.adults && product.children ? `${product.adults} adultos, ${product.children} crianças` : '',
         origin: product.origin,
         destination: product.destination,
-        departure_date: product.trecho1,
-        return_date: product.trecho2,
+        // Convert empty strings to null for date fields
+        departure_date: product.trecho1 || null,
+        return_date: product.trecho2 || null,
         miles: product.qtdMilhas,
         miles_cost: product.custoMil,
-        checkin_date: product.checkin,
-        checkout_date: product.checkout,
+        checkin_date: product.checkin || null,
+        checkout_date: product.checkout || null,
         vehicle_category: product.categoria,
         rental_period: product.periodo,
         coverage_type: product.cobertura
