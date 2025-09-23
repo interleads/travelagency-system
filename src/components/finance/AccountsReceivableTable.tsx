@@ -9,11 +9,34 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
-
-// Dados serão buscados do sistema de vendas e parcelas
-const accountsReceivable: any[] = [];
+import { Skeleton } from "@/components/ui/skeleton";
+import { PaymentStatusButton } from "./PaymentStatusButton";
+import { useAccountsReceivable, useMarkAsReceived } from "@/hooks/useAccountsReceivable";
+import { useToast } from "@/hooks/use-toast";
+import { format, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export function AccountsReceivableTable() {
+  const { data: receivables, isLoading } = useAccountsReceivable();
+  const { toast } = useToast();
+  const markAsReceived = useMarkAsReceived();
+
+  const handleMarkAsReceived = async (receivableId: string, amount: number) => {
+    try {
+      await markAsReceived.mutateAsync({ receivableId, amount });
+      toast({
+        title: "Parcela marcada como recebida!",
+        description: `Valor de R$ ${amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} registrado`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao marcar como recebida",
+        description: "Tente novamente mais tarde",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -31,28 +54,40 @@ export function AccountsReceivableTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {accountsReceivable.length === 0 ? (
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                  <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
+                </TableRow>
+              ))
+            ) : receivables?.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                   Nenhuma conta a receber encontrada
                 </TableCell>
               </TableRow>
             ) : (
-              accountsReceivable.map((item, i) => (
-                <TableRow key={i}>
-                  <TableCell>{item.date}</TableCell>
-                  <TableCell>{item.client}</TableCell>
+              receivables?.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell>
+                    {format(parseISO(item.due_date), 'dd/MM/yyyy', { locale: ptBR })}
+                  </TableCell>
+                  <TableCell>{item.client_name}</TableCell>
                   <TableCell>{item.description}</TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      item.status === "Pendente" 
-                        ? "bg-amber-100 text-amber-800" 
-                        : "bg-emerald-100 text-emerald-800"
-                    }`}>
-                      {item.status}
-                    </span>
+                    <PaymentStatusButton
+                      status={item.status}
+                      onMarkAsReceived={() => handleMarkAsReceived(item.id, item.amount)}
+                      disabled={markAsReceived.isPending}
+                    />
                   </TableCell>
-                  <TableCell className="text-right">{item.value}</TableCell>
+                  <TableCell className="text-right">
+                    R$ {item.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </TableCell>
                 </TableRow>
               ))
             )}
