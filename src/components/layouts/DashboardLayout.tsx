@@ -3,9 +3,8 @@ import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
-  Home, CreditCard, Users, Briefcase, 
-  Menu, X, BarChart2, Settings,
-  Plane, FileText, Building2, Package
+  Home, CreditCard, Briefcase, 
+  Menu, X, Settings, Plane, Package
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -25,15 +24,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const navigationItems = [
     { path: "/dashboard", icon: Home, label: "Dashboard" },
-    { path: "/vendas", icon: Plane, label: "Vendas" }, // Alterado Operacional para Vendas
+    { path: "/vendas", icon: Plane, label: "Vendas" },
     { path: "/milhas", icon: Package, label: "Gestão de Milhas" },
     { path: "/finance", icon: CreditCard, label: "Financeiro" },
-    { path: "/crm", icon: Users, label: "CRM" },
     { path: "/packages", icon: Briefcase, label: "Pacotes" },
-    { path: "/fornecedores", icon: Building2, label: "Fornecedores" },
-    // Retirado Vendas do menu lateral, pois agora está em uma tab de Vendas
-    // { path: "/vendas", icon: BarChart2, label: "Vendas" },
-    // { path: "/relatorios", icon: FileText, label: "Relatórios" },
   ];
 
   return (
