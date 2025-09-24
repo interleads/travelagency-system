@@ -41,19 +41,19 @@ const PRESETS = [
 export function DateRangeFilter() {
   const { dateRange, setDateRange } = useDateRangeFilter();
   const [selectedPreset, setSelectedPreset] = useState(0);
-  const [isCustom, setIsCustom] = useState(false);
+  const [showCustomCalendar, setShowCustomCalendar] = useState(false);
 
   const handlePresetClick = (idx: number) => {
     setSelectedPreset(idx);
     const range = PRESETS[idx].getRange();
     setDateRange(range);
-    setIsCustom(idx === 3);
+    setShowCustomCalendar(idx === 3);
   };
 
   const handleCustomRange = (range: DateRange | undefined) => {
     if (range) {
       setDateRange(range);
-      setIsCustom(true);
+      setShowCustomCalendar(true);
       setSelectedPreset(3);
     }
   };
@@ -88,7 +88,7 @@ export function DateRangeFilter() {
               ))}
             </div>
           </div>
-          {isCustom && (
+          {showCustomCalendar && (
             <Calendar
               mode="range"
               selected={dateRange}
