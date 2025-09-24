@@ -45,12 +45,8 @@ export const useCurrencyInput = (initialValue: number = 0) => {
     const parsed = parseCurrency(inputValue);
     setNumericValue(parsed);
     
-    // Formatar apenas se há valor
-    if (inputValue && parsed > 0) {
-      setDisplayValue(formatCurrency(parsed));
-    } else {
-      setDisplayValue(inputValue);
-    }
+    // Manter o valor digitado pelo usuário sem reformatar automaticamente
+    setDisplayValue(inputValue);
   }, []);
 
   const setValue = useCallback((value: number) => {
