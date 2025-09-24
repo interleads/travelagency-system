@@ -29,6 +29,7 @@ import { SalesHistoryTable } from "@/components/vendas/SalesHistoryTable";
 import CRMKanban from "@/components/crm/CRMKanban";
 import { DateRangeFilter } from '@/components/shared/DateRangeFilter';
 import { DateRangeFilterProvider } from '@/components/shared/useDateRangeFilter';
+import { ImportCSV } from '@/components/vendas/ImportCSV';
 
 const Vendas = () => {
   const { toast } = useToast();
@@ -118,13 +119,15 @@ const Vendas = () => {
             </TabsList>
             
             {activeTab === "historico" && (
-              <Dialog open={isSaleDialogOpen} onOpenChange={setIsSaleDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button size="lg" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
-                    <Plus className="h-4 w-4" />
-                    Registrar Nova Venda
-                  </Button>
-                </DialogTrigger>
+              <div className="flex gap-2">
+                <ImportCSV />
+                <Dialog open={isSaleDialogOpen} onOpenChange={setIsSaleDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="lg" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
+                      <Plus className="h-4 w-4" />
+                      Registrar Nova Venda
+                    </Button>
+                  </DialogTrigger>
                 <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto p-0">
                   <DialogHeader className="bg-gradient-to-r from-primary to-primary/90 text-primary-foreground p-6 rounded-t-lg shadow-lg">
                     <DialogTitle className="text-2xl font-bold flex items-center gap-2">
@@ -137,7 +140,8 @@ const Vendas = () => {
                   </div>
                 </DialogContent>
                 </Dialog>
-              )}
+              </div>
+            )}
             </div>
             
             <SalesOverviewCards activeTab={activeTab} />

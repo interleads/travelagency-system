@@ -277,6 +277,7 @@ export type Database = {
           installments: number | null
           miles_cost: number | null
           miles_used: number | null
+          notes: string | null
           payment_method: string
           sale_date: string | null
           supplier_id: string | null
@@ -293,6 +294,7 @@ export type Database = {
           installments?: number | null
           miles_cost?: number | null
           miles_used?: number | null
+          notes?: string | null
           payment_method: string
           sale_date?: string | null
           supplier_id?: string | null
@@ -309,6 +311,7 @@ export type Database = {
           installments?: number | null
           miles_cost?: number | null
           miles_used?: number | null
+          notes?: string | null
           payment_method?: string
           sale_date?: string | null
           supplier_id?: string | null
