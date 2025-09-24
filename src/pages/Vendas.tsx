@@ -35,9 +35,9 @@ const Vendas = () => {
   const [isSaleDialogOpen, setIsSaleDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("historico");
   const [searchFilter, setSearchFilter] = useState("");
-  const [periodFilter, setPeriodFilter] = useState("");
-  const [yearFilter, setYearFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [periodFilter, setPeriodFilter] = useState("todos");
+  const [yearFilter, setYearFilter] = useState("todos");
+  const [statusFilter, setStatusFilter] = useState("todos");
 
   return (
     <DateRangeFilterProvider>
@@ -65,7 +65,7 @@ const Vendas = () => {
                   <SelectValue placeholder="Período" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   <SelectItem value="hoje">Hoje</SelectItem>
                   <SelectItem value="semana">Esta Semana</SelectItem>
                   <SelectItem value="mes">Este Mês</SelectItem>
@@ -78,7 +78,7 @@ const Vendas = () => {
                   <SelectValue placeholder="Ano" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   <SelectItem value="2024">2024</SelectItem>
                   <SelectItem value="2023">2023</SelectItem>
                   <SelectItem value="2022">2022</SelectItem>
@@ -90,7 +90,7 @@ const Vendas = () => {
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   <SelectItem value="pendente">Pendente</SelectItem>
                   <SelectItem value="andamento">Andamento</SelectItem>
                   <SelectItem value="concluido">Concluído</SelectItem>

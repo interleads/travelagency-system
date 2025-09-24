@@ -170,11 +170,20 @@ export function SalesHistoryTable({
     }
     
     // Filtro de ano
-    if (yearFilter) {
+    if (yearFilter && yearFilter !== "todos") {
       filtered = filtered.filter(sale => {
         const saleYear = new Date(sale.sale_date || sale.created_at).getFullYear().toString();
         return saleYear === yearFilter;
       });
+    }
+    
+    // Filtro de status
+    if (statusFilter && statusFilter !== "todos") {
+      // Aqui você pode implementar a lógica de filtro por status baseada nos installments
+      // Por enquanto, vou deixar comentado para não quebrar
+      // const { data: installments = [] } = useInstallments(sale.id);
+      // const paymentStatus = getSalePaymentStatus(sale, installments);
+      // return paymentStatus === statusFilter;
     }
     
     return filtered;
