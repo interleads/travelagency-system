@@ -13,6 +13,7 @@ export interface SaleProductDb {
   name: string;
   quantity: number;
   price: number;
+  cost: number;
   details?: string;
   airline?: string;
   passengers?: string;
@@ -57,6 +58,8 @@ export interface SaleInput {
   miles_cost?: number;
   supplier_id?: string;
   gross_profit?: number;
+  has_anticipation?: boolean;
+  anticipation_date?: string;
   products: SaleProduct[];
 }
 
@@ -105,7 +108,9 @@ export const useCreateSale = () => {
           miles_used: saleData.miles_used,
           miles_cost: saleData.miles_cost,
           supplier_id: saleData.supplier_id,
-          gross_profit: saleData.gross_profit
+          gross_profit: saleData.gross_profit,
+          has_anticipation: saleData.has_anticipation,
+          anticipation_date: saleData.anticipation_date
         }])
         .select()
         .single();
@@ -119,6 +124,7 @@ export const useCreateSale = () => {
         name: product.name,
         quantity: product.quantity,
         price: product.price,
+        cost: product.cost || 0,
         details: product.details || '',
         // Map form fields to database fields
         airline: product.airline,

@@ -185,6 +185,7 @@ export type Database = {
           airline: string | null
           checkin_date: string | null
           checkout_date: string | null
+          cost: number | null
           coverage_type: string | null
           created_at: string
           departure_date: string | null
@@ -208,6 +209,7 @@ export type Database = {
           airline?: string | null
           checkin_date?: string | null
           checkout_date?: string | null
+          cost?: number | null
           coverage_type?: string | null
           created_at?: string
           departure_date?: string | null
@@ -231,6 +233,7 @@ export type Database = {
           airline?: string | null
           checkin_date?: string | null
           checkout_date?: string | null
+          cost?: number | null
           coverage_type?: string | null
           created_at?: string
           departure_date?: string | null
@@ -262,9 +265,11 @@ export type Database = {
       }
       sales: {
         Row: {
+          anticipation_date: string | null
           client_name: string
           created_at: string
           gross_profit: number | null
+          has_anticipation: boolean | null
           id: string
           installments: number | null
           miles_cost: number | null
@@ -276,9 +281,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          anticipation_date?: string | null
           client_name: string
           created_at?: string
           gross_profit?: number | null
+          has_anticipation?: boolean | null
           id?: string
           installments?: number | null
           miles_cost?: number | null
@@ -290,9 +297,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          anticipation_date?: string | null
           client_name?: string
           created_at?: string
           gross_profit?: number | null
+          has_anticipation?: boolean | null
           id?: string
           installments?: number | null
           miles_cost?: number | null

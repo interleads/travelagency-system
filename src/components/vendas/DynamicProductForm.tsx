@@ -24,6 +24,7 @@ export interface SaleProduct {
   name: string;
   quantity: number;
   price: number;
+  cost: number;
   details: string;
   // Campos só para passagem
   airline?: string;
@@ -46,6 +47,7 @@ export const EmptyProduct: SaleProduct = {
   name: "",
   quantity: 1,
   price: 0,
+  cost: 0,
   details: "",
   airline: "",
   adults: 1,
@@ -275,14 +277,38 @@ const DynamicProductForm: React.FC<{
             placeholder="R$"
           />
         </div>
+        <div>
+          <Label>Custo</Label>
+          <Input
+            type="number"
+            min={0}
+            step="0.01"
+            value={value.cost}
+            onChange={e => onChange({ ...value, cost: Number(e.target.value) })}
+            placeholder="R$"
+          />
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+        <div>
+          <Label>Lucro do Produto</Label>
+          <div className="mt-1 px-3 py-2 bg-muted rounded-md h-10 flex items-center">
+            <span className={`font-medium ${((value.price * value.quantity) - value.cost) >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+              R$ {(((value.price * value.quantity) - value.cost) || 0).toFixed(2)}
+            </span>
+          </div>
+        </div>
+        <div className="md:col-span-2"></div>
+      </div>
         
         {value.type && (
-          <div className="md:col-span-6 mt-2">
+          <div className="mt-4">
             {renderExtraFields()}
           </div>
         )}
         
-        <div className="md:col-span-6">
+        <div className="mt-4">
           <Label>Detalhes/Opcional</Label>
           <Input
             value={value.details}
@@ -290,7 +316,6 @@ const DynamicProductForm: React.FC<{
             placeholder="Ex: Observações (vencimento, fornecedor...)"
           />
         </div>
-      </div>
     </div>
   );
 };

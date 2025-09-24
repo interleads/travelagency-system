@@ -20,6 +20,8 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
   const [products, setProducts] = useState<SaleProduct[]>([EmptyProduct]);
   const [paymentMethod, setPaymentMethod] = useState('');
   const [installments, setInstallments] = useState(1);
+  const [hasAnticipation, setHasAnticipation] = useState(false);
+  const [anticipationDate, setAnticipationDate] = useState('');
   const { toast } = useToast();
   const createSale = useCreateSale();
 
@@ -28,6 +30,7 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
   const updateProduct = (idx: number, product: SaleProduct) => setProducts(products.map((p, i) => i === idx ? product : p));
 
   const total = products.reduce((sum, p) => sum + (p.price || 0) * (p.quantity || 1), 0);
+  const totalCost = products.reduce((sum, p) => sum + (p.cost || 0), 0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +54,8 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
       payment_method: paymentMethod,
       installments,
       total_amount: total,
+      has_anticipation: hasAnticipation,
+      anticipation_date: anticipationDate || undefined,
     }, {
       onSuccess: () => {
         toast({ title: "Venda registrada no banco com sucesso!", description: `Total: R$ ${total.toFixed(2)}` });
@@ -59,6 +64,8 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
         setProducts([EmptyProduct]);
         setPaymentMethod('');
         setInstallments(1);
+        setHasAnticipation(false);
+        setAnticipationDate('');
         onSaleSuccess?.();
       },
       onError: (err: any) => {
@@ -158,10 +165,40 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
               </div>
             )}
           </div>
+          
+          {paymentMethod === "Cartão de Crédito" && (
+            <div className="mt-4 p-4 border border-primary/20 rounded-lg bg-primary/5">
+              <div className="flex items-center space-x-2 mb-3">
+                <input
+                  type="checkbox"
+                  id="anticipation"
+                  checked={hasAnticipation}
+                  onChange={e => setHasAnticipation(e.target.checked)}
+                  className="rounded"
+                />
+                <Label htmlFor="anticipation" className="text-sm">
+                  Antecipação (receber valor total em 1x)
+                </Label>
+              </div>
+              {hasAnticipation && (
+                <div>
+                  <Label htmlFor="anticipationDate">Data da Antecipação</Label>
+                  <Input
+                    id="anticipationDate"
+                    type="date"
+                    value={anticipationDate}
+                    onChange={e => setAnticipationDate(e.target.value)}
+                    className="mt-1"
+                    max={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      <SaleSummary total={total} />
+      <SaleSummary total={total} totalCost={totalCost} />
       
       <Button
         type="submit"

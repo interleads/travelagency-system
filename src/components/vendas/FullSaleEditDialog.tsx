@@ -34,6 +34,7 @@ export function FullSaleEditDialog({ sale, open, onOpenChange }: FullSaleEditDia
           name: p.name,
           type: p.type as ProductType,
           price: Number(p.price),
+          cost: Number(p.cost || 0),
           quantity: p.quantity,
           // Map database fields back to form fields
           trecho1: p.departure_date || '',
@@ -72,6 +73,7 @@ export function FullSaleEditDialog({ sale, open, onOpenChange }: FullSaleEditDia
               name: p.name,
               type: p.type as ProductType,
               price: Number(p.price),
+              cost: Number(p.cost || 0),
               quantity: p.quantity,
               // Map database fields back to form fields
               trecho1: p.departure_date || '',
@@ -100,6 +102,7 @@ export function FullSaleEditDialog({ sale, open, onOpenChange }: FullSaleEditDia
   const updateProduct = (idx: number, product: SaleProduct) => setProducts(products.map((p, i) => i === idx ? product : p));
 
   const total = products.reduce((sum, p) => sum + (p.price || 0) * (p.quantity || 1), 0);
+  const totalCost = products.reduce((sum, p) => sum + (p.cost || 0), 0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -240,7 +243,7 @@ export function FullSaleEditDialog({ sale, open, onOpenChange }: FullSaleEditDia
             </CardContent>
           </Card>
 
-          <SaleSummary total={total} />
+          <SaleSummary total={total} totalCost={totalCost} />
           
           <div className="flex gap-2">
             <Button
