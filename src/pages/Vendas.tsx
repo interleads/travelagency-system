@@ -5,6 +5,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +13,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, BarChart2, Users, FileText } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Plus, BarChart2, Users, FileText, Search } from "lucide-react";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { useToast } from "@/hooks/use-toast";
 import VendasForm from "@/components/vendas/VendasForm";
@@ -26,12 +34,70 @@ const Vendas = () => {
   const { toast } = useToast();
   const [isSaleDialogOpen, setIsSaleDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("historico");
+  const [searchFilter, setSearchFilter] = useState("");
+  const [periodFilter, setPeriodFilter] = useState("");
+  const [yearFilter, setYearFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
   return (
     <DateRangeFilterProvider>
       <DashboardLayout>
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <div className="flex flex-col lg:flex-row gap-4 mb-6">
           <DateRangeFilter />
+          
+          {/* Filtros adicionais */}
+          <div className="flex flex-col sm:flex-row gap-3 flex-1">
+            {/* Busca por cliente */}
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Buscar por cliente, local ou grupo..."
+                value={searchFilter}
+                onChange={(e) => setSearchFilter(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            {/* Filtros de período, ano e status */}
+            <div className="flex gap-2">
+              <Select value={periodFilter} onValueChange={setPeriodFilter}>
+                <SelectTrigger className="w-[130px]">
+                  <SelectValue placeholder="Período" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="hoje">Hoje</SelectItem>
+                  <SelectItem value="semana">Esta Semana</SelectItem>
+                  <SelectItem value="mes">Este Mês</SelectItem>
+                  <SelectItem value="trimestre">Trimestre</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={yearFilter} onValueChange={setYearFilter}>
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue placeholder="Ano" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="2024">2024</SelectItem>
+                  <SelectItem value="2023">2023</SelectItem>
+                  <SelectItem value="2022">2022</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="pendente">Pendente</SelectItem>
+                  <SelectItem value="andamento">Andamento</SelectItem>
+                  <SelectItem value="concluido">Concluído</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
       
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
@@ -77,7 +143,12 @@ const Vendas = () => {
             <SalesOverviewCards activeTab={activeTab} />
         
         <TabsContent value="historico">
-          <SalesHistoryTable />
+          <SalesHistoryTable 
+            searchFilter={searchFilter}
+            periodFilter={periodFilter}
+            yearFilter={yearFilter}
+            statusFilter={statusFilter}
+          />
         </TabsContent>
         
         <TabsContent value="crm">

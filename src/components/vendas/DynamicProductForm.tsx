@@ -40,6 +40,7 @@ export interface SaleProduct {
   qtdMilhas?: number;
   custoMil?: number;
   profit?: number;
+  locator?: string; // Campo localizador para passagens
   [key: string]: any;
 }
 
@@ -63,6 +64,7 @@ export const EmptyProduct: SaleProduct = {
   qtdMilhas: 0,
   custoMil: 0,
   profit: 0,
+  locator: "", // Incluir localizador no produto vazio
 };
 
 const typeOptions = [
@@ -217,8 +219,8 @@ const DynamicProductForm: React.FC<{
               </div>
             </div>
 
-            {/* Datas */}
-            <div className="grid grid-cols-2 gap-3">
+            {/* Datas e Localizador */}
+            <div className="grid grid-cols-3 gap-3">
               <div>
                 <Label>Data Trecho 1</Label>
                 <Input type="date" value={value.trecho1 || ""} onChange={e => onChange({ ...value, trecho1: e.target.value })} required />
@@ -226,6 +228,15 @@ const DynamicProductForm: React.FC<{
               <div>
                 <Label>Data Trecho 2</Label>
                 <Input type="date" value={value.trecho2 || ""} onChange={e => onChange({ ...value, trecho2: e.target.value })} />
+              </div>
+              <div>
+                <Label>Localizador</Label>
+                <Input 
+                  value={value.locator || ""} 
+                  onChange={e => onChange({ ...value, locator: e.target.value })} 
+                  placeholder="Ex: ABC123"
+                  className="uppercase"
+                />
               </div>
             </div>
 

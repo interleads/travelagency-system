@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSales } from "@/hooks/useSales";
+import { TrendingUp, TrendingDown, DollarSign, Calculator, BarChart3 } from "lucide-react";
 
 interface SalesOverviewCardsProps {
   activeTab: string;
@@ -12,6 +13,23 @@ export function SalesOverviewCards({ activeTab }: SalesOverviewCardsProps) {
   const totalSales = sales.length;
   const totalRevenue = sales.reduce((sum, sale) => sum + Number(sale.total_amount), 0);
   const averageTicket = totalSales > 0 ? totalRevenue / totalSales : 0;
+  
+  // Calcular custo total e lucro bruto
+  const totalCost = sales.reduce((sum, sale) => {
+    const saleCost = sale.sale_products?.reduce((productSum: number, product: any) => {
+      if (product.type === 'passagem') {
+        if (product.miles && product.miles_cost) {
+          return productSum + Number(product.miles_cost);
+        }
+        return productSum + (Number(product.cost) || 0);
+      }
+      return productSum + (Number(product.cost) || 0);
+    }, 0) || 0;
+    return sum + saleCost;
+  }, 0);
+  
+  const grossProfit = totalRevenue - totalCost;
+  const profitMargin = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0;
   
   const thisMonth = new Date().getMonth();
   const thisYear = new Date().getFullYear();
@@ -31,39 +49,71 @@ export function SalesOverviewCards({ activeTab }: SalesOverviewCardsProps) {
     if (activeTab === "historico") {
       return (
         <>
-          <Card>
-            <CardHeader>
-              <CardTitle>Vendas do Mês</CardTitle>
+          {/* Faturamento Total */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-card to-card/50 border-l-4 border-l-blue-500 hover:shadow-lg transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Faturamento Total
+              </CardTitle>
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                <DollarSign className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              </div>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-blue-600">{salesThisMonth}</p>
-              <p className="text-sm text-gray-500">
-                {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Receita Total</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-emerald-600">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 {formatCurrency(totalRevenue)}
-              </p>
-              <p className="text-sm text-gray-500">{totalSales} vendas</p>
+              </div>
+              <div className="flex items-center space-x-1 text-xs text-muted-foreground mt-1">
+                <TrendingUp className="h-3 w-3 text-green-500" />
+                <span>{totalSales} vendas realizadas</span>
+              </div>
             </CardContent>
           </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Ticket Médio</CardTitle>
+
+          {/* Custo Total */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-card to-card/50 border-l-4 border-l-red-500 hover:shadow-lg transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Custo Total
+              </CardTitle>
+              <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-full">
+                <Calculator className="h-4 w-4 text-red-600 dark:text-red-400" />
+              </div>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-amber-600">
-                {formatCurrency(averageTicket)}
-              </p>
-              <p className="text-sm text-gray-500">Por venda</p>
+              <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                {formatCurrency(totalCost)}
+              </div>
+              <div className="flex items-center space-x-1 text-xs text-muted-foreground mt-1">
+                <TrendingDown className="h-3 w-3 text-red-500" />
+                <span>Custos operacionais</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Lucro Bruto */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-card to-card/50 border-l-4 border-l-green-500 hover:shadow-lg transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Lucro Bruto
+              </CardTitle>
+              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full">
+                <BarChart3 className="h-4 w-4 text-green-600 dark:text-green-400" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                {formatCurrency(grossProfit)}
+              </div>
+              <div className="flex items-center space-x-1 text-xs text-muted-foreground mt-1">
+                <span className={`px-2 py-1 rounded-full text-xs ${
+                  profitMargin >= 20 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
+                  profitMargin >= 10 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300' :
+                  'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                }`}>
+                  {profitMargin.toFixed(1)}% margem
+                </span>
+              </div>
             </CardContent>
           </Card>
         </>

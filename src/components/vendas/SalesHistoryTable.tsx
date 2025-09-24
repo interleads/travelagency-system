@@ -137,9 +137,50 @@ function SaleRow({
   );
 }
 
-export function SalesHistoryTable() {
+interface SalesHistoryTableProps {
+  searchFilter?: string;
+  periodFilter?: string;
+  yearFilter?: string;
+  statusFilter?: string;
+}
+
+export function SalesHistoryTable({ 
+  searchFilter = "", 
+  periodFilter = "", 
+  yearFilter = "", 
+  statusFilter = "" 
+}: SalesHistoryTableProps = {}) {
   const { dateRange } = useDateRangeFilter();
-  const { data: sales = [], isLoading } = useSales(dateRange);
+  const { data: allSales = [], isLoading } = useSales(dateRange);
+  
+  // Aplicar filtros
+  const filteredSales = React.useMemo(() => {
+    let filtered = [...allSales];
+    
+    // Filtro de busca por cliente
+    if (searchFilter) {
+      filtered = filtered.filter(sale => 
+        sale.client_name?.toLowerCase().includes(searchFilter.toLowerCase()) ||
+        sale.sale_products?.some((product: any) => 
+          product.origin?.toLowerCase().includes(searchFilter.toLowerCase()) ||
+          product.destination?.toLowerCase().includes(searchFilter.toLowerCase()) ||
+          product.details?.toLowerCase().includes(searchFilter.toLowerCase())
+        )
+      );
+    }
+    
+    // Filtro de ano
+    if (yearFilter) {
+      filtered = filtered.filter(sale => {
+        const saleYear = new Date(sale.sale_date || sale.created_at).getFullYear().toString();
+        return saleYear === yearFilter;
+      });
+    }
+    
+    return filtered;
+  }, [allSales, searchFilter, periodFilter, yearFilter, statusFilter]);
+  
+  const sales = filteredSales;
   const [expandedSales, setExpandedSales] = useState<Set<string>>(new Set());
   const [editingSale, setEditingSale] = useState<any>(null);
   const [deletingSale, setDeletingSale] = useState<any>(null);

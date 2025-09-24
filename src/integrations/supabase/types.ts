@@ -192,6 +192,7 @@ export type Database = {
           destination: string | null
           details: string | null
           id: string
+          locator: string | null
           miles: number | null
           miles_cost: number | null
           name: string
@@ -216,6 +217,7 @@ export type Database = {
           destination?: string | null
           details?: string | null
           id?: string
+          locator?: string | null
           miles?: number | null
           miles_cost?: number | null
           name: string
@@ -240,6 +242,7 @@ export type Database = {
           destination?: string | null
           details?: string | null
           id?: string
+          locator?: string | null
           miles?: number | null
           miles_cost?: number | null
           name?: string
