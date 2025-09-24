@@ -29,6 +29,8 @@ interface PreviewData {
   }>;
   detectedHeaders: string[];
   rowCount: number;
+  uniqueRowCount: number;
+  duplicatesDetected: number;
 }
 
 interface ColumnMapping {
@@ -212,6 +214,15 @@ export function ImportCSV() {
                   <CardTitle className="text-lg">Preview dos Dados</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {preview.duplicatesDetected > 0 && (
+                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <p className="text-sm text-yellow-800">
+                        ⚠️ <strong>{preview.duplicatesDetected} linhas duplicadas</strong> foram detectadas e ignoradas no cálculo dos totais.
+                        Apenas <strong>{preview.uniqueRowCount} linhas únicas</strong> foram processadas.
+                      </p>
+                    </div>
+                  )}
+                  
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center p-4 bg-green-50 rounded-lg">
                       <p className="text-sm text-muted-foreground">Total Faturamento</p>
@@ -226,8 +237,13 @@ export function ImportCSV() {
                       </p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Total Linhas</p>
-                      <p className="text-2xl font-bold">{preview.rowCount}</p>
+                      <p className="text-sm text-muted-foreground">Linhas Únicas</p>
+                      <p className="text-2xl font-bold">{preview.uniqueRowCount}</p>
+                      {preview.duplicatesDetected > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          ({preview.rowCount} total, {preview.duplicatesDetected} duplicatas)
+                        </p>
+                      )}
                     </div>
                   </div>
 

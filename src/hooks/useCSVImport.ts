@@ -21,6 +21,8 @@ interface PreviewData {
   }>;
   detectedHeaders: string[];
   rowCount: number;
+  uniqueRowCount: number;
+  duplicatesDetected: number;
 }
 
 // Normalize text for comparison (remove accents, punctuation, convert to uppercase)
@@ -600,7 +602,11 @@ export function useCSVImport() {
       }
     }
 
-    // Calculate totals for all rows
+    // Calculate totals for all rows with deduplication
+    const processedRows = new Set<string>();
+    const duplicateKeys: string[] = [];
+    let uniqueRowCount = 0;
+
     for (let i = 0; i < dataLines.length; i++) {
       const columns = parseCSVLine(dataLines[i], delimiter);
       const row: any = {};
@@ -610,6 +616,20 @@ export function useCSVImport() {
 
       try {
         const saleData = mapRowToSale(row, finalMapping);
+        
+        // Skip rows with zero amount (headers, totals, empty lines)
+        if (saleData.total_amount <= 0) continue;
+        
+        // Create deduplication key using client_name, sale_date, and total_amount
+        const dedupeKey = `${saleData.sale_date}|${saleData.client_name}|${saleData.total_amount}`;
+        
+        if (processedRows.has(dedupeKey)) {
+          duplicateKeys.push(dedupeKey);
+          continue; // Skip duplicate row
+        }
+        
+        processedRows.add(dedupeKey);
+        uniqueRowCount++;
         totalRevenue += saleData.total_amount;
         totalProfit += saleData.gross_profit || 0;
       } catch (error) {
@@ -617,12 +637,22 @@ export function useCSVImport() {
       }
     }
 
+    const duplicatesDetected = duplicateKeys.length;
+    
+    // Log diagnostics
+    console.log(`Preview: ${dataLines.length} total rows, ${uniqueRowCount} unique rows, ${duplicatesDetected} duplicates detected`);
+    if (duplicatesDetected > 0 && duplicateKeys.length > 0) {
+      console.log('Sample duplicate keys:', duplicateKeys.slice(0, 3));
+    }
+
     return {
       totalRevenue,
       totalProfit,
       sampleRows,
       detectedHeaders,
-      rowCount: dataLines.length
+      rowCount: dataLines.length,
+      uniqueRowCount,
+      duplicatesDetected
     };
   };
 
@@ -731,6 +761,10 @@ export function useCSVImport() {
       const dataLineNumbers = originalLineNumbers.slice(headerIndex + 1);
       const result: ImportResult = { success: 0, errors: [], suppliers: 0 };
       const createdSuppliers = new Set<string>();
+      
+      // Deduplication for import
+      const processedImportRows = new Set<string>();
+      let importDuplicates = 0;
 
       for (let i = 0; i < dataLines.length; i++) {
         const rowNumber = (dataLineNumbers[i] ?? headerIndex + 1 + i) + 1;
@@ -751,6 +785,14 @@ export function useCSVImport() {
             result.errors.push(`Linha ${rowNumber}: Dados obrigatórios faltando (Cliente ou Valor)`);
             continue;
           }
+          
+          // Check for duplicate during import
+          const importKey = `${saleData.sale_date}|${saleData.client_name}|${saleData.total_amount}`;
+          if (processedImportRows.has(importKey)) {
+            importDuplicates++;
+            continue; // Skip duplicate row during import
+          }
+          processedImportRows.add(importKey);
 
           // Create or get supplier if provided
           let supplierId: string | null = null;
@@ -866,6 +908,13 @@ export function useCSVImport() {
       }
 
       setProgress(100);
+      
+      // Log import duplicates
+      if (importDuplicates > 0) {
+        console.log(`Import: ${importDuplicates} linhas duplicadas foram ignoradas`);
+        result.errors.push(`${importDuplicates} linhas duplicadas foram automaticamente ignoradas durante a importação`);
+      }
+      
       return result;
     },
     onSuccess: () => {
