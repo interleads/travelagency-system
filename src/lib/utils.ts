@@ -14,10 +14,28 @@ export const formatCurrency = (value: number): string => {
   }).format(value);
 };
 
-// Parsear moeda formatada para número
+// Parsear moeda formatada para número com melhor precisão
 export const parseCurrency = (value: string): number => {
-  const numericValue = value.replace(/[^\d,.-]/g, '').replace(',', '.');
-  return parseFloat(numericValue) || 0;
+  // Remove todos os caracteres exceto números, vírgula e ponto
+  let cleanValue = value.replace(/[^\d,.-]/g, '');
+  
+  // Se não tem vírgula nem ponto, é um número inteiro
+  if (!cleanValue.includes(',') && !cleanValue.includes('.')) {
+    return parseFloat(cleanValue) || 0;
+  }
+  
+  // Se tem vírgula, substitui por ponto (formato brasileiro)
+  if (cleanValue.includes(',')) {
+    // Se tem tanto vírgula quanto ponto, remove pontos (separadores de milhares)
+    if (cleanValue.includes('.') && cleanValue.includes(',')) {
+      cleanValue = cleanValue.replace(/\./g, '');
+    }
+    cleanValue = cleanValue.replace(',', '.');
+  }
+  
+  const result = parseFloat(cleanValue) || 0;
+  console.log('Parsing currency:', { original: value, cleaned: cleanValue, result });
+  return result;
 };
 
 // Formatação de quantidade com separador de milhares

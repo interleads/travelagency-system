@@ -343,6 +343,11 @@ const DynamicProductForm: React.FC<{
                     }}
                     placeholder="R$ 0,00"
                   />
+                  {custoMilInput.numericValue > 0 && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      Valor interpretado: R$ {custoMilInput.numericValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 5 })}
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-end">
                   <div className="w-full">
@@ -517,6 +522,11 @@ const DynamicProductForm: React.FC<{
             }}
             placeholder="R$ 0,00"
           />
+          {priceInput.numericValue > 0 && (
+            <div className="text-xs text-muted-foreground mt-1">
+              Valor interpretado: R$ {priceInput.numericValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 5 })}
+            </div>
+          )}
         </div>
         {/* Custo - Oculto para todas as passagens */}
         {value.type !== "passagem" && (
