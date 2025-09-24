@@ -31,7 +31,14 @@ export const useAddSupplier = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: Omit<Supplier, 'id' | 'created_at' | 'updated_at'>) => {
-      const { error } = await supabase.from("suppliers").insert([data]);
+      const { error } = await supabase.from("suppliers").insert([{
+        name: data.name,
+        contact: data.contact,
+        program: data.program,
+        notes: data.notes,
+        account_type: '', // Set empty string for backward compatibility
+        status: 'Ativo' // Set default status
+      }]);
       if (error) throw error;
     },
     onSuccess: () => {

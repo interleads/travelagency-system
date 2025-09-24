@@ -12,7 +12,7 @@ export interface MilesProgram {
 export interface MilesInventory {
   id: string;
   program_id: string;
-  supplier_id: string;
+  supplier_id?: string;
   quantity: number;
   cost_per_thousand: number;
   purchase_date: string;
@@ -27,7 +27,6 @@ export interface MilesInventory {
 
 export interface MilesPurchase {
   program_id: string;
-  supplier_id: string;
   quantity: number;
   cost_per_thousand: number;
   purchase_date: string;
@@ -87,9 +86,14 @@ export const useAddMilesPurchase = () => {
       const { data: inventoryData, error: inventoryError } = await supabase
         .from("miles_inventory")
         .insert([{
-          ...purchase,
+          program_id: purchase.program_id,
+          supplier_id: null,
+          quantity: purchase.quantity,
+          cost_per_thousand: purchase.cost_per_thousand,
+          purchase_date: purchase.purchase_date,
           purchase_value,
-          remaining_quantity: purchase.quantity
+          remaining_quantity: purchase.quantity,
+          status: 'Ativo'
         }])
         .select()
         .single();
