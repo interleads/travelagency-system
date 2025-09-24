@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2, UserPlus } from "lucide-react";
+import { Plus, Edit, Trash2, UserPlus, MoreVertical } from "lucide-react";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -388,79 +394,94 @@ const CRMKanban = () => {
                       <p className="text-sm text-muted-foreground mt-1">{card.client}</p>
                       <p className="text-xs text-muted-foreground mt-1">{card.description}</p>
                       
-                      <div className="flex justify-end mt-2 gap-2">
-                        <Dialog>
-                          <DialogTrigger asChild>
+                      <div className="flex justify-end mt-2">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
                             <Button 
                               size="sm" 
-                              variant="outline" 
-                              onClick={() => setEditingCard(card)}
+                              variant="ghost"
+                              className="h-8 w-8 p-0"
                             >
-                              <Edit size={14} />
+                              <MoreVertical size={14} />
                             </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Editar Cliente</DialogTitle>
-                            </DialogHeader>
-                            {editingCard && (
-                              <div className="space-y-4 pt-4">
-                                <div>
-                                  <Label htmlFor="edit-title">Título</Label>
-                                  <Input 
-                                    id="edit-title"
-                                    value={editingCard.title}
-                                    onChange={(e) => setEditingCard({...editingCard, title: e.target.value})}
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="edit-client">Nome do Cliente</Label>
-                                  <Input 
-                                    id="edit-client"
-                                    value={editingCard.client}
-                                    onChange={(e) => setEditingCard({...editingCard, client: e.target.value})}
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="edit-email">Email</Label>
-                                  <Input 
-                                    id="edit-email"
-                                    type="email"
-                                    value={editingCard.email}
-                                    onChange={(e) => setEditingCard({...editingCard, email: e.target.value})}
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="edit-phone">Telefone</Label>
-                                  <Input 
-                                    id="edit-phone"
-                                    value={editingCard.phone}
-                                    onChange={(e) => setEditingCard({...editingCard, phone: e.target.value})}
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="edit-description">Descrição</Label>
-                                  <Textarea 
-                                    id="edit-description"
-                                    value={editingCard.description}
-                                    onChange={(e) => setEditingCard({...editingCard, description: e.target.value})}
-                                    rows={3}
-                                  />
-                                </div>
-                                <Button onClick={updateCard} className="w-full">Salvar Alterações</Button>
-                              </div>
-                            )}
-                          </DialogContent>
-                        </Dialog>
-                        
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => deleteCard(column.id, card.id)}
-                        >
-                          <Trash2 size={14} />
-                        </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <DropdownMenuItem 
+                                  onSelect={(e) => {
+                                    e.preventDefault();
+                                    setEditingCard(card);
+                                  }}
+                                  className="cursor-pointer"
+                                >
+                                  <Edit size={14} className="mr-2" />
+                                  Editar Cliente
+                                </DropdownMenuItem>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Editar Cliente</DialogTitle>
+                                </DialogHeader>
+                                {editingCard && (
+                                  <div className="space-y-4 pt-4">
+                                    <div>
+                                      <Label htmlFor="edit-title">Título</Label>
+                                      <Input 
+                                        id="edit-title"
+                                        value={editingCard.title}
+                                        onChange={(e) => setEditingCard({...editingCard, title: e.target.value})}
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label htmlFor="edit-client">Nome do Cliente</Label>
+                                      <Input 
+                                        id="edit-client"
+                                        value={editingCard.client}
+                                        onChange={(e) => setEditingCard({...editingCard, client: e.target.value})}
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label htmlFor="edit-email">Email</Label>
+                                      <Input 
+                                        id="edit-email"
+                                        type="email"
+                                        value={editingCard.email}
+                                        onChange={(e) => setEditingCard({...editingCard, email: e.target.value})}
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label htmlFor="edit-phone">Telefone</Label>
+                                      <Input 
+                                        id="edit-phone"
+                                        value={editingCard.phone}
+                                        onChange={(e) => setEditingCard({...editingCard, phone: e.target.value})}
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label htmlFor="edit-description">Descrição</Label>
+                                      <Textarea 
+                                        id="edit-description"
+                                        value={editingCard.description}
+                                        onChange={(e) => setEditingCard({...editingCard, description: e.target.value})}
+                                        rows={3}
+                                      />
+                                    </div>
+                                    <Button onClick={updateCard} className="w-full">Salvar Alterações</Button>
+                                  </div>
+                                )}
+                              </DialogContent>
+                            </Dialog>
+                            
+                            <DropdownMenuItem 
+                              onSelect={() => deleteCard(column.id, card.id)}
+                              className="cursor-pointer text-destructive focus:text-destructive"
+                            >
+                              <Trash2 size={14} className="mr-2" />
+                              Excluir Cliente
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </CardContent>
                   </Card>
