@@ -105,8 +105,11 @@ export function SaleDetailsExpanded({ sale }: SaleDetailsExpandedProps) {
             const getProductTypeLabel = (type: string) => {
               const labels = {
                 'passagem': 'Passagem',
-                'hospedagem': 'Hospedagem', 
+                'hotel': 'Hotel',
+                'veiculo': 'Veículo',
                 'seguro': 'Seguro',
+                'transfer': 'Transfer',
+                'passeios': 'Passeios',
                 'outros': 'Outros'
               };
               return labels[type] || labels['outros'];
@@ -115,8 +118,11 @@ export function SaleDetailsExpanded({ sale }: SaleDetailsExpandedProps) {
             // Static class mappings for Tailwind JIT
             const productClassMap = {
               'passagem': 'bg-product-passagem text-product-passagem-foreground border-0',
-              'hospedagem': 'bg-product-hospedagem text-product-hospedagem-foreground border-0', 
+              'hotel': 'bg-product-hotel text-product-hotel-foreground border-0',
+              'veiculo': 'bg-product-veiculo text-product-veiculo-foreground border-0',
               'seguro': 'bg-product-seguro text-product-seguro-foreground border-0',
+              'transfer': 'bg-product-transfer text-product-transfer-foreground border-0',
+              'passeios': 'bg-product-passeios text-product-passeios-foreground border-0',
               'outros': 'bg-product-outros text-product-outros-foreground border-0'
             };
 

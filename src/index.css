@@ -53,10 +53,16 @@
     /* Product type colors - light mode */
     --product-passagem: 217 91% 95%;
     --product-passagem-foreground: 217 91% 20%;
-    --product-hospedagem: 142 76% 95%;  
-    --product-hospedagem-foreground: 142 76% 20%;
+    --product-hotel: 142 76% 95%;  
+    --product-hotel-foreground: 142 76% 20%;
+    --product-veiculo: 30 100% 95%;
+    --product-veiculo-foreground: 30 100% 20%;
     --product-seguro: 262 83% 95%;
     --product-seguro-foreground: 262 83% 20%;
+    --product-transfer: 190 95% 95%;
+    --product-transfer-foreground: 190 95% 20%;
+    --product-passeios: 290 85% 95%;
+    --product-passeios-foreground: 290 85% 20%;
     --product-outros: 214 32% 95%;
     --product-outros-foreground: 215 16% 47%;
     
@@ -109,10 +115,16 @@
     /* Product type colors - dark mode */
     --product-passagem: 217 91% 15%;
     --product-passagem-foreground: 217 91% 80%;
-    --product-hospedagem: 142 76% 15%;
-    --product-hospedagem-foreground: 142 76% 80%;
+    --product-hotel: 142 76% 15%;
+    --product-hotel-foreground: 142 76% 80%;
+    --product-veiculo: 30 100% 15%;
+    --product-veiculo-foreground: 30 100% 80%;
     --product-seguro: 262 83% 15%;
-    --product-seguro-foreground: 262 83% 20%;
+    --product-seguro-foreground: 262 83% 80%;
+    --product-transfer: 190 95% 15%;
+    --product-transfer-foreground: 190 95% 80%;
+    --product-passeios: 290 85% 15%;
+    --product-passeios-foreground: 290 85% 80%;
     --product-outros: 217 33% 15%;
     --product-outros-foreground: 215 20% 65%;
     

@@ -18,7 +18,7 @@ const airlines = [
   "Delta"
 ];
 
-export type ProductType = "passagem" | "hotel" | "veiculo" | "seguro" | "outros";
+export type ProductType = "passagem" | "hotel" | "veiculo" | "seguro" | "transfer" | "passeios" | "outros";
 
 export interface SaleProduct {
   type?: ProductType;
@@ -67,9 +67,11 @@ export const EmptyProduct: SaleProduct = {
 
 const typeOptions = [
   { value: "passagem", label: "Passagem Aérea" },
-  { value: "hotel", label: "Diária de Hotel" },
-  { value: "veiculo", label: "Diária de Veículo" },
+  { value: "hotel", label: "Hotel" },
+  { value: "veiculo", label: "Veículo" },
   { value: "seguro", label: "Seguro Viagem" },
+  { value: "transfer", label: "Transfer" },
+  { value: "passeios", label: "Passeios" },
   { value: "outros", label: "Outros" },
 ];
 
@@ -325,6 +327,48 @@ const DynamicProductForm: React.FC<{
           <div>
             <Label>Tipo de Cobertura</Label>
             <Input value={value.cobertura || ""} onChange={e => onChange({ ...value, cobertura: e.target.value })} />
+          </div>
+        );
+      case "transfer":
+        return (
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Origem</Label>
+              <Input value={value.origem || ""} onChange={e => onChange({ ...value, origem: e.target.value })} />
+            </div>
+            <div>
+              <Label>Destino</Label>
+              <Input value={value.destino || ""} onChange={e => onChange({ ...value, destino: e.target.value })} />
+            </div>
+            <div>
+              <Label>Data/Hora</Label>
+              <Input type="datetime-local" value={value.dataHora || ""} onChange={e => onChange({ ...value, dataHora: e.target.value })} />
+            </div>
+            <div>
+              <Label>Tipo de Veículo</Label>
+              <Input value={value.tipoVeiculo || ""} onChange={e => onChange({ ...value, tipoVeiculo: e.target.value })} />
+            </div>
+          </div>
+        );
+      case "passeios":
+        return (
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Local do Passeio</Label>
+              <Input value={value.local || ""} onChange={e => onChange({ ...value, local: e.target.value })} />
+            </div>
+            <div>
+              <Label>Data</Label>
+              <Input type="date" value={value.dataPasseio || ""} onChange={e => onChange({ ...value, dataPasseio: e.target.value })} />
+            </div>
+            <div>
+              <Label>Duração</Label>
+              <Input value={value.duracao || ""} onChange={e => onChange({ ...value, duracao: e.target.value })} placeholder="Ex: 4 horas" />
+            </div>
+            <div>
+              <Label>Nº de Pessoas</Label>
+              <Input type="number" value={value.numeroPessoas || ""} onChange={e => onChange({ ...value, numeroPessoas: e.target.value })} />
+            </div>
           </div>
         );
       default:
