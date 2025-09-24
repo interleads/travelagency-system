@@ -30,7 +30,16 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
   const updateProduct = (idx: number, product: SaleProduct) => setProducts(products.map((p, i) => i === idx ? product : p));
 
   const total = products.reduce((sum, p) => sum + (p.price || 0) * (p.quantity || 1), 0);
-  const totalCost = products.reduce((sum, p) => sum + (p.cost || 0), 0);
+  const totalCost = products.reduce((sum, p) => {
+    if (p.type === "passagem" && p.ticketType === "milhas") {
+      // Para passagem com milhas, usar qtdMilhas * custoMil / 1000
+      const milhas = Number(p.qtdMilhas || 0);
+      const custoMil = Number(p.custoMil || 0);
+      return sum + ((milhas / 1000) * custoMil);
+    }
+    // Para outros produtos e passagem tarifada, usar campo cost
+    return sum + (p.cost || 0);
+  }, 0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,13 +84,13 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
   };
 
   return (
-    <div className="space-y-4 max-w-4xl mx-auto p-4">
+    <div className="space-y-3 max-w-4xl mx-auto">
       <Card className="border-primary/20">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2">
           <CardTitle className="text-lg text-primary">Dados do Cliente</CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <Label htmlFor="client">Nome do Cliente</Label>
               <Input 
@@ -107,12 +116,12 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
       </Card>
 
       <Card className="border-primary/20">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2">
           <CardTitle className="text-lg text-primary">Produtos / Serviços</CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-3">
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="space-y-2">
               {products.map((product, idx) => (
                 <DynamicProductForm
                   key={idx}
@@ -130,11 +139,11 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
       </Card>
 
       <Card className="border-primary/20">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2">
           <CardTitle className="text-lg text-primary">Pagamento</CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <Label htmlFor="payment">Método de Pagamento</Label>
               <select

@@ -40,11 +40,14 @@ const Vendas = () => {
                   Registrar Nova Venda
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader className="bg-primary text-primary-foreground p-6 -m-6 mb-6 rounded-t-lg">
-                  <DialogTitle className="text-xl font-semibold">Registrar Nova Venda</DialogTitle>
+              <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto p-0">
+                <DialogHeader className="bg-gradient-to-r from-primary to-primary/90 text-primary-foreground p-6 rounded-t-lg shadow-lg">
+                  <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                    <Plus className="h-6 w-6" />
+                    Registrar Nova Venda
+                  </DialogTitle>
                 </DialogHeader>
-                <div className="px-2">
+                <div className="p-4">
                   <VendasForm onSaleSuccess={() => setIsSaleDialogOpen(false)} />
                 </div>
               </DialogContent>

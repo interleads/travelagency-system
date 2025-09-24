@@ -27,6 +27,7 @@ export interface SaleProduct {
   cost: number;
   details: string;
   // Campos só para passagem
+  ticketType?: "milhas" | "tarifada";
   airline?: string;
   adults?: number;
   children?: number;
@@ -49,6 +50,7 @@ export const EmptyProduct: SaleProduct = {
   price: 0,
   cost: 0,
   details: "",
+  ticketType: "milhas",
   airline: "",
   adults: 1,
   children: 0,
@@ -76,17 +78,23 @@ const DynamicProductForm: React.FC<{
   onRemove?: () => void;
 }> = ({ value, onChange, onRemove }) => {
 
-  // Cálculo do lucro em tempo real (para passagem)
+  // Cálculo do lucro em tempo real
   const computedProfit = React.useMemo(() => {
-    if (value.type !== "passagem") return undefined;
     const venda = Number(value.price || 0) * Number(value.quantity || 1);
-    const milhas = Number(value.qtdMilhas || 0);
-    const custoMil = Number(value.custoMil || 0);
-    if (!milhas || !custoMil) return venda || 0;
-    const custoTotal = (milhas / 1000) * custoMil;
-    return venda - custoTotal;
+    
+    if (value.type === "passagem" && value.ticketType === "milhas") {
+      const milhas = Number(value.qtdMilhas || 0);
+      const custoMil = Number(value.custoMil || 0);
+      if (!milhas || !custoMil) return venda || 0;
+      const custoTotal = (milhas / 1000) * custoMil;
+      return venda - custoTotal;
+    }
+    
+    // Para passagem tarifada e outros produtos
+    const custo = Number(value.cost || 0);
+    return venda - custo;
   }, [
-    value.price, value.quantity, value.qtdMilhas, value.custoMil, value.type
+    value.price, value.quantity, value.qtdMilhas, value.custoMil, value.cost, value.type, value.ticketType
   ]);
 
   // Render extra fields REVISADO
@@ -94,23 +102,39 @@ const DynamicProductForm: React.FC<{
     switch (value.type) {
       case "passagem":
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <div>
-              <Label>Companhia Aérea</Label>
-              <select
-                className="w-full mt-1 border rounded-md h-10"
-                value={value.airline ?? ""}
-                onChange={e => onChange({ ...value, airline: e.target.value })}
-                required
-              >
-                <option value="">Selecione</option>
-                {airlines.map(airline => (
-                  <option key={airline} value={airline}>{airline}</option>
-                ))}
-              </select>
+          <div className="space-y-3">
+            {/* Tipo da Passagem */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Tipo da Passagem</Label>
+                <select
+                  className="w-full mt-1 border border-input rounded-md h-10 px-3 bg-background"
+                  value={value.ticketType || "milhas"}
+                  onChange={e => onChange({ ...value, ticketType: e.target.value as "milhas" | "tarifada" })}
+                >
+                  <option value="milhas">Com Milhas</option>
+                  <option value="tarifada">Tarifada</option>
+                </select>
+              </div>
+              <div>
+                <Label>Companhia Aérea</Label>
+                <select
+                  className="w-full mt-1 border border-input rounded-md h-10 px-3 bg-background"
+                  value={value.airline ?? ""}
+                  onChange={e => onChange({ ...value, airline: e.target.value })}
+                  required
+                >
+                  <option value="">Selecione</option>
+                  {airlines.map(airline => (
+                    <option key={airline} value={airline}>{airline}</option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <div className="w-1/2">
+
+            {/* Informações Básicas */}
+            <div className="grid grid-cols-3 gap-3">
+              <div>
                 <Label>Adultos</Label>
                 <Input
                   type="number"
@@ -120,7 +144,7 @@ const DynamicProductForm: React.FC<{
                   required
                 />
               </div>
-              <div className="w-1/2">
+              <div>
                 <Label>Crianças</Label>
                 <Input
                   type="number"
@@ -129,50 +153,78 @@ const DynamicProductForm: React.FC<{
                   onChange={e => onChange({ ...value, children: Number(e.target.value) })}
                 />
               </div>
-            </div>
-            <div>
-              <Label>Origem</Label>
-              <Input value={value.origin || ""} onChange={e => onChange({ ...value, origin: e.target.value })} required />
-            </div>
-            <div>
-              <Label>Destino</Label>
-              <Input value={value.destination || ""} onChange={e => onChange({ ...value, destination: e.target.value })} required />
-            </div>
-            <div>
-              <Label>Data Trecho 1</Label>
-              <Input type="date" value={value.trecho1 || ""} onChange={e => onChange({ ...value, trecho1: e.target.value })} required />
-            </div>
-            <div>
-              <Label>Data Trecho 2</Label>
-              <Input type="date" value={value.trecho2 || ""} onChange={e => onChange({ ...value, trecho2: e.target.value })} />
-            </div>
-            <div>
-              <Label>Cartão das Taxas</Label>
-              <Input value={value.cardTaxes || ""} onChange={e => onChange({ ...value, cardTaxes: e.target.value })} />
-            </div>
-            <div className="flex gap-2">
-              <div className="w-1/2">
-                <Label>Qtd Milhas</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  value={value.qtdMilhas ?? 0}
-                  onChange={e => onChange({ ...value, qtdMilhas: Number(e.target.value) })}
-                />
-              </div>
-              <div className="w-1/2">
-                <Label>Custo por 1k</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  value={value.custoMil ?? 0}
-                  onChange={e => onChange({ ...value, custoMil: Number(e.target.value) })}
-                />
+              <div>
+                <Label>Cartão das Taxas</Label>
+                <Input value={value.cardTaxes || ""} onChange={e => onChange({ ...value, cardTaxes: e.target.value })} />
               </div>
             </div>
+
+            {/* Origem e Destino */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Origem</Label>
+                <Input value={value.origin || ""} onChange={e => onChange({ ...value, origin: e.target.value })} required />
+              </div>
+              <div>
+                <Label>Destino</Label>
+                <Input value={value.destination || ""} onChange={e => onChange({ ...value, destination: e.target.value })} required />
+              </div>
+            </div>
+
+            {/* Datas */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Data Trecho 1</Label>
+                <Input type="date" value={value.trecho1 || ""} onChange={e => onChange({ ...value, trecho1: e.target.value })} required />
+              </div>
+              <div>
+                <Label>Data Trecho 2</Label>
+                <Input type="date" value={value.trecho2 || ""} onChange={e => onChange({ ...value, trecho2: e.target.value })} />
+              </div>
+            </div>
+
+            {/* Campos específicos por tipo */}
+            {value.ticketType === "milhas" ? (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Qtd Milhas</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={value.qtdMilhas ?? 0}
+                    onChange={e => onChange({ ...value, qtdMilhas: Number(e.target.value) })}
+                  />
+                </div>
+                <div>
+                  <Label>Custo por 1k</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={value.custoMil ?? 0}
+                    onChange={e => onChange({ ...value, custoMil: Number(e.target.value) })}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Custo da Passagem</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={value.cost || 0}
+                    onChange={e => onChange({ ...value, cost: Number(e.target.value) })}
+                    placeholder="R$"
+                  />
+                </div>
+                <div></div>
+              </div>
+            )}
+
             {/* Preview do lucro */}
-            <div className="md:col-span-2 rounded-md mt-1 bg-gray-50 px-2 py-1 flex items-center justify-between">
+            <div className="rounded-md bg-muted/50 px-3 py-2 flex items-center justify-between border">
               <span className="font-medium text-sm">Lucro Calculado:</span>
               <span className={`text-base font-bold ${computedProfit >= 0 ? "text-emerald-600" : "text-red-600"}`}>
                 R$ {isNaN(computedProfit) ? "0,00" : computedProfit?.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
@@ -277,30 +329,36 @@ const DynamicProductForm: React.FC<{
             placeholder="R$"
           />
         </div>
-        <div>
-          <Label>Custo</Label>
-          <Input
-            type="number"
-            min={0}
-            step="0.01"
-            value={value.cost}
-            onChange={e => onChange({ ...value, cost: Number(e.target.value) })}
-            placeholder="R$"
-          />
-        </div>
+        {/* Custo - Oculto para passagem com milhas */}
+        {!(value.type === "passagem" && value.ticketType === "milhas") && (
+          <div>
+            <Label>Custo</Label>
+            <Input
+              type="number"
+              min={0}
+              step="0.01"
+              value={value.cost}
+              onChange={e => onChange({ ...value, cost: Number(e.target.value) })}
+              placeholder="R$"
+            />
+          </div>
+        )}
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
-        <div>
-          <Label>Lucro do Produto</Label>
-          <div className="mt-1 px-3 py-2 bg-muted rounded-md h-10 flex items-center">
-            <span className={`font-medium ${((value.price * value.quantity) - value.cost) >= 0 ? "text-emerald-600" : "text-red-600"}`}>
-              R$ {(((value.price * value.quantity) - value.cost) || 0).toFixed(2)}
-            </span>
+      {/* Lucro - Só mostrar para produtos que não sejam passagem (que já tem preview próprio) */}
+      {value.type !== "passagem" && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+          <div>
+            <Label>Lucro do Produto</Label>
+            <div className="mt-1 px-3 py-2 bg-muted rounded-md h-10 flex items-center">
+              <span className={`font-medium ${computedProfit >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                R$ {(computedProfit || 0).toFixed(2)}
+              </span>
+            </div>
           </div>
+          <div className="md:col-span-2"></div>
         </div>
-        <div className="md:col-span-2"></div>
-      </div>
+      )}
         
         {value.type && (
           <div className="mt-4">
