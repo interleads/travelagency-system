@@ -3,9 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useMilesInventory } from '@/hooks/useMilesInventory';
+import { useDateRangeFilter } from "@/components/shared/useDateRangeFilter";
 
 export const MilesInventoryTable = () => {
-  const { data: inventory = [], isLoading } = useMilesInventory();
+  const { dateRange } = useDateRangeFilter();
+  const { data: inventory = [], isLoading } = useMilesInventory(dateRange);
 
   const getStatusColor = (status: string, remainingQuantity: number) => {
     if (status === 'Esgotado' || remainingQuantity === 0) return "destructive";

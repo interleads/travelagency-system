@@ -10,6 +10,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTransactions, Transaction } from '@/hooks/useTransactions';
 import { TransactionActions } from './TransactionActions';
+import { useDateRangeFilter } from "@/components/shared/useDateRangeFilter";
 
 const getCategoryColor = (category: string, subcategory?: string) => {
   switch (category) {
@@ -33,7 +34,8 @@ const getCategoryColor = (category: string, subcategory?: string) => {
 };
 
 export function CashFlowTableReal() {
-  const { data: transactions = [], isLoading } = useTransactions();
+  const { dateRange } = useDateRangeFilter();
+  const { data: transactions = [], isLoading } = useTransactions(dateRange);
 
   const totalEntradas = transactions
     .filter(t => t.type === 'receita')

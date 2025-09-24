@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { DateRange } from "@/components/shared/useDateRangeFilter";
 
 export interface Transaction {
   id: string;
@@ -22,14 +23,25 @@ export interface TransactionInput {
   value: number;
 }
 
-export const useTransactions = () => {
+export const useTransactions = (dateRange?: DateRange) => {
   return useQuery({
-    queryKey: ["transactions"],
+    queryKey: ["transactions", dateRange],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("transactions")
-        .select("*")
-        .order("date", { ascending: false });
+        .select("*");
+
+      // Apply date filter if dateRange is provided
+      if (dateRange?.from) {
+        query = query.gte("date", dateRange.from.toISOString().split('T')[0]);
+      }
+      if (dateRange?.to) {
+        query = query.lte("date", dateRange.to.toISOString().split('T')[0]);
+      }
+
+      query = query.order("date", { ascending: false });
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     }

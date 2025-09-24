@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SaleProduct } from "@/components/vendas/DynamicProductForm";
+import { DateRange } from "@/components/shared/useDateRangeFilter";
 
 // Re-export SaleProduct for convenience
 export type { SaleProduct };
@@ -32,17 +33,28 @@ export interface SaleInput {
   products: SaleProduct[];
 }
 
-export const useSales = () => {
+export const useSales = (dateRange?: DateRange) => {
   return useQuery({
-    queryKey: ["sales"],
+    queryKey: ["sales", dateRange],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("sales")
         .select(`
           *,
           suppliers (name)
-        `)
-        .order("created_at", { ascending: false });
+        `);
+
+      // Apply date filter if dateRange is provided
+      if (dateRange?.from) {
+        query = query.gte("created_at", dateRange.from.toISOString().split('T')[0]);
+      }
+      if (dateRange?.to) {
+        query = query.lte("created_at", dateRange.to.toISOString().split('T')[0]);
+      }
+
+      query = query.order("created_at", { ascending: false });
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     }

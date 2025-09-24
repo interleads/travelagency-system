@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { DateRange } from "@/components/shared/useDateRangeFilter";
 
 export interface AccountPayable {
   id: string;
@@ -14,21 +15,31 @@ export interface AccountPayable {
   reference_id?: string;
 }
 
-export const useAccountsPayable = () => {
+export const useAccountsPayable = (dateRange?: DateRange) => {
   return useQuery({
-    queryKey: ["accounts_payable"],
+    queryKey: ["accounts_payable", dateRange],
     queryFn: async () => {
       const payables: AccountPayable[] = [];
 
       // Buscar compras de milhas (da tabela miles_inventory)
-      const { data: milesInventory, error: milesError } = await supabase
+      let milesQuery = supabase
         .from("miles_inventory")
         .select(`
           *,
           suppliers (name)
-        `)
-        .order("created_at", { ascending: false });
+        `);
 
+      // Apply date filter to purchase_date if dateRange is provided
+      if (dateRange?.from) {
+        milesQuery = milesQuery.gte("purchase_date", dateRange.from.toISOString().split('T')[0]);
+      }
+      if (dateRange?.to) {
+        milesQuery = milesQuery.lte("purchase_date", dateRange.to.toISOString().split('T')[0]);
+      }
+
+      milesQuery = milesQuery.order("created_at", { ascending: false });
+
+      const { data: milesInventory, error: milesError } = await milesQuery;
       if (milesError) throw milesError;
 
       // Converter compras de milhas em contas a pagar
@@ -50,13 +61,23 @@ export const useAccountsPayable = () => {
       });
 
       // Buscar despesas da tabela transactions (tipo despesa)
-      const { data: expenses, error: expensesError } = await supabase
+      let expenseQuery = supabase
         .from("transactions")
         .select("*")
         .eq("type", "despesa")
-        .eq("category", "Fornecedores")
-        .order("created_at", { ascending: false });
+        .eq("category", "Fornecedores");
 
+      // Apply date filter to transaction date if dateRange is provided
+      if (dateRange?.from) {
+        expenseQuery = expenseQuery.gte("date", dateRange.from.toISOString().split('T')[0]);
+      }
+      if (dateRange?.to) {
+        expenseQuery = expenseQuery.lte("date", dateRange.to.toISOString().split('T')[0]);
+      }
+
+      expenseQuery = expenseQuery.order("created_at", { ascending: false });
+
+      const { data: expenses, error: expensesError } = await expenseQuery;
       if (expensesError) throw expensesError;
 
       // Converter despesas em contas a pagar

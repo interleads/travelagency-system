@@ -19,17 +19,19 @@ import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Search } from "lucide-react";
+import { useDateRangeFilter } from "@/components/shared/useDateRangeFilter";
 
 type AccountType = 'all' | 'receivable' | 'payable';
 type StatusType = 'all' | 'pending' | 'paid';
 
 export function UnifiedAccountsTable() {
+  const { dateRange } = useDateRangeFilter();
   const [accountType, setAccountType] = useState<AccountType>('all');
   const [statusFilter, setStatusFilter] = useState<StatusType>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const { data: receivables, isLoading: loadingReceivables } = useAccountsReceivable();
-  const { data: payables, isLoading: loadingPayables } = useAccountsPayable();
+  const { data: receivables, isLoading: loadingReceivables } = useAccountsReceivable(dateRange);
+  const { data: payables, isLoading: loadingPayables } = useAccountsPayable(dateRange);
   const { toast } = useToast();
   const markAsReceived = useMarkAsReceived();
   const markAsPaid = useMarkAsPaid();

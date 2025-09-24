@@ -9,9 +9,11 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { useSales } from "@/hooks/useSales";
+import { useDateRangeFilter } from "@/components/shared/useDateRangeFilter";
 
 export function SalesHistoryTable() {
-  const { data: sales = [], isLoading } = useSales();
+  const { dateRange } = useDateRangeFilter();
+  const { data: sales = [], isLoading } = useSales(dateRange);
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('pt-BR', { 
