@@ -16,7 +16,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const userEmail = "Usuário de Desenvolvimento";
+  
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -88,12 +88,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       </div>
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
-        <header className="bg-white shadow-sm p-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-xl font-semibold text-gray-800">Sistema de Gestão</h1>
-            <div className="text-sm text-gray-600">{userEmail}</div>
-          </div>
-        </header>
         <main className="p-6">{children}</main>
       </div>
     </div>

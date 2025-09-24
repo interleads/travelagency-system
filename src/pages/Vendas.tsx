@@ -39,10 +39,6 @@ const Vendas = () => {
     <DateRangeFilterProvider>
       <DashboardLayout>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-          <div>
-            <h2 className="text-3xl font-bold">Módulo Vendas</h2>
-            <p className="text-muted-foreground">Gerencie vendas, clientes e relatórios em um só lugar</p>
-          </div>
           <div className="flex gap-2">
             <DateRangeFilter />
             <Dialog open={isSaleDialogOpen} onOpenChange={setIsSaleDialogOpen}>

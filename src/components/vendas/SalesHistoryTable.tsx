@@ -213,9 +213,6 @@ export function SalesHistoryTable() {
   if (isLoading) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Histórico de Vendas</CardTitle>
-        </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {[1, 2, 3, 4, 5].map(i => (
@@ -230,9 +227,6 @@ export function SalesHistoryTable() {
   return (
     <>
       <Card>
-        <CardHeader>
-          <CardTitle>Histórico de Vendas</CardTitle>
-        </CardHeader>
         <CardContent>
           <div className="space-y-0 overflow-hidden rounded-lg border">
             <Table>
