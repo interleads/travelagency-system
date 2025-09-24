@@ -23,45 +23,100 @@ interface PreviewData {
   rowCount: number;
 }
 
-// Column mapping based on CSV headers (with common aliases)
-const COLUMN_MAPPING: Record<string, string> = {
-  'PASSAGENS AÉREAS': 'type',
-  'PASSAGEM AÉREA': 'type',
-  'DATA DA VENDA': 'sale_date',
-  'DATA VENDA': 'sale_date',
-  'DATA': 'sale_date',
-  'TRECHO': 'route',
-  'ROTA': 'route',
-  'DATA T1': 'date_t1',
-  'DATA T2': 'date_t2', 
-  'PAX': 'client_name',
-  'CLIENTE': 'client_name',
-  'LOC': 'locator',
-  'LOCALIZADOR': 'locator',
-  'MALA': 'baggage',
-  'CIA': 'airline',
-  'CIA AÉREA': 'airline',
-  'CIA AEREA': 'airline',
-  'COMPANHIA': 'airline',
-  'CONTA USADA': 'supplier',
-  'TX EMB': 'tx_emb',
-  'TX DE EMBARQUE': 'tx_emb',
-  'TX EMBARQUE': 'tx_emb',
-  'CARTAO TX': 'card_tax',
-  'CARTÃO TX': 'card_tax',
-  'QTD MILHAS': 'miles_qty',
-  'CUSTO (k)': 'cost',
-  'CUSTO': 'cost',
-  'FATURAMENTO': 'revenue',
-  'LUCRO': 'profit',
-  'PGTO': 'payment_method',
-  'PAGAMENTO': 'payment_method',
-  'FORMA DE PAGAMENTO': 'payment_method',
-  'STATUS': 'status',
-  'COMISSÃO': 'commission',
-  'COMISSAO': 'commission',
-  'DESCRIÇÃO': 'description',
-  'DESCRICAO': 'description'
+// Normalize text for comparison (remove accents, punctuation, convert to uppercase)
+const normalizeText = (text: string): string => {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove accents
+    .replace(/[^\w\s]/g, '') // Remove punctuation
+    .replace(/\s+/g, ' ') // Normalize spaces
+    .trim()
+    .toUpperCase();
+};
+
+// Robust column mapping with exact synonyms for each field
+const FIELD_SYNONYMS: Record<string, string[]> = {
+  sale_date: [
+    'DATA DA VENDA', 
+    'DATA VENDA',
+    'DATA DE VENDA'
+  ],
+  client_name: [
+    'PAX', 
+    'CLIENTE', 
+    'NOME DO PASSAGEIRO',
+    'PASSAGEIRO'
+  ],
+  total_amount: [
+    'FATURAMENTO', 
+    'VALOR', 
+    'VALOR TOTAL',
+    'RECEITA'
+  ],
+  gross_profit: [
+    'LUCRO',
+    'MARGEM',
+    'PROFIT'
+  ],
+  payment_method: [
+    'PGTO', 
+    'PAGAMENTO', 
+    'FORMA DE PAGAMENTO',
+    'METODO DE PAGAMENTO',
+    'TIPO DE PAGAMENTO'
+  ],
+  status: [
+    'STATUS',
+    'SITUACAO',
+    'SITUAÇÃO'
+  ],
+  route: [
+    'TRECHO', 
+    'ROTA',
+    'TRAJETO'
+  ],
+  airline: [
+    'CIA', 
+    'CIA AÉREA', 
+    'CIA AEREA', 
+    'COMPANHIA',
+    'COMPANHIA AEREA'
+  ],
+  supplier: [
+    'CONTA USADA', 
+    'FORNECEDOR',
+    'SUPPLIER'
+  ],
+  miles_qty: [
+    'QTD MILHAS', 
+    'MILHAS',
+    'QUANTIDADE MILHAS'
+  ],
+  cost: [
+    'CUSTO', 
+    'CUSTO (K)',
+    'CUSTO K'
+  ],
+  tx_emb: [
+    'TX EMB', 
+    'TX DE EMBARQUE', 
+    'TX EMBARQUE',
+    'TAXA EMBARQUE'
+  ],
+  card_tax: [
+    'CARTÃO TX', 
+    'CARTAO TX', 
+    'TAXA CARTÃO', 
+    'TAXA CARTAO',
+    'TX CARTAO'
+  ],
+  description: [
+    'DESCRIÇÃO', 
+    'DESCRICAO', 
+    'OBS', 
+    'OBSERVAÇÃO', 
+    'OBSERVACAO'
+  ]
 };
 
 const parseCSVLine = (line: string, delimiter: ',' | ';' = ','): string[] => {
@@ -119,6 +174,21 @@ const preprocessCSVContent = (
   return { lines, originalLineNumbers, delimiterHint };
 };
 
+// Map header to field using exact synonym matching
+const mapHeaderToField = (header: string): string | null => {
+  const normalized = normalizeText(header);
+  
+  for (const [field, synonyms] of Object.entries(FIELD_SYNONYMS)) {
+    for (const synonym of synonyms) {
+      if (normalized === normalizeText(synonym)) {
+        return field;
+      }
+    }
+  }
+  
+  return null;
+};
+
 // Detect CSV delimiter by checking recognized header tokens in the first few lines
 const detectDelimiter = (lines: string[], hint?: ',' | ';'): ',' | ';' => {
   if (hint) {
@@ -137,14 +207,8 @@ const detectDelimiter = (lines: string[], hint?: ',' | ';'): ',' | ';' => {
       const line = lines[i];
       delimiterHits += line.split(delim).length - 1;
       const cols = parseCSVLine(line, delim);
-      for (const c of cols) {
-        const norm = c.trim().toUpperCase();
-        if (
-          Object.keys(COLUMN_MAPPING).some(k => {
-            const kk = k.toUpperCase();
-            return norm === kk || norm.includes(kk.split(' ')[0]);
-          })
-        ) {
+      for (const col of cols) {
+        if (mapHeaderToField(col)) {
           score++;
         }
       }
@@ -163,24 +227,34 @@ const detectDelimiter = (lines: string[], hint?: ',' | ';'): ',' | ';' => {
 const findHeaderIndex = (lines: string[], delimiter: ',' | ';'): number => {
   let bestIndex = 1; // common case
   let bestScore = -1;
+  
   for (let i = 0; i < Math.min(5, lines.length); i++) {
     const cols = parseCSVLine(lines[i], delimiter);
-    const recognized = cols.filter(c => {
-      const norm = c.trim().toUpperCase();
-      return Object.keys(COLUMN_MAPPING).some(k => {
-        const kk = k.toUpperCase();
-        return norm === kk || norm.includes(kk.split(' ')[0]);
-      });
-    });
-    let score = recognized.length;
-    // bonus if includes critical headers
-    const crit = ['PAX', 'FATURAMENTO', 'PGTO', 'DATA DA VENDA'];
-    if (cols.some(c => crit.includes(c.trim().toUpperCase()))) score += 2;
-    if (score > bestScore) {
+    let score = 0;
+    
+    // Count recognized headers
+    for (const col of cols) {
+      if (mapHeaderToField(col)) {
+        score++;
+      }
+    }
+    
+    // Bonus for critical headers
+    const criticalHeaders = ['PAX', 'FATURAMENTO', 'PGTO', 'DATA DA VENDA'];
+    const hasCritical = cols.some(col => 
+      criticalHeaders.some(critical => 
+        normalizeText(col).includes(normalizeText(critical))
+      )
+    );
+    if (hasCritical) score += 2;
+    
+    // Require minimum 3 recognized headers
+    if (score >= 3 && score > bestScore) {
       bestScore = score;
       bestIndex = i;
     }
   }
+  
   return bestIndex;
 };
 
@@ -226,18 +300,17 @@ export function useCSVImport() {
     const headers = parseCSVLine(headerLine, delimiter);
     const detectedHeaders = headers.filter(h => h.trim() !== '');
 
-    // Create column index mapping
+    // Create column index mapping using robust header matching
     const columnIndexes: Record<string, number> = {};
     headers.forEach((header, index) => {
-      const normalizedHeader = header.trim().toUpperCase();
-      const mappedField = Object.keys(COLUMN_MAPPING).find(key => 
-        key.toUpperCase() === normalizedHeader || 
-        normalizedHeader.includes(key.split(' ')[0])
-      );
-      if (mappedField) {
-        columnIndexes[COLUMN_MAPPING[mappedField]] = index;
+      const field = mapHeaderToField(header);
+      if (field) {
+        columnIndexes[field] = index;
       }
     });
+
+    console.log('Detected headers:', detectedHeaders);
+    console.log('Column mapping:', columnIndexes);
 
     // Process sample rows
     const dataLines = lines.slice(headerIndex + 1);
@@ -248,8 +321,8 @@ export function useCSVImport() {
     for (let i = 0; i < Math.min(5, dataLines.length); i++) {
       const columns = parseCSVLine(dataLines[i], delimiter);
       const clientName = columns[columnIndexes.client_name] || '';
-      const revenueStr = columns[columnIndexes.revenue] || '';
-      const profitStr = columns[columnIndexes.profit] || '';
+      const revenueStr = columns[columnIndexes.total_amount] || '';
+      const profitStr = columns[columnIndexes.gross_profit] || '';
       const paymentMethod = columns[columnIndexes.payment_method] || '';
       const status = columns[columnIndexes.status] || '';
       const saleDateStr = columns[columnIndexes.sale_date] || '';
@@ -272,8 +345,8 @@ export function useCSVImport() {
     // Calculate totals for all rows
     for (let i = 0; i < dataLines.length; i++) {
       const columns = parseCSVLine(dataLines[i], delimiter);
-      const revenueStr = columns[columnIndexes.revenue] || '';
-      const profitStr = columns[columnIndexes.profit] || '';
+      const revenueStr = columns[columnIndexes.total_amount] || '';
+      const profitStr = columns[columnIndexes.gross_profit] || '';
       if (revenueStr) {
         totalRevenue += parseNumber(revenueStr);
         totalProfit += parseNumber(profitStr);
@@ -322,12 +395,48 @@ const clearImports = async (): Promise<void> => {
   const parseDate = (dateStr: string): string | null => {
     if (!dateStr || dateStr.trim() === '') return null;
     
-    // Format: DD/MM/AAAA
-    const parts = dateStr.split('/');
-    if (parts.length !== 3) return null;
+    const trimmed = dateStr.trim();
     
-    const [day, month, year] = parts;
-    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    // Try multiple date formats
+    // Format: DD/MM/YYYY or DD/MM/YY
+    let dateParts = trimmed.split('/');
+    if (dateParts.length === 3) {
+      let [day, month, year] = dateParts;
+      
+      // Convert 2-digit year to 4-digit
+      if (year.length === 2) {
+        const yearNum = parseInt(year);
+        year = yearNum > 50 ? `19${year}` : `20${year}`;
+      }
+      
+      if (day.length <= 2 && month.length <= 2 && year.length === 4) {
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      }
+    }
+    
+    // Format: DD-MM-YYYY or DD-MM-YY
+    dateParts = trimmed.split('-');
+    if (dateParts.length === 3) {
+      let [day, month, year] = dateParts;
+      
+      // Check if it's YYYY-MM-DD format (ISO)
+      if (day.length === 4) {
+        [year, month, day] = dateParts;
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      }
+      
+      // Convert 2-digit year to 4-digit for DD-MM-YY
+      if (year.length === 2) {
+        const yearNum = parseInt(year);
+        year = yearNum > 50 ? `19${year}` : `20${year}`;
+      }
+      
+      if (day.length <= 2 && month.length <= 2 && year.length === 4) {
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      }
+    }
+    
+    return null;
   };
 
   const parseNumber = (value: string): number => {
@@ -344,9 +453,18 @@ const clearImports = async (): Promise<void> => {
     return isNaN(parsed) ? 0 : parsed;
   };
 
-  const normalizePaymentMethod = (method: string): string => {
-    if (!method) return 'Outros';
+  const normalizePaymentMethod = (method: string, status?: string): string => {
+    if (!method || method.trim() === '') {
+      // If payment method is empty but status is "PAGO", don't use "PAGO" as payment method
+      return 'Outros';
+    }
+    
     const normalized = method.toLowerCase().trim();
+    
+    // Don't treat status values as payment methods
+    if (normalized === 'pago' || normalized === 'pendente' || normalized === 'cancelado') {
+      return 'Outros';
+    }
 
     if (
       normalized.includes('infinity') ||
@@ -365,6 +483,8 @@ const clearImports = async (): Promise<void> => {
 
     if (normalized.includes('pix')) return 'PIX';
     if (normalized.includes('cliente')) return 'Cliente';
+    if (normalized.includes('dinheiro')) return 'Dinheiro';
+    if (normalized.includes('boleto')) return 'Boleto';
 
     return method;
   };
@@ -438,15 +558,12 @@ const clearImports = async (): Promise<void> => {
       const headerIndex = findHeaderIndex(lines, delimiter);
       const headers = parseCSVLine(lines[headerIndex], delimiter);
       
+      // Create robust column mapping using exact header matching
       const columnIndexes: Record<string, number> = {};
       headers.forEach((header, index) => {
-        const normalizedHeader = header.trim().toUpperCase();
-        const mappedField = Object.keys(COLUMN_MAPPING).find(key => 
-          key.toUpperCase() === normalizedHeader || 
-          normalizedHeader.includes(key.split(' ')[0])
-        );
-        if (mappedField) {
-          columnIndexes[COLUMN_MAPPING[mappedField]] = index;
+        const field = mapHeaderToField(header);
+        if (field) {
+          columnIndexes[field] = index;
         }
       });
 
@@ -464,7 +581,7 @@ const clearImports = async (): Promise<void> => {
 
           const columns = parseCSVLine(dataLines[i], delimiter);
 
-          // Extract data using header-based mapping
+          // Extract data using robust header-based mapping
           const clientName = columns[columnIndexes.client_name] || '';
           const dateStr = columns[columnIndexes.sale_date] || '';
           const route = columns[columnIndexes.route] || '';
@@ -474,8 +591,8 @@ const clearImports = async (): Promise<void> => {
           const cardTaxStr = columns[columnIndexes.card_tax] || '';
           const milesQtyStr = columns[columnIndexes.miles_qty] || '';
           const costStr = columns[columnIndexes.cost] || '';
-          const revenueStr = columns[columnIndexes.revenue] || '';
-          const profitStr = columns[columnIndexes.profit] || '';
+          const revenueStr = columns[columnIndexes.total_amount] || '';
+          const profitStr = columns[columnIndexes.gross_profit] || '';
           const paymentMethod = columns[columnIndexes.payment_method] || '';
           const status = columns[columnIndexes.status] || '';
           const description = columns[columnIndexes.description] || '';
@@ -530,7 +647,7 @@ const clearImports = async (): Promise<void> => {
             sale_date: parsedDate,
             client_name: clientName.trim(),
             total_amount: revenue,
-            payment_method: normalizePaymentMethod(paymentMethod),
+            payment_method: normalizePaymentMethod(paymentMethod, status),
             notes: description && description.trim() !== '' ? description.trim() : undefined,
             supplier_id: supplierId,
             gross_profit: grossProfit,
