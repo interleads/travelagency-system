@@ -343,8 +343,8 @@ const DynamicProductForm: React.FC<{
             placeholder="R$"
           />
         </div>
-        {/* Custo - Oculto para passagem com milhas */}
-        {!(value.type === "passagem" && value.ticketType === "milhas") && (
+        {/* Custo - Oculto para todas as passagens */}
+        {value.type !== "passagem" && (
           <div>
             <Label>Custo</Label>
             <Input
