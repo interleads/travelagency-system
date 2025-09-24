@@ -2,6 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { useCurrencyInput, useQuantityInput } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,6 +30,10 @@ export function MilesPurchaseForm({ onSubmit }: MilesPurchaseFormProps) {
   const { data: suppliers = [] } = useSuppliers();
   const addPurchase = useAddMilesPurchase();
 
+  // Hooks de formatação
+  const quantityInput = useQuantityInput(0);
+  const costInput = useCurrencyInput(0);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -40,18 +45,21 @@ export function MilesPurchaseForm({ onSubmit }: MilesPurchaseFormProps) {
     },
   });
 
-  const watchedQuantity = form.watch("quantity");
-  const watchedCost = form.watch("cost_per_thousand");
-  const purchaseValue = (watchedQuantity / 1000) * watchedCost;
+  const purchaseValue = (quantityInput.numericValue / 1000) * costInput.numericValue;
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await addPurchase.mutateAsync(values as any);
+      const finalValues = {
+        ...values,
+        quantity: quantityInput.numericValue,
+        cost_per_thousand: costInput.numericValue,
+      };
+      await addPurchase.mutateAsync(finalValues as any);
       toast({
         title: "Compra registrada com sucesso!",
-        description: `${values.quantity.toLocaleString()} milhas - R$ ${purchaseValue.toFixed(2)}`,
+        description: `${quantityInput.numericValue.toLocaleString()} milhas - R$ ${purchaseValue.toFixed(2)}`,
       });
-      onSubmit({ ...values, purchase_value: purchaseValue });
+      onSubmit({ ...finalValues, purchase_value: purchaseValue });
     } catch (error) {
       toast({
         title: "Erro ao registrar compra",
@@ -122,9 +130,13 @@ export function MilesPurchaseForm({ onSubmit }: MilesPurchaseFormProps) {
               <FormLabel>Quantidade de Milhas</FormLabel>
               <FormControl>
                 <Input 
-                  type="number" 
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  type="text" 
+                  value={quantityInput.displayValue}
+                  onChange={(e) => {
+                    quantityInput.handleChange(e);
+                    field.onChange(quantityInput.numericValue);
+                  }}
+                  placeholder="0"
                 />
               </FormControl>
               <FormMessage />
@@ -140,10 +152,13 @@ export function MilesPurchaseForm({ onSubmit }: MilesPurchaseFormProps) {
               <FormLabel>Custo por Mil Milhas (R$)</FormLabel>
               <FormControl>
                 <Input 
-                  type="number" 
-                  step="0.01"
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  type="text" 
+                  value={costInput.displayValue}
+                  onChange={(e) => {
+                    costInput.handleChange(e);
+                    field.onChange(costInput.numericValue);
+                  }}
+                  placeholder="R$ 0,00"
                 />
               </FormControl>
               <FormMessage />
@@ -165,7 +180,7 @@ export function MilesPurchaseForm({ onSubmit }: MilesPurchaseFormProps) {
           )}
         />
 
-        {watchedQuantity > 0 && watchedCost > 0 && (
+        {quantityInput.numericValue > 0 && costInput.numericValue > 0 && (
           <div className="p-4 bg-muted rounded-lg">
             <Label className="text-sm font-medium">Valor Total da Compra</Label>
             <div className="text-xl font-bold text-primary">

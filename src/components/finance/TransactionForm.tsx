@@ -3,6 +3,7 @@ import React from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useCurrencyInput } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -44,6 +45,8 @@ interface TransactionFormProps {
 }
 
 export function TransactionForm({ onSubmit, defaultValues }: TransactionFormProps) {
+  const valueInput = useCurrencyInput(defaultValues?.value || 0);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -55,6 +58,11 @@ export function TransactionForm({ onSubmit, defaultValues }: TransactionFormProp
       value: defaultValues?.value ? defaultValues.value.toString() : "",
     },
   });
+
+  // Sincronizar quando defaultValues mudar
+  React.useEffect(() => {
+    valueInput.setValue(defaultValues?.value || 0);
+  }, [defaultValues?.value]);
 
   const watchedType = form.watch('type');
   const watchedCategory = form.watch('category');
@@ -201,7 +209,15 @@ export function TransactionForm({ onSubmit, defaultValues }: TransactionFormProp
             <FormItem>
               <FormLabel>Valor (R$)</FormLabel>
               <FormControl>
-                <Input type="number" step="0.01" {...field} />
+                <Input 
+                  type="text" 
+                  value={valueInput.displayValue}
+                  onChange={(e) => {
+                    valueInput.handleChange(e);
+                    field.onChange(valueInput.numericValue.toString());
+                  }}
+                  placeholder="R$ 0,00"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

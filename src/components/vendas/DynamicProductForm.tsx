@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
+import { useCurrencyInput, useQuantityInput } from "@/lib/utils";
 
 // Componente select reutilizável
 const airlines = [
@@ -78,23 +79,48 @@ const DynamicProductForm: React.FC<{
   onRemove?: () => void;
 }> = ({ value, onChange, onRemove }) => {
 
+  // Hooks de formatação para campos monetários
+  const taxValueInput = useCurrencyInput(value.taxValue || 0);
+  const priceInput = useCurrencyInput(value.price || 0);
+  const costInput = useCurrencyInput(value.cost || 0);
+  const custoMilInput = useCurrencyInput(value.custoMil || 0);
+  
+  // Hooks de formatação para campos de quantidade
+  const qtdMilhasInput = useQuantityInput(value.qtdMilhas || 0);
+  const quantityInput = useQuantityInput(value.quantity || 1);
+  const adultsInput = useQuantityInput(value.adults || 1);
+  const childrenInput = useQuantityInput(value.children || 0);
+
+  // Sincronizar valores quando o produto mudar externamente
+  React.useEffect(() => {
+    taxValueInput.setValue(value.taxValue || 0);
+    priceInput.setValue(value.price || 0);
+    costInput.setValue(value.cost || 0);
+    custoMilInput.setValue(value.custoMil || 0);
+    qtdMilhasInput.setValue(value.qtdMilhas || 0);
+    quantityInput.setValue(value.quantity || 1);
+    adultsInput.setValue(value.adults || 1);
+    childrenInput.setValue(value.children || 0);
+  }, [value.type]);
+
   // Cálculo do lucro em tempo real
   const computedProfit = React.useMemo(() => {
-    const venda = Number(value.price || 0) * Number(value.quantity || 1);
+    const venda = priceInput.numericValue * quantityInput.numericValue;
     
     if (value.type === "passagem" && value.ticketType === "milhas") {
-      const milhas = Number(value.qtdMilhas || 0);
-      const custoMil = Number(value.custoMil || 0);
+      const milhas = qtdMilhasInput.numericValue;
+      const custoMil = custoMilInput.numericValue;
       if (!milhas || !custoMil) return venda || 0;
       const custoTotal = (milhas / 1000) * custoMil;
       return venda - custoTotal;
     }
     
     // Para passagem tarifada e outros produtos
-    const custo = Number(value.cost || 0);
+    const custo = costInput.numericValue;
     return venda - custo;
   }, [
-    value.price, value.quantity, value.qtdMilhas, value.custoMil, value.cost, value.type, value.ticketType
+    priceInput.numericValue, quantityInput.numericValue, qtdMilhasInput.numericValue, 
+    custoMilInput.numericValue, costInput.numericValue, value.type, value.ticketType
   ]);
 
   // Render extra fields REVISADO
@@ -137,31 +163,38 @@ const DynamicProductForm: React.FC<{
               <div>
                 <Label>Adultos</Label>
                 <Input
-                  type="number"
-                  min={1}
-                  value={value.adults ?? 1}
-                  onChange={e => onChange({ ...value, adults: Number(e.target.value) })}
+                  type="text"
+                  value={adultsInput.displayValue}
+                  onChange={(e) => {
+                    adultsInput.handleChange(e);
+                    onChange({ ...value, adults: adultsInput.numericValue });
+                  }}
+                  placeholder="1"
                   required
                 />
               </div>
               <div>
                 <Label>Crianças</Label>
                 <Input
-                  type="number"
-                  min={0}
-                  value={value.children ?? 0}
-                  onChange={e => onChange({ ...value, children: Number(e.target.value) })}
+                  type="text"
+                  value={childrenInput.displayValue}
+                  onChange={(e) => {
+                    childrenInput.handleChange(e);
+                    onChange({ ...value, children: childrenInput.numericValue });
+                  }}
+                  placeholder="0"
                 />
               </div>
               <div>
                 <Label>Valor das Taxas</Label>
                 <Input 
-                  type="number" 
-                  min={0} 
-                  step="0.01"
-                  value={value.taxValue || ""} 
-                  onChange={e => onChange({ ...value, taxValue: Number(e.target.value) })} 
-                  placeholder="R$"
+                  type="text" 
+                  value={taxValueInput.displayValue}
+                  onChange={(e) => {
+                    taxValueInput.handleChange(e);
+                    onChange({ ...value, taxValue: taxValueInput.numericValue });
+                  }}
+                  placeholder="R$ 0,00"
                 />
               </div>
               <div>
@@ -200,20 +233,25 @@ const DynamicProductForm: React.FC<{
                 <div>
                   <Label>Qtd Milhas</Label>
                   <Input
-                    type="number"
-                    min={0}
-                    value={value.qtdMilhas ?? 0}
-                    onChange={e => onChange({ ...value, qtdMilhas: Number(e.target.value) })}
+                    type="text"
+                    value={qtdMilhasInput.displayValue}
+                    onChange={(e) => {
+                      qtdMilhasInput.handleChange(e);
+                      onChange({ ...value, qtdMilhas: qtdMilhasInput.numericValue });
+                    }}
+                    placeholder="0"
                   />
                 </div>
                 <div>
                   <Label>Custo por 1k</Label>
                   <Input
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    value={value.custoMil ?? 0}
-                    onChange={e => onChange({ ...value, custoMil: Number(e.target.value) })}
+                    type="text"
+                    value={custoMilInput.displayValue}
+                    onChange={(e) => {
+                      custoMilInput.handleChange(e);
+                      onChange({ ...value, custoMil: custoMilInput.numericValue });
+                    }}
+                    placeholder="R$ 0,00"
                   />
                 </div>
                 <div className="flex items-end">
@@ -232,12 +270,13 @@ const DynamicProductForm: React.FC<{
                 <div>
                   <Label>Custo da Passagem</Label>
                   <Input
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    value={value.cost || 0}
-                    onChange={e => onChange({ ...value, cost: Number(e.target.value) })}
-                    placeholder="R$"
+                    type="text"
+                    value={costInput.displayValue}
+                    onChange={(e) => {
+                      costInput.handleChange(e);
+                      onChange({ ...value, cost: costInput.numericValue });
+                    }}
+                    placeholder="R$ 0,00"
                   />
                 </div>
                 <div className="flex items-end">
@@ -326,21 +365,25 @@ const DynamicProductForm: React.FC<{
         <div>
           <Label>Qtd</Label>
           <Input
-            type="number"
-            min={1}
-            value={value.quantity}
-            onChange={e => onChange({ ...value, quantity: Number(e.target.value) })}
+            type="text"
+            value={quantityInput.displayValue}
+            onChange={(e) => {
+              quantityInput.handleChange(e);
+              onChange({ ...value, quantity: quantityInput.numericValue });
+            }}
+            placeholder="1"
           />
         </div>
         <div>
           <Label>Valor</Label>
           <Input
-            type="number"
-            min={0}
-            step="0.01"
-            value={value.price}
-            onChange={e => onChange({ ...value, price: Number(e.target.value) })}
-            placeholder="R$"
+            type="text"
+            value={priceInput.displayValue}
+            onChange={(e) => {
+              priceInput.handleChange(e);
+              onChange({ ...value, price: priceInput.numericValue });
+            }}
+            placeholder="R$ 0,00"
           />
         </div>
         {/* Custo - Oculto para todas as passagens */}
@@ -348,12 +391,13 @@ const DynamicProductForm: React.FC<{
           <div>
             <Label>Custo</Label>
             <Input
-              type="number"
-              min={0}
-              step="0.01"
-              value={value.cost}
-              onChange={e => onChange({ ...value, cost: Number(e.target.value) })}
-              placeholder="R$"
+              type="text"
+              value={costInput.displayValue}
+              onChange={(e) => {
+                costInput.handleChange(e);
+                onChange({ ...value, cost: costInput.numericValue });
+              }}
+              placeholder="R$ 0,00"
             />
           </div>
         )}

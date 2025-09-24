@@ -3,6 +3,7 @@ import React from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useCurrencyInput } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -60,6 +61,11 @@ const airlines = [
 ];
 
 export function TicketForm({ onSubmit }: TicketFormProps) {
+  // Hooks de formatação para campos monetários
+  const txPixInput = useCurrencyInput(0);
+  const cardTxInput = useCurrencyInput(0);
+  const costInput = useCurrencyInput(0);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -76,22 +82,18 @@ export function TicketForm({ onSubmit }: TicketFormProps) {
     },
   });
 
-  const watchedTxPix = form.watch('txPix');
-  const watchedCardTx = form.watch('cardTx');
-  const watchedCost = form.watch('cost');
-
   // Cálculo automático do lucro
   const calculateProfit = () => {
-    const txPix = parseFloat(watchedTxPix) || 0;
-    const cardTx = parseFloat(watchedCardTx) || 0;
-    const cost = parseFloat(watchedCost) || 0;
-    return (txPix + cardTx) - cost;
+    return (txPixInput.numericValue + cardTxInput.numericValue) - costInput.numericValue;
   };
 
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
     const profit = calculateProfit();
     onSubmit({
       ...data,
+      txPix: txPixInput.numericValue.toString(),
+      cardTx: cardTxInput.numericValue.toString(),
+      cost: costInput.numericValue.toString(),
       profit: profit
     });
   };
@@ -213,7 +215,15 @@ export function TicketForm({ onSubmit }: TicketFormProps) {
               <FormItem>
                 <FormLabel>TX + PIX (R$)</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.01" {...field} />
+                  <Input 
+                    type="text" 
+                    value={txPixInput.displayValue}
+                    onChange={(e) => {
+                      txPixInput.handleChange(e);
+                      field.onChange(txPixInput.numericValue.toString());
+                    }}
+                    placeholder="R$ 0,00"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -227,7 +237,15 @@ export function TicketForm({ onSubmit }: TicketFormProps) {
               <FormItem>
                 <FormLabel>Cartão TX (R$)</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.01" {...field} />
+                  <Input 
+                    type="text" 
+                    value={cardTxInput.displayValue}
+                    onChange={(e) => {
+                      cardTxInput.handleChange(e);
+                      field.onChange(cardTxInput.numericValue.toString());
+                    }}
+                    placeholder="R$ 0,00"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -241,7 +259,15 @@ export function TicketForm({ onSubmit }: TicketFormProps) {
               <FormItem>
                 <FormLabel>Custo (R$)</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.01" {...field} />
+                  <Input 
+                    type="text" 
+                    value={costInput.displayValue}
+                    onChange={(e) => {
+                      costInput.handleChange(e);
+                      field.onChange(costInput.numericValue.toString());
+                    }}
+                    placeholder="R$ 0,00"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
