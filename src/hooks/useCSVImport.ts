@@ -8,6 +8,45 @@ interface ImportResult {
   suppliers: number;
 }
 
+interface PreviewData {
+  totalRevenue: number;
+  totalProfit: number;
+  sampleRows: Array<{
+    client_name: string;
+    revenue: number;
+    profit: number;
+    payment_method: string;
+    status: string;
+    sale_date: string;
+  }>;
+  detectedHeaders: string[];
+  rowCount: number;
+}
+
+// Column mapping based on CSV headers
+const COLUMN_MAPPING: Record<string, string> = {
+  'PASSAGENS AÉREAS': 'type',
+  'DATA DA VENDA': 'sale_date',
+  'TRECHO': 'route',
+  'DATA T1': 'date_t1',
+  'DATA T2': 'date_t2', 
+  'PAX': 'client_name',
+  'LOC': 'locator',
+  'MALA': 'baggage',
+  'CIA': 'airline',
+  'CONTA USADA': 'supplier',
+  'TX EMB': 'tx_emb',
+  'CARTAO TX': 'card_tax',
+  'QTD MILHAS': 'miles_qty',
+  'CUSTO (k)': 'cost',
+  'FATURAMENTO': 'revenue',
+  'LUCRO': 'profit',
+  'PGTO': 'payment_method',
+  'STATUS': 'status',
+  'COMISSÃO': 'commission',
+  'DESCRIÇÃO': 'description'
+};
+
 interface SaleData {
   sale_date: string;
   client_name: string;
@@ -33,6 +72,97 @@ interface ProductData {
 export function useCSVImport() {
   const [progress, setProgress] = useState(0);
   const queryClient = useQueryClient();
+
+  // Preview CSV data without importing
+  const previewCSV = async (file: File): Promise<PreviewData> => {
+    const text = await file.text();
+    const lines = text.split('\n').filter(line => line.trim() !== '');
+    
+    if (lines.length < 3) {
+      throw new Error('Arquivo CSV deve ter pelo menos cabeçalho e uma linha de dados');
+    }
+
+    // Get headers from second line (first line is often title)
+    const headerLine = lines[1];
+    const headers = parseCSVLine(headerLine);
+    const detectedHeaders = headers.filter(h => h.trim() !== '');
+
+    // Create column index mapping
+    const columnIndexes: Record<string, number> = {};
+    headers.forEach((header, index) => {
+      const normalizedHeader = header.trim().toUpperCase();
+      const mappedField = Object.keys(COLUMN_MAPPING).find(key => 
+        key.toUpperCase() === normalizedHeader || 
+        normalizedHeader.includes(key.split(' ')[0])
+      );
+      if (mappedField) {
+        columnIndexes[COLUMN_MAPPING[mappedField]] = index;
+      }
+    });
+
+    // Process sample rows
+    const dataLines = lines.slice(2);
+    let totalRevenue = 0;
+    let totalProfit = 0;
+    const sampleRows: PreviewData['sampleRows'] = [];
+
+    for (let i = 0; i < Math.min(5, dataLines.length); i++) {
+      const columns = parseCSVLine(dataLines[i]);
+      
+      const clientName = columns[columnIndexes.client_name] || '';
+      const revenueStr = columns[columnIndexes.revenue] || '';
+      const profitStr = columns[columnIndexes.profit] || '';
+      const paymentMethod = columns[columnIndexes.payment_method] || '';
+      const status = columns[columnIndexes.status] || '';
+      const saleDateStr = columns[columnIndexes.sale_date] || '';
+
+      if (clientName && revenueStr) {
+        const revenue = parseNumber(revenueStr);
+        const profit = parseNumber(profitStr);
+        
+        sampleRows.push({
+          client_name: clientName,
+          revenue,
+          profit,
+          payment_method: paymentMethod,
+          status,
+          sale_date: saleDateStr
+        });
+      }
+    }
+
+    // Calculate totals for all rows
+    for (let i = 0; i < dataLines.length; i++) {
+      const columns = parseCSVLine(dataLines[i]);
+      const revenueStr = columns[columnIndexes.revenue] || '';
+      const profitStr = columns[columnIndexes.profit] || '';
+      
+      if (revenueStr) {
+        totalRevenue += parseNumber(revenueStr);
+        totalProfit += parseNumber(profitStr);
+      }
+    }
+
+    return {
+      totalRevenue,
+      totalProfit,
+      sampleRows,
+      detectedHeaders,
+      rowCount: dataLines.length
+    };
+  };
+
+  // Clear all imported sales
+  const clearImports = async (): Promise<void> => {
+    const { error } = await supabase
+      .from('sales')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+    
+    if (error) {
+      throw new Error(`Erro ao limpar dados: ${error.message}`);
+    }
+  };
 
   const parseCSVLine = (line: string): string[] => {
     const result: string[] = [];
@@ -161,7 +291,24 @@ export function useCSVImport() {
         throw new Error('Arquivo CSV deve ter pelo menos cabeçalho e uma linha de dados');
       }
 
-      // Pular as duas primeiras linhas (cabeçalhos)
+      // Get headers and create column mapping
+      const headerLine = lines[1];
+      const headers = parseCSVLine(headerLine);
+      
+      const columnIndexes: Record<string, number> = {};
+      headers.forEach((header, index) => {
+        const normalizedHeader = header.trim().toUpperCase();
+        const mappedField = Object.keys(COLUMN_MAPPING).find(key => 
+          key.toUpperCase() === normalizedHeader || 
+          normalizedHeader.includes(key.split(' ')[0])
+        );
+        if (mappedField) {
+          columnIndexes[COLUMN_MAPPING[mappedField]] = index;
+        }
+      });
+
+      console.log('Detected column mapping:', columnIndexes);
+
       const dataLines = lines.slice(2);
       const result: ImportResult = { success: 0, errors: [], suppliers: 0 };
       const createdSuppliers = new Set<string>();
@@ -172,29 +319,21 @@ export function useCSVImport() {
           
           const columns = parseCSVLine(dataLines[i]);
           
-          // Mapeamento das colunas baseado no CSV fornecido
-          const [
-            , // PASSAGENS AÉREAS (ignorar) - 0
-            dateStr, // DATA DA VENDA - 1
-            route, // TRECHO - 2
-            , // DATA T1 (ignorar) - 3
-            , // DATA T2 (ignorar) - 4
-            clientName, // PAX - 5
-            , // LOC (ignorar) - 6
-            , // MALA (ignorar) - 7
-            airline, // CIA - 8
-            supplierName, // CONTA USADA - 9
-            txEmbStr, // TX EMB - 10
-            cardTaxStr, // CARTAO TX - 11
-            milesQtyStr, // QTD MILHAS - 12
-            costStr, // CUSTO (k) - 13
-            revenueStr, // FATURAMENTO - 14
-            profitStr, // LUCRO - 15
-            paymentMethod, // PGTO - 16
-            status, // STATUS - 17
-            , // COMISSÃO (ignorar) - 18
-            description // DESCRIÇÃO - 19
-          ] = columns;
+          // Extract data using header-based mapping
+          const clientName = columns[columnIndexes.client_name] || '';
+          const dateStr = columns[columnIndexes.sale_date] || '';
+          const route = columns[columnIndexes.route] || '';
+          const airline = columns[columnIndexes.airline] || '';
+          const supplierName = columns[columnIndexes.supplier] || '';
+          const txEmbStr = columns[columnIndexes.tx_emb] || '';
+          const cardTaxStr = columns[columnIndexes.card_tax] || '';
+          const milesQtyStr = columns[columnIndexes.miles_qty] || '';
+          const costStr = columns[columnIndexes.cost] || '';
+          const revenueStr = columns[columnIndexes.revenue] || '';
+          const profitStr = columns[columnIndexes.profit] || '';
+          const paymentMethod = columns[columnIndexes.payment_method] || '';
+          const status = columns[columnIndexes.status] || '';
+          const description = columns[columnIndexes.description] || '';
 
           console.log(`Linha ${i + 3}:`, {
             clientName,
@@ -203,8 +342,7 @@ export function useCSVImport() {
             dateStr,
             revenueStr,
             profitStr,
-            milesQtyStr,
-            cardTaxStr
+            airline
           });
 
           // Validações básicas
@@ -220,7 +358,6 @@ export function useCSVImport() {
           const cardTax = parseNumber(cardTaxStr);
           const milesUsed = milesQtyStr ? parseNumber(milesQtyStr) * 1000 : 0;
           const grossProfit = profitStr ? parseNumber(profitStr) : (revenue - cost - txEmb - cardTax);
-          const saleStatus = status && status.trim().toLowerCase() === 'pago' ? 'paid' : 'pending';
 
           if (revenue <= 0) {
             result.errors.push(`Linha ${i + 3}: Faturamento inválido`);
@@ -265,6 +402,23 @@ export function useCSVImport() {
           if (saleError) {
             result.errors.push(`Linha ${i + 3}: Erro ao criar venda - ${saleError.message}`);
             continue;
+          }
+
+          // Create installments based on status
+          const saleStatus = status && status.trim().toLowerCase() === 'pago' ? 'paid' : 'pending';
+          const { error: installmentError } = await supabase
+            .from('sale_installments')
+            .insert({
+              sale_id: sale.id,
+              installment_number: 1,
+              due_date: parsedDate,
+              amount: revenue,
+              status: saleStatus,
+              paid_date: saleStatus === 'paid' ? parsedDate : null
+            });
+
+          if (installmentError) {
+            console.warn(`Erro ao criar parcela para venda ${sale.id}:`, installmentError);
           }
 
           // Preparar dados do produto
@@ -316,6 +470,8 @@ export function useCSVImport() {
   return {
     importCSV: importCSVMutation.mutateAsync,
     isLoading: importCSVMutation.isPending,
-    progress
+    progress,
+    previewCSV,
+    clearImports
   };
 }

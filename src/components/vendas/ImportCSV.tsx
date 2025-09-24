@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/hooks/use-toast";
-import { Upload, FileText, CheckCircle, AlertCircle } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Upload, FileText, Trash2, Eye } from "lucide-react";
 import { useCSVImport } from "@/hooks/useCSVImport";
+import { useToast } from "@/hooks/use-toast";
 
 interface ImportResult {
   success: number;
@@ -13,23 +15,81 @@ interface ImportResult {
   suppliers: number;
 }
 
+interface PreviewData {
+  totalRevenue: number;
+  totalProfit: number;
+  sampleRows: Array<{
+    client_name: string;
+    revenue: number;
+    profit: number;
+    payment_method: string;
+    status: string;
+    sale_date: string;
+  }>;
+  detectedHeaders: string[];
+  rowCount: number;
+}
+
 export function ImportCSV() {
   const [file, setFile] = useState<File | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [preview, setPreview] = useState<PreviewData | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
   const { toast } = useToast();
-  const { importCSV, isLoading, progress } = useCSVImport();
+  const { importCSV, isLoading, progress, previewCSV, clearImports } = useCSVImport();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile && selectedFile.type === "text/csv") {
       setFile(selectedFile);
+      setPreview(null);
+      setShowPreview(false);
     } else {
       toast({
-        title: "Erro",
+        title: "Arquivo inválido",
         description: "Por favor, selecione um arquivo CSV válido.",
         variant: "destructive",
       });
     }
+  };
+
+  const handlePreview = async () => {
+    if (!file) return;
+    
+    try {
+      const previewData = await previewCSV(file);
+      setPreview(previewData);
+      setShowPreview(true);
+    } catch (error) {
+      toast({
+        title: "Erro no preview",
+        description: error instanceof Error ? error.message : "Erro desconhecido",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleClearImports = async () => {
+    try {
+      await clearImports();
+      toast({
+        title: "Dados limpos",
+        description: "Todas as vendas importadas foram removidas.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao limpar dados",
+        description: error instanceof Error ? error.message : "Erro desconhecido",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
   };
 
   const handleImport = async () => {
@@ -53,11 +113,13 @@ export function ImportCSV() {
       }
 
       setFile(null);
+      setPreview(null);
+      setShowPreview(false);
       setIsOpen(false);
     } catch (error) {
       toast({
         title: "Erro na importação",
-        description: "Ocorreu um erro durante a importação. Tente novamente.",
+        description: error instanceof Error ? error.message : "Erro desconhecido",
         variant: "destructive",
       });
     }
@@ -71,101 +133,168 @@ export function ImportCSV() {
           Importar Vendas
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Importar Vendas via CSV</DialogTitle>
-          <DialogDescription>
-            Faça upload do arquivo CSV com os dados das vendas para importar automaticamente.
-          </DialogDescription>
+          <DialogTitle>Importar CSV de Vendas</DialogTitle>
         </DialogHeader>
-
-        <div className="space-y-4">
-          {!isLoading && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm flex items-center gap-2">
+        
+        {isLoading ? (
+          <div className="space-y-4">
+            <div className="text-center">
+              <p>Importando dados...</p>
+              <Progress value={progress} className="mt-2" />
+              <p className="text-sm text-muted-foreground mt-1">{progress}%</p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="csv-file">Selecionar arquivo CSV</Label>
+              <Input
+                id="csv-file"
+                type="file"
+                accept=".csv"
+                onChange={handleFileChange}
+                className="mt-1"
+              />
+            </div>
+            
+            {file && (
+              <div className="p-4 bg-muted rounded-lg">
+                <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
-                  Selecionar Arquivo
-                </CardTitle>
-                <CardDescription>
-                  Escolha o arquivo CSV com os dados das vendas
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <input
-                    type="file"
-                    accept=".csv"
-                    onChange={handleFileChange}
-                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-                  />
-                  
-                  {file && (
-                    <div className="flex items-center gap-2 text-sm text-green-600">
-                      <CheckCircle className="h-4 w-4" />
-                      <span>{file.name} selecionado</span>
-                    </div>
-                  )}
+                  <span className="text-sm font-medium">{file.name}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Tamanho: {(file.size / 1024).toFixed(1)} KB
+                </p>
+              </div>
+            )}
 
-                  <div className="text-xs text-muted-foreground">
-                    <div className="space-y-1">
-                      <p><strong>Formato esperado:</strong></p>
-                      <ul className="list-disc list-inside space-y-1">
-                        <li>DATA DA VENDA (DD/MM/AAAA)</li>
-                        <li>TRECHO (origem-destino)</li>
-                        <li>PAX (nome do passageiro)</li>
-                        <li>FATURAMENTO, CUSTO, TX EMB</li>
-                        <li>CIA (companhia aérea)</li>
-                        <li>CONTA USADA (fornecedor)</li>
-                        <li>PGTO (método de pagamento)</li>
-                      </ul>
+            {file && !showPreview && (
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={handlePreview}
+                  className="flex items-center gap-2"
+                >
+                  <Eye className="h-4 w-4" />
+                  Visualizar Preview
+                </Button>
+              </div>
+            )}
+
+            {preview && showPreview && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Preview dos Dados</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                      <p className="text-sm text-muted-foreground">Total Faturamento</p>
+                      <p className="text-2xl font-bold text-green-600">
+                        {formatCurrency(preview.totalRevenue)}
+                      </p>
+                    </div>
+                    <div className="text-center p-4 bg-blue-50 rounded-lg">
+                      <p className="text-sm text-muted-foreground">Total Lucro</p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {formatCurrency(preview.totalProfit)}
+                      </p>
+                    </div>
+                    <div className="text-center p-4 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-muted-foreground">Total Linhas</p>
+                      <p className="text-2xl font-bold">{preview.rowCount}</p>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
-          {isLoading && (
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                    <span className="text-sm">Processando importação...</span>
+                  <div>
+                    <h4 className="font-medium mb-2">Primeiras 5 linhas:</h4>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm border-collapse border border-gray-200">
+                        <thead>
+                          <tr className="bg-gray-50">
+                            <th className="border border-gray-200 px-2 py-1 text-left">Cliente</th>
+                            <th className="border border-gray-200 px-2 py-1 text-left">Data</th>
+                            <th className="border border-gray-200 px-2 py-1 text-right">Faturamento</th>
+                            <th className="border border-gray-200 px-2 py-1 text-right">Lucro</th>
+                            <th className="border border-gray-200 px-2 py-1 text-left">Pagamento</th>
+                            <th className="border border-gray-200 px-2 py-1 text-left">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {preview.sampleRows.map((row, index) => (
+                            <tr key={index}>
+                              <td className="border border-gray-200 px-2 py-1">{row.client_name}</td>
+                              <td className="border border-gray-200 px-2 py-1">{row.sale_date}</td>
+                              <td className="border border-gray-200 px-2 py-1 text-right">
+                                {formatCurrency(row.revenue)}
+                              </td>
+                              <td className="border border-gray-200 px-2 py-1 text-right">
+                                {formatCurrency(row.profit)}
+                              </td>
+                              <td className="border border-gray-200 px-2 py-1">{row.payment_method}</td>
+                              <td className="border border-gray-200 px-2 py-1">{row.status}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                  <Progress value={progress} className="w-full" />
-                  <p className="text-xs text-muted-foreground">
-                    {progress}% concluído
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setIsOpen(false)} disabled={isLoading}>
-              Cancelar
-            </Button>
-            <Button 
-              onClick={handleImport} 
-              disabled={!file || isLoading}
-              className="gap-2"
-            >
-              {isLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Importando...
-                </>
-              ) : (
-                <>
+                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-sm font-medium text-yellow-800">
+                      ⚠️ Verificar Totais:
+                    </p>
+                    <p className="text-sm text-yellow-700 mt-1">
+                      Faturamento esperado: R$ 334.806,01 | Lucro esperado: R$ 48.542,38
+                    </p>
+                    <p className="text-sm text-yellow-700">
+                      Faturamento detectado: {formatCurrency(preview.totalRevenue)} | 
+                      Lucro detectado: {formatCurrency(preview.totalProfit)}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
+            <div className="text-sm text-muted-foreground">
+              <p className="font-medium mb-2">Formato esperado:</p>
+              <ul className="space-y-1 text-xs">
+                <li>• Cabeçalhos na segunda linha</li>
+                <li>• Colunas obrigatórias: PAX, FATURAMENTO</li>
+                <li>• Data no formato DD/MM/AAAA</li>
+                <li>• Valores monetários com vírgula decimal</li>
+              </ul>
+            </div>
+            
+            <div className="flex justify-between">
+              <Button 
+                variant="destructive" 
+                onClick={handleClearImports}
+                className="flex items-center gap-2"
+              >
+                <Trash2 className="h-4 w-4" />
+                Limpar Importações
+              </Button>
+              
+              <div className="flex space-x-2">
+                <Button variant="outline" onClick={() => setIsOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button 
+                  onClick={handleImport} 
+                  disabled={!file || !showPreview}
+                  className="flex items-center gap-2"
+                >
                   <Upload className="h-4 w-4" />
                   Importar
-                </>
-              )}
-            </Button>
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </DialogContent>
     </Dialog>
   );
