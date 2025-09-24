@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, FileText, Trash2, Eye } from "lucide-react";
+import { Upload, FileText, Trash2, Eye, Settings } from "lucide-react";
 import { useCSVImport } from "@/hooks/useCSVImport";
 import { useToast } from "@/hooks/use-toast";
+import { ColumnMappingDialog } from "@/components/csv/ColumnMappingDialog";
 
 interface ImportResult {
   success: number;
@@ -30,11 +31,17 @@ interface PreviewData {
   rowCount: number;
 }
 
+interface ColumnMapping {
+  [systemField: string]: string | null;
+}
+
 export function ImportCSV() {
   const [file, setFile] = useState<File | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [preview, setPreview] = useState<PreviewData | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [showMappingDialog, setShowMappingDialog] = useState(false);
+  const [manualMapping, setManualMapping] = useState<ColumnMapping>({});
   const { toast } = useToast();
   const { importCSV, isLoading, progress, previewCSV, clearImports } = useCSVImport();
 
@@ -44,6 +51,7 @@ export function ImportCSV() {
       setFile(selectedFile);
       setPreview(null);
       setShowPreview(false);
+      setManualMapping({});
     } else {
       toast({
         title: "Arquivo inválido",
@@ -53,11 +61,11 @@ export function ImportCSV() {
     }
   };
 
-  const handlePreview = async () => {
+  const handlePreview = async (customMapping?: ColumnMapping) => {
     if (!file) return;
     
     try {
-      const previewData = await previewCSV(file);
+      const previewData = await previewCSV(file, customMapping);
       setPreview(previewData);
       setShowPreview(true);
     } catch (error) {
@@ -67,6 +75,11 @@ export function ImportCSV() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleMappingApply = (mapping: ColumnMapping) => {
+    setManualMapping(mapping);
+    handlePreview(mapping);
   };
 
   const handleClearImports = async () => {
@@ -96,7 +109,7 @@ export function ImportCSV() {
     if (!file) return;
 
     try {
-      const result = await importCSV(file);
+      const result = await importCSV(file, manualMapping);
       
       toast({
         title: "Importação concluída!",
@@ -115,6 +128,7 @@ export function ImportCSV() {
       setFile(null);
       setPreview(null);
       setShowPreview(false);
+      setManualMapping({});
       setIsOpen(false);
     } catch (error) {
       toast({
@@ -175,11 +189,19 @@ export function ImportCSV() {
               <div className="flex gap-2">
                 <Button 
                   variant="outline" 
-                  onClick={handlePreview}
+                  onClick={() => handlePreview()}
                   className="flex items-center gap-2"
                 >
                   <Eye className="h-4 w-4" />
                   Visualizar Preview
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowMappingDialog(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Settings className="h-4 w-4" />
+                  Mapear Colunas
                 </Button>
               </div>
             )}
@@ -247,13 +269,22 @@ export function ImportCSV() {
                     <p className="text-sm font-medium text-yellow-800">
                       ⚠️ Verificar Totais:
                     </p>
-                    <p className="text-sm text-yellow-700 mt-1">
-                      Faturamento esperado: R$ 334.806,01 | Lucro esperado: R$ 48.542,38
-                    </p>
                     <p className="text-sm text-yellow-700">
                       Faturamento detectado: {formatCurrency(preview.totalRevenue)} | 
                       Lucro detectado: {formatCurrency(preview.totalProfit)}
                     </p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setShowMappingDialog(true)}
+                      className="flex items-center gap-2"
+                    >
+                      <Settings className="h-4 w-4" />
+                      Ajustar Mapeamento
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -295,6 +326,14 @@ export function ImportCSV() {
             </div>
           </div>
         )}
+
+        <ColumnMappingDialog
+          isOpen={showMappingDialog}
+          onClose={() => setShowMappingDialog(false)}
+          onApply={handleMappingApply}
+          csvColumns={preview?.detectedHeaders || []}
+          initialMapping={manualMapping}
+        />
       </DialogContent>
     </Dialog>
   );

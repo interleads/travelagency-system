@@ -285,7 +285,7 @@ export function useCSVImport() {
   const queryClient = useQueryClient();
 
   // Preview CSV data without importing
-  const previewCSV = async (file: File): Promise<PreviewData> => {
+  const previewCSV = async (file: File, customMapping?: Record<string, string | null>): Promise<PreviewData> => {
     const text = await file.text();
     const { lines, delimiterHint } = preprocessCSVContent(text);
 
@@ -300,14 +300,27 @@ export function useCSVImport() {
     const headers = parseCSVLine(headerLine, delimiter);
     const detectedHeaders = headers.filter(h => h.trim() !== '');
 
-    // Create column index mapping using robust header matching
+    // Create column index mapping using custom mapping or robust header matching
     const columnIndexes: Record<string, number> = {};
-    headers.forEach((header, index) => {
-      const field = mapHeaderToField(header);
-      if (field) {
-        columnIndexes[field] = index;
-      }
-    });
+    if (customMapping) {
+      // Use custom mapping
+      Object.entries(customMapping).forEach(([field, csvColumn]) => {
+        if (csvColumn) {
+          const index = headers.findIndex(h => h === csvColumn);
+          if (index !== -1) {
+            columnIndexes[field] = index;
+          }
+        }
+      });
+    } else {
+      // Use automatic header matching
+      headers.forEach((header, index) => {
+        const field = mapHeaderToField(header);
+        if (field) {
+          columnIndexes[field] = index;
+        }
+      });
+    }
 
     console.log('Detected headers:', detectedHeaders);
     console.log('Column mapping:', columnIndexes);
@@ -545,7 +558,7 @@ const clearImports = async (): Promise<void> => {
   };
 
   const importCSVMutation = useMutation({
-    mutationFn: async (file: File): Promise<ImportResult> => {
+    mutationFn: async ({ file, customMapping }: { file: File; customMapping?: Record<string, string | null> }): Promise<ImportResult> => {
       const text = await file.text();
       const { lines, originalLineNumbers, delimiterHint } = preprocessCSVContent(text);
 
@@ -558,14 +571,27 @@ const clearImports = async (): Promise<void> => {
       const headerIndex = findHeaderIndex(lines, delimiter);
       const headers = parseCSVLine(lines[headerIndex], delimiter);
       
-      // Create robust column mapping using exact header matching
+      // Create column index mapping using custom mapping or robust header matching
       const columnIndexes: Record<string, number> = {};
-      headers.forEach((header, index) => {
-        const field = mapHeaderToField(header);
-        if (field) {
-          columnIndexes[field] = index;
-        }
-      });
+      if (customMapping) {
+        // Use custom mapping
+        Object.entries(customMapping).forEach(([field, csvColumn]) => {
+          if (csvColumn) {
+            const index = headers.findIndex(h => h === csvColumn);
+            if (index !== -1) {
+              columnIndexes[field] = index;
+            }
+          }
+        });
+      } else {
+        // Use automatic header matching
+        headers.forEach((header, index) => {
+          const field = mapHeaderToField(header);
+          if (field) {
+            columnIndexes[field] = index;
+          }
+        });
+      }
 
       console.log('Detected delimiter:', delimiter, 'headerIndex:', headerIndex, 'column mapping:', columnIndexes);
 
@@ -730,7 +756,8 @@ const clearImports = async (): Promise<void> => {
   });
 
   return {
-    importCSV: importCSVMutation.mutateAsync,
+    importCSV: (file: File, customMapping?: Record<string, string | null>) => 
+      importCSVMutation.mutateAsync({ file, customMapping }),
     isLoading: importCSVMutation.isPending,
     progress,
     previewCSV,
