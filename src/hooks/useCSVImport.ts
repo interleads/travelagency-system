@@ -16,6 +16,7 @@ interface SaleData {
   notes?: string;
   supplier_id?: string;
   gross_profit?: number;
+  miles_used?: number;
 }
 
 interface ProductData {
@@ -173,27 +174,38 @@ export function useCSVImport() {
           
           // Mapeamento das colunas baseado no CSV fornecido
           const [
-            , // PASSAGENS AÉREAS (ignorar)
-            dateStr, // DATA DA VENDA
-            route, // TRECHO
-            , // DATA T1 (ignorar)
-            , // DATA T2 (ignorar)
-            clientName, // PAX
-            , // LOC (ignorar)
-            , // MALA (ignorar)
-            airline, // CIA
-            supplierName, // CONTA USADA
-            txEmbStr, // TX EMB
-            , // CARTAO TX (ignorar)
-            , // QTD MILHAS (ignorar)
-            costStr, // CUSTO (k)
-            revenueStr, // FATURAMENTO
-            , // LUCRO (calcular automaticamente)
-            paymentMethod, // PGTO
-            , // STATUS (ignorar)
-            , // COMISSÃO (ignorar)
-            description // DESCRIÇÃO
+            , // PASSAGENS AÉREAS (ignorar) - 0
+            dateStr, // DATA DA VENDA - 1
+            route, // TRECHO - 2
+            , // DATA T1 (ignorar) - 3
+            , // DATA T2 (ignorar) - 4
+            clientName, // PAX - 5
+            , // LOC (ignorar) - 6
+            , // MALA (ignorar) - 7
+            airline, // CIA - 8
+            supplierName, // CONTA USADA - 9
+            txEmbStr, // TX EMB - 10
+            cardTaxStr, // CARTAO TX - 11
+            milesQtyStr, // QTD MILHAS - 12
+            costStr, // CUSTO (k) - 13
+            revenueStr, // FATURAMENTO - 14
+            profitStr, // LUCRO - 15
+            paymentMethod, // PGTO - 16
+            status, // STATUS - 17
+            , // COMISSÃO (ignorar) - 18
+            description // DESCRIÇÃO - 19
           ] = columns;
+
+          console.log(`Linha ${i + 3}:`, {
+            clientName,
+            paymentMethod,
+            status,
+            dateStr,
+            revenueStr,
+            profitStr,
+            milesQtyStr,
+            cardTaxStr
+          });
 
           // Validações básicas
           if (!clientName || !revenueStr) {
@@ -205,11 +217,19 @@ export function useCSVImport() {
           const revenue = parseNumber(revenueStr);
           const cost = parseNumber(costStr);
           const txEmb = parseNumber(txEmbStr);
-          const totalCost = cost + txEmb;
-          const grossProfit = revenue - totalCost;
+          const cardTax = parseNumber(cardTaxStr);
+          const milesUsed = milesQtyStr ? parseNumber(milesQtyStr) * 1000 : 0;
+          const grossProfit = profitStr ? parseNumber(profitStr) : (revenue - cost - txEmb - cardTax);
+          const saleStatus = status && status.trim().toLowerCase() === 'pago' ? 'paid' : 'pending';
 
           if (revenue <= 0) {
             result.errors.push(`Linha ${i + 3}: Faturamento inválido`);
+            continue;
+          }
+
+          // Não usar data atual se a data estiver vazia - pular a linha
+          if (!parsedDate) {
+            result.errors.push(`Linha ${i + 3}: Data da venda é obrigatória`);
             continue;
           }
 
@@ -225,13 +245,14 @@ export function useCSVImport() {
 
           // Preparar dados da venda
           const saleData: SaleData = {
-            sale_date: parsedDate || new Date().toISOString().split('T')[0],
+            sale_date: parsedDate,
             client_name: clientName.trim(),
             total_amount: revenue,
             payment_method: normalizePaymentMethod(paymentMethod),
             notes: description && description.trim() !== '' ? description.trim() : undefined,
             supplier_id: supplierId,
-            gross_profit: grossProfit
+            gross_profit: grossProfit,
+            miles_used: milesUsed > 0 ? milesUsed : undefined
           };
 
           // Inserir venda
@@ -248,11 +269,12 @@ export function useCSVImport() {
 
           // Preparar dados do produto
           const { origin, destination } = splitRoute(route);
+          const totalProductCost = cost + txEmb + cardTax;
           const productData: ProductData = {
             type: 'passagem',
             name: 'Passagem Aérea',
             price: revenue,
-            cost: totalCost,
+            cost: totalProductCost,
             origin,
             destination,
             airline: airline && airline.trim() !== '' ? airline.trim() : undefined,
