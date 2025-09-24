@@ -26,14 +26,6 @@ const Vendas = () => {
   const { toast } = useToast();
   const [isSaleDialogOpen, setIsSaleDialogOpen] = useState(false);
 
-  const handleSaleSubmit = (data: any) => {
-    console.log('Nova venda:', data);
-    toast({
-      title: "Venda registrada com sucesso!",
-      description: `Cliente: ${data.client} - R$ ${data.total}`,
-    });
-    setIsSaleDialogOpen(false);
-  };
 
   return (
     <DateRangeFilterProvider>
@@ -53,7 +45,7 @@ const Vendas = () => {
                   <DialogTitle className="text-xl font-semibold">Registrar Nova Venda</DialogTitle>
                 </DialogHeader>
                 <div className="px-2">
-                  <VendasForm />
+                  <VendasForm onSaleSuccess={() => setIsSaleDialogOpen(false)} />
                 </div>
               </DialogContent>
             </Dialog>

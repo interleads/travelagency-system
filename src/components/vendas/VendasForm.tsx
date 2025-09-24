@@ -10,7 +10,11 @@ import SaleSummary from "@/components/sales/SaleSummary";
 import { PAYMENT_METHODS } from '@/data/products';
 import { useCreateSale, SaleProduct } from '@/hooks/useSales';
 
-const VendasForm = () => {
+interface VendasFormProps {
+  onSaleSuccess?: () => void;
+}
+
+const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
   const [client, setClient] = useState('');
   const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0]);
   const [products, setProducts] = useState<SaleProduct[]>([EmptyProduct]);
@@ -55,6 +59,7 @@ const VendasForm = () => {
         setProducts([EmptyProduct]);
         setPaymentMethod('');
         setInstallments(1);
+        onSaleSuccess?.();
       },
       onError: (err: any) => {
         toast({ variant: "destructive", title: "Erro ao salvar no banco", description: err.message });
