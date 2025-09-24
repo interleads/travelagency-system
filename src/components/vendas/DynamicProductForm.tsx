@@ -129,6 +129,7 @@ const DynamicProductForm: React.FC<{
 
   // Sincronizar valores quando o produto mudar externamente
   React.useEffect(() => {
+    console.log('Sincronizando hooks com valores externos:', value);
     taxValueInput.setValue(value.taxValue || 0);
     priceInput.setValue(value.price || 0);
     costInput.setValue(value.cost || 0);
@@ -137,7 +138,7 @@ const DynamicProductForm: React.FC<{
     quantityInput.setValue(value.quantity || 1);
     adultsInput.setValue(value.adults || 1);
     childrenInput.setValue(value.children || 0);
-  }, [value.type]);
+  }, [value.taxValue, value.price, value.cost, value.custoMil, value.qtdMilhas, value.quantity, value.adults, value.children]);
 
   // Cálculo do lucro em tempo real
   const computedProfit = React.useMemo(() => {
@@ -160,6 +161,40 @@ const DynamicProductForm: React.FC<{
     priceInput.numericValue, quantityInput.numericValue, qtdMilhasInput.numericValue, 
     custoMilInput.numericValue, costInput.numericValue, value.type, value.ticketType
   ]);
+
+  // Propagar mudanças dos hooks para o estado principal em tempo real
+  const propagateChanges = React.useCallback(() => {
+    console.log('Propagando mudanças dos hooks para estado principal');
+    const updatedProduct = {
+      ...value,
+      taxValue: taxValueInput.numericValue,
+      price: priceInput.numericValue,
+      cost: costInput.numericValue,
+      custoMil: custoMilInput.numericValue,
+      qtdMilhas: qtdMilhasInput.numericValue,
+      quantity: quantityInput.numericValue,
+      adults: adultsInput.numericValue,
+      children: childrenInput.numericValue,
+      profit: computedProfit
+    };
+    
+    // Só propagar se houver diferenças significativas
+    const hasChanges = updatedProduct.price !== value.price ||
+                      updatedProduct.cost !== value.cost ||
+                      updatedProduct.custoMil !== value.custoMil ||
+                      updatedProduct.qtdMilhas !== value.qtdMilhas ||
+                      updatedProduct.quantity !== value.quantity ||
+                      Math.abs((updatedProduct.profit || 0) - (value.profit || 0)) > 0.01;
+    
+    if (hasChanges) {
+      console.log('Mudanças detectadas, propagando:', updatedProduct);
+      onChange(updatedProduct);
+    }
+  }, [value, taxValueInput.numericValue, priceInput.numericValue, costInput.numericValue, custoMilInput.numericValue, qtdMilhasInput.numericValue, quantityInput.numericValue, adultsInput.numericValue, childrenInput.numericValue, computedProfit, onChange]);
+
+  React.useEffect(() => {
+    propagateChanges();
+  }, [propagateChanges]);
 
   // Atualizar nome automaticamente quando os campos relevantes mudarem
   React.useEffect(() => {

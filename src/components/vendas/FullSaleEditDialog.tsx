@@ -101,8 +101,31 @@ export function FullSaleEditDialog({ sale, open, onOpenChange }: FullSaleEditDia
   const removeProduct = (idx: number) => setProducts(products.filter((_, i) => i !== idx));
   const updateProduct = (idx: number, product: SaleProduct) => setProducts(products.map((p, i) => i === idx ? product : p));
 
-  const total = products.reduce((sum, p) => sum + (p.price || 0) * (p.quantity || 1), 0);
-  const totalCost = products.reduce((sum, p) => sum + (p.cost || 0), 0);
+  // Cálculo dos totais em tempo real com debugging  
+  const total = React.useMemo(() => {
+    return products.reduce((sum, p) => {
+      const productTotal = (p.price || 0) * (p.quantity || 1);
+      console.log('Cálculo total produto (edit):', { name: p.name, price: p.price, quantity: p.quantity, total: productTotal });
+      return sum + productTotal;
+    }, 0);
+  }, [products]);
+
+  const totalCost = React.useMemo(() => {
+    return products.reduce((sum, p) => {
+      if (p.type === "passagem" && p.ticketType === "milhas") {
+        const milhas = Number(p.qtdMilhas || 0);
+        const custoMil = Number(p.custoMil || 0);
+        const custoTotal = (milhas / 1000) * custoMil;
+        console.log('Cálculo custo milhas (edit):', { name: p.name, milhas, custoMil, custoTotal });
+        return sum + custoTotal;
+      }
+      const custo = p.cost || 0;
+      console.log('Cálculo custo padrão (edit):', { name: p.name, custo });
+      return sum + custo;
+    }, 0);
+  }, [products]);
+
+  console.log('Totais calculados FullSaleEditDialog:', { total, totalCost, profit: total - totalCost });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
