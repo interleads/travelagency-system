@@ -119,8 +119,21 @@ export function ColumnMappingDialog({
     return getRequiredFields().filter(field => !mapping[field]);
   };
 
+  const getDuplicateColumns = () => {
+    const columnCounts: Record<string, string[]> = {};
+    Object.entries(mapping).forEach(([field, column]) => {
+      if (column) {
+        if (!columnCounts[column]) columnCounts[column] = [];
+        columnCounts[column].push(field);
+      }
+    });
+    return Object.entries(columnCounts).filter(([, fields]) => fields.length > 1);
+  };
+
   const canApply = () => {
-    return getMissingRequiredFields().length === 0;
+    const hasMissingRequired = getMissingRequiredFields().length > 0;
+    const hasDuplicates = getDuplicateColumns().length > 0;
+    return !hasMissingRequired && !hasDuplicates;
   };
 
   const handleApply = () => {
@@ -170,47 +183,78 @@ export function ColumnMappingDialog({
                         <CheckCircle className="h-4 w-4 text-green-500" />
                       )}
                     </div>
-                    <Select
-                      value={mapping[field] || "none"}
-                      onValueChange={(value) => handleMappingChange(field, value)}
-                    >
-                      <SelectTrigger className="w-64">
-                        <SelectValue placeholder="Selecionar coluna CSV" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Não mapear</SelectItem>
-                        {csvColumns.map((column, index) => (
-                          <SelectItem 
-                            key={index} 
-                            value={column}
-                            disabled={isColumnUsed(column, field)}
-                          >
-                            {column}
-                            {isColumnUsed(column, field) && " (já usado)"}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                     <Select
+                       value={mapping[field] || "none"}
+                       onValueChange={(value) => handleMappingChange(field, value)}
+                     >
+                       <SelectTrigger className={`w-64 ${
+                         mapping[field] && getDuplicateColumns().some(([col]) => col === mapping[field])
+                           ? 'border-destructive' 
+                           : ''
+                       }`}>
+                         <SelectValue placeholder="Selecionar coluna CSV" />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="none">Não mapear</SelectItem>
+                         {csvColumns.map((column, index) => (
+                           <SelectItem 
+                             key={index} 
+                             value={column}
+                             disabled={isColumnUsed(column, field)}
+                           >
+                             {column}
+                             {isColumnUsed(column, field) && " (já usado)"}
+                           </SelectItem>
+                         ))}
+                       </SelectContent>
+                     </Select>
+                     {mapping[field] && getDuplicateColumns().some(([col]) => col === mapping[field]) && (
+                       <div className="text-xs text-destructive mt-1">
+                         ⚠️ Mapeamento duplicado
+                       </div>
+                     )}
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
 
-          {getMissingRequiredFields().length > 0 && (
+          {(getMissingRequiredFields().length > 0 || getDuplicateColumns().length > 0) && (
             <Card className="border-destructive">
               <CardContent className="pt-6">
-                <div className="flex items-center gap-2 text-destructive">
-                  <AlertTriangle className="h-4 w-4" />
-                  <span className="font-medium">Campos obrigatórios não mapeados:</span>
-                </div>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {getMissingRequiredFields().map(field => (
-                    <Badge key={field} variant="destructive" className="text-xs">
-                      {SYSTEM_FIELDS[field as keyof typeof SYSTEM_FIELDS].label}
-                    </Badge>
-                  ))}
-                </div>
+                {getMissingRequiredFields().length > 0 && (
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 text-destructive">
+                      <AlertTriangle className="h-4 w-4" />
+                      <span className="font-medium">Campos obrigatórios não mapeados:</span>
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {getMissingRequiredFields().map(field => (
+                        <Badge key={field} variant="destructive" className="text-xs">
+                          {SYSTEM_FIELDS[field as keyof typeof SYSTEM_FIELDS].label}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {getDuplicateColumns().length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 text-destructive">
+                      <AlertTriangle className="h-4 w-4" />
+                      <span className="font-medium">Mapeamentos duplicados detectados:</span>
+                    </div>
+                    <div className="mt-2 space-y-1 text-sm text-destructive/80">
+                      {getDuplicateColumns().map(([column, fields]) => (
+                        <div key={column}>
+                          Coluna "{column}" está mapeada em: {fields.map(f => 
+                            SYSTEM_FIELDS[f as keyof typeof SYSTEM_FIELDS].label
+                          ).join(', ')}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

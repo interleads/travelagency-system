@@ -547,30 +547,28 @@ export function useCSVImport() {
     const headers = parseCSVLine(headerLine, delimiter);
     const detectedHeaders = headers.filter(h => h.trim() !== '');
 
-    // Create column index mapping using custom mapping or robust header matching
-    const columnIndexes: Record<string, number> = {};
+    // Create proper mapping: field -> csvColumn
+    let finalMapping: Record<string, string | null> = {};
+    
     if (customMapping) {
-      // Use custom mapping
-      Object.entries(customMapping).forEach(([field, csvColumn]) => {
-        if (csvColumn) {
-          const index = headers.findIndex(h => h === csvColumn);
-          if (index !== -1) {
-            columnIndexes[field] = index;
-          }
-        }
-      });
+      // Use custom mapping directly
+      finalMapping = customMapping;
     } else {
-      // Use automatic header matching
-      headers.forEach((header, index) => {
+      // Create mapping from automatic header detection
+      // Ensure each field maps to only ONE column (prevent duplicates)
+      const usedColumns = new Set<string>();
+      
+      headers.forEach((header) => {
         const field = mapHeaderToField(header);
-        if (field) {
-          columnIndexes[field] = index;
+        if (field && !finalMapping[field] && !usedColumns.has(header)) {
+          finalMapping[field] = header;
+          usedColumns.add(header);
         }
       });
     }
 
     console.log('Detected headers:', detectedHeaders);
-    console.log('Column mapping:', columnIndexes);
+    console.log('Final mapping:', finalMapping);
 
     // Process sample rows using new mapping function
     const dataLines = lines.slice(headerIndex + 1);
@@ -586,7 +584,7 @@ export function useCSVImport() {
       });
 
       try {
-        const saleData = mapRowToSale(row, customMapping || {});
+        const saleData = mapRowToSale(row, finalMapping);
         if (saleData.client_name && saleData.total_amount) {
           sampleRows.push({
             client_name: saleData.client_name,
@@ -611,7 +609,7 @@ export function useCSVImport() {
       });
 
       try {
-        const saleData = mapRowToSale(row, customMapping || {});
+        const saleData = mapRowToSale(row, finalMapping);
         totalRevenue += saleData.total_amount;
         totalProfit += saleData.gross_profit || 0;
       } catch (error) {
