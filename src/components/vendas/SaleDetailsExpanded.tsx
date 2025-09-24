@@ -96,51 +96,68 @@ export function SaleDetailsExpanded({ sale }: SaleDetailsExpandedProps) {
         </Card>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Produtos */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Produtos da Venda</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {sale.sale_products?.map((product: SaleProductDb) => (
-                <div key={product.id} className="border rounded-lg p-3">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <div className="font-medium">{product.name}</div>
-                      <Badge variant="outline" className="text-xs">{product.type}</Badge>
-                    </div>
+      {/* Produtos da Venda - Layout Horizontal */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Produtos da Venda</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {sale.sale_products?.map((product: SaleProductDb) => {
+            const getProductTypeLabel = (type: string) => {
+              const labels = {
+                'passagem': 'Passagem',
+                'hospedagem': 'Hospedagem', 
+                'seguro': 'Seguro',
+                'outros': 'Outros'
+              };
+              return labels[type] || labels['outros'];
+            };
+
+            return (
+              <Card key={product.id} className="p-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Badge 
+                      variant="secondary"
+                      className={`bg-product-${product.type} text-product-${product.type}-foreground border-0`}
+                    >
+                      {getProductTypeLabel(product.type)}
+                    </Badge>
                     <div className="text-right">
-                      <div className="font-bold">{formatCurrency(Number(product.price))}</div>
-                      <div className="text-sm text-muted-foreground">Qtd: {product.quantity}</div>
+                      <div className="font-bold text-lg">{formatCurrency(Number(product.price))}</div>
+                      {product.quantity > 1 && (
+                        <div className="text-sm text-muted-foreground">Qtd: {product.quantity}</div>
+                      )}
                     </div>
                   </div>
+
                   {product.details && (
                     <div className="text-sm text-muted-foreground">{product.details}</div>
                   )}
+
                   {product.origin && product.destination && (
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm font-medium">
                       {product.origin} → {product.destination}
                     </div>
                   )}
+
                   {product.departure_date && (
                     <div className="text-sm text-muted-foreground">
-                      Partida: {formatDate(product.departure_date)}
-                      {product.return_date && ` • Retorno: ${formatDate(product.return_date)}`}
+                      <div>Partida: {formatDate(product.departure_date)}</div>
+                      {product.return_date && (
+                        <div>Retorno: {formatDate(product.return_date)}</div>
+                      )}
                     </div>
                   )}
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
 
-        {/* Controle de Parcelas */}
+      {/* Controle de Parcelas - Layout Vertical */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Controle de Parcelas</h3>
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Controle de Parcelas</CardTitle>
-          </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {installments.map((installment) => (

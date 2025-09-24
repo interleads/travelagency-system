@@ -233,10 +233,10 @@ export function SalesHistoryTable() {
               <TableHeader>
                 <TableRow className="bg-muted/50">
                   <TableHead className="w-12"></TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Produtos</TableHead>
-                  <TableHead>Pagamento</TableHead>
+                  <TableHead className="text-center">Data</TableHead>
+                  <TableHead className="text-center">Cliente</TableHead>
+                  <TableHead className="text-center">Produtos</TableHead>
+                  <TableHead className="text-center">Pagamento</TableHead>
                   <TableHead className="text-center">Status</TableHead>
                   <TableHead className="text-right">Total</TableHead>
                   <TableHead className="w-12"></TableHead>
