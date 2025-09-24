@@ -6,6 +6,30 @@ import { DateRange } from "@/components/shared/useDateRangeFilter";
 // Re-export SaleProduct for convenience
 export type { SaleProduct };
 
+export interface SaleProductDb {
+  id: string;
+  sale_id: string;
+  type: string;
+  name: string;
+  quantity: number;
+  price: number;
+  details?: string;
+  airline?: string;
+  passengers?: string;
+  origin?: string;
+  destination?: string;
+  departure_date?: string;
+  return_date?: string;
+  miles?: number;
+  miles_cost?: number;
+  checkin_date?: string;
+  checkout_date?: string;
+  vehicle_category?: string;
+  rental_period?: string;
+  coverage_type?: string;
+  created_at: string;
+}
+
 export interface Sale {
   id: string;
   client_name: string;
@@ -19,6 +43,7 @@ export interface Sale {
   created_at: string;
   updated_at: string;
   suppliers?: { name: string };
+  sale_products?: SaleProductDb[];
 }
 
 export interface SaleInput {
@@ -41,7 +66,8 @@ export const useSales = (dateRange?: DateRange) => {
         .from("sales")
         .select(`
           *,
-          suppliers (name)
+          suppliers (name),
+          sale_products (*)
         `);
 
       // Apply date filter if dateRange is provided
@@ -149,6 +175,56 @@ export const useCreateSale = () => {
       queryClient.invalidateQueries({ queryKey: ["sales"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       queryClient.invalidateQueries({ queryKey: ["miles_inventory"] });
+    },
+  });
+};
+
+export const useUpdateSale = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: { id: string } & Partial<SaleInput>) => {
+      const { data, error } = await supabase
+        .from("sales")
+        .update({
+          client_name: updates.client_name,
+          payment_method: updates.payment_method,
+          installments: updates.installments,
+          total_amount: updates.total_amount,
+          miles_used: updates.miles_used,
+          miles_cost: updates.miles_cost,
+          supplier_id: updates.supplier_id,
+          gross_profit: updates.gross_profit
+        })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
+    },
+  });
+};
+
+export const useDeleteSale = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (saleId: string) => {
+      // Delete sale (cascade will handle sale_products and sale_installments)
+      const { error } = await supabase
+        .from("sales")
+        .delete()
+        .eq("id", saleId);
+
+      if (error) throw error;
+      return saleId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["installments"] });
     },
   });
 };
