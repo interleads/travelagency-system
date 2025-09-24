@@ -36,87 +36,70 @@ const normalizeText = (text: string): string => {
 
 // Robust column mapping with exact synonyms for each field
 const FIELD_SYNONYMS: Record<string, string[]> = {
-  sale_date: [
-    'DATA DA VENDA', 
-    'DATA VENDA',
-    'DATA DE VENDA'
-  ],
-  client_name: [
-    'PAX', 
-    'CLIENTE', 
-    'NOME DO PASSAGEIRO',
-    'PASSAGEIRO'
-  ],
-  total_amount: [
-    'FATURAMENTO', 
-    'VALOR', 
-    'VALOR TOTAL',
-    'RECEITA'
-  ],
-  gross_profit: [
-    'LUCRO',
-    'MARGEM',
-    'PROFIT'
-  ],
-  payment_method: [
-    'PGTO', 
-    'PAGAMENTO', 
-    'FORMA DE PAGAMENTO',
-    'METODO DE PAGAMENTO',
-    'TIPO DE PAGAMENTO'
-  ],
-  status: [
-    'STATUS',
-    'SITUACAO',
-    'SITUAÇÃO'
-  ],
-  route: [
-    'TRECHO', 
-    'ROTA',
-    'TRAJETO'
-  ],
-  airline: [
-    'CIA', 
-    'CIA AÉREA', 
-    'CIA AEREA', 
-    'COMPANHIA',
-    'COMPANHIA AEREA'
-  ],
-  supplier: [
-    'CONTA USADA', 
-    'FORNECEDOR',
-    'SUPPLIER'
-  ],
-  miles_qty: [
-    'QTD MILHAS', 
-    'MILHAS',
-    'QUANTIDADE MILHAS'
-  ],
-  cost: [
-    'CUSTO', 
-    'CUSTO (K)',
-    'CUSTO K'
-  ],
-  tx_emb: [
-    'TX EMB', 
-    'TX DE EMBARQUE', 
-    'TX EMBARQUE',
-    'TAXA EMBARQUE'
-  ],
-  card_tax: [
-    'CARTÃO TX', 
-    'CARTAO TX', 
-    'TAXA CARTÃO', 
-    'TAXA CARTAO',
-    'TX CARTAO'
-  ],
-  description: [
-    'DESCRIÇÃO', 
-    'DESCRICAO', 
-    'OBS', 
-    'OBSERVAÇÃO', 
-    'OBSERVACAO'
-  ]
+  // Dados da Venda Principal
+  sale_date: ['DATA DA VENDA', 'DATA VENDA', 'DATA DE VENDA', 'DATA'],
+  client_name: ['PAX', 'CLIENTE', 'NOME DO PASSAGEIRO', 'PASSAGEIRO', 'NOME'],
+  total_amount: ['FATURAMENTO', 'VALOR', 'VALOR TOTAL', 'RECEITA', 'PRECO', 'PREÇO'],
+  payment_method: ['PGTO', 'PAGAMENTO', 'FORMA DE PAGAMENTO', 'METODO DE PAGAMENTO', 'TIPO DE PAGAMENTO'],
+  installments: ['PARCELAS', 'PRESTACOES', 'PRESTAÇÕES'],
+  gross_profit: ['LUCRO', 'MARGEM', 'PROFIT'],
+  phone: ['TELEFONE', 'FONE', 'CELULAR'],
+  notes: ['OBSERVACOES', 'OBSERVAÇÕES', 'OBS', 'NOTAS'],
+  supplier: ['CONTA USADA', 'FORNECEDOR', 'SUPPLIER'],
+  has_anticipation: ['ANTECIPACAO', 'ANTECIPAÇÃO', 'TEM ANTECIPACAO'],
+  anticipation_date: ['DATA ANTECIPACAO', 'DATA ANTECIPAÇÃO'],
+  
+  // Dados Gerais do Produto  
+  product_type: ['TIPO', 'TIPO PRODUTO', 'CATEGORIA'],
+  quantity: ['QTD', 'QUANTIDADE'],
+  price: ['PRECO', 'PREÇO', 'VALOR UNITARIO', 'VALOR UNITÁRIO'],
+  cost: ['CUSTO', 'CUSTO (K)', 'CUSTO K'],
+  details: ['DETALHES', 'DESCRICAO', 'DESCRIÇÃO'],
+  
+  // Dados de Passagem Aérea
+  ticket_type: ['TIPO PASSAGEM', 'TIPO TICKET'],
+  airline: ['CIA', 'CIA AÉREA', 'CIA AEREA', 'COMPANHIA', 'COMPANHIA AEREA'],
+  adults: ['ADULTOS', 'ADT'],
+  children: ['CRIANCAS', 'CRIANÇAS', 'CHD'],
+  origin: ['ORIGEM', 'PARTIDA', 'FROM'],
+  destination: ['DESTINO', 'CHEGADA', 'TO'],
+  departure_date: ['DATA IDA', 'DATA PARTIDA', 'TRECHO 1', 'TRECHO1'],
+  return_date: ['DATA VOLTA', 'DATA RETORNO', 'TRECHO 2', 'TRECHO2'],
+  tax_value: ['TX EMB', 'TX DE EMBARQUE', 'TX EMBARQUE', 'TAXA EMBARQUE', 'TAXAS'],
+  card_taxes: ['CARTÃO TX', 'CARTAO TX', 'TAXA CARTÃO', 'TAXA CARTAO', 'TX CARTAO'],
+  miles_qty: ['QTD MILHAS', 'MILHAS', 'QUANTIDADE MILHAS'],
+  miles_cost_per_thousand: ['CUSTO MIL', 'CUSTO 1K', 'CUSTO POR 1000'],
+  locator: ['LOCALIZADOR', 'CODIGO', 'CÓDIGO', 'PNR'],
+  
+  // Dados de Hotel
+  checkin_date: ['CHECK IN', 'CHECKIN', 'DATA CHECKIN'],
+  checkout_date: ['CHECK OUT', 'CHECKOUT', 'DATA CHECKOUT'],
+  
+  // Dados de Veículo
+  vehicle_category: ['CATEGORIA VEICULO', 'CATEGORIA VEÍCULO', 'TIPO CARRO'],
+  rental_period: ['PERIODO LOCACAO', 'PERÍODO LOCAÇÃO', 'PERIODO'],
+  
+  // Dados de Seguro
+  coverage_type: ['TIPO COBERTURA', 'COBERTURA'],
+  
+  // Dados de Transfer
+  transfer_origin: ['ORIGEM TRANSFER', 'ORIGEM TRANSLADO'],
+  transfer_destination: ['DESTINO TRANSFER', 'DESTINO TRANSLADO'],
+  transfer_datetime: ['DATA TRANSFER', 'DATA TRANSLADO', 'HORA TRANSFER'],
+  vehicle_type: ['TIPO VEICULO', 'TIPO VEÍCULO'],
+  
+  // Dados de Passeios
+  tour_location: ['LOCAL PASSEIO', 'LOCAL TOUR'],
+  tour_date: ['DATA PASSEIO', 'DATA TOUR'],
+  tour_duration: ['DURACAO', 'DURAÇÃO', 'TEMPO'],
+  tour_people_count: ['NUMERO PESSOAS', 'NÚMERO PESSOAS', 'QTD PESSOAS'],
+  
+  // Campos legados para compatibilidade
+  status: ['STATUS', 'SITUACAO', 'SITUAÇÃO'],
+  route: ['TRECHO', 'ROTA', 'TRAJETO'],
+  tx_emb: ['TX EMB', 'TX DE EMBARQUE', 'TX EMBARQUE', 'TAXA EMBARQUE'],
+  card_tax: ['CARTÃO TX', 'CARTAO TX', 'TAXA CARTÃO', 'TAXA CARTAO', 'TX CARTAO'],
+  description: ['DESCRIÇÃO', 'DESCRICAO', 'OBS', 'OBSERVAÇÃO', 'OBSERVACAO']
 };
 
 const parseCSVLine = (line: string, delimiter: ',' | ';' = ','): string[] => {
@@ -263,147 +246,62 @@ interface SaleData {
   client_name: string;
   total_amount: number;
   payment_method: string;
+  installments?: number;
   notes?: string;
+  phone?: string;
   supplier_id?: string;
   gross_profit?: number;
   miles_used?: number;
+  miles_cost?: number;
+  has_anticipation?: boolean;
+  anticipation_date?: string;
+  products: ProductData[];
 }
 
 interface ProductData {
   type: string;
   name: string;
+  quantity: number;
   price: number;
   cost: number;
+  details?: string;
+  // Passagem fields
+  ticketType?: string;
+  airline?: string;
+  adults?: number;
+  children?: number;
   origin?: string;
   destination?: string;
-  airline?: string;
-  quantity: number;
+  trecho1?: string;
+  trecho2?: string;
+  taxValue?: number;
+  cardTaxes?: string;
+  qtdMilhas?: number;
+  custoMil?: number;
+  locator?: string;
+  // Hotel fields  
+  checkin?: string;
+  checkout?: string;
+  // Vehicle fields
+  categoria?: string;
+  periodo?: string;
+  // Insurance fields
+  cobertura?: string;
+  // Transfer fields
+  origem?: string;
+  destino?: string;
+  dataHora?: string;
+  tipoVeiculo?: string;
+  // Tour fields
+  local?: string;
+  dataPasseio?: string;
+  duracao?: string;
+  numeroPessoas?: string;
 }
 
 export function useCSVImport() {
   const [progress, setProgress] = useState(0);
   const queryClient = useQueryClient();
-
-  // Preview CSV data without importing
-  const previewCSV = async (file: File, customMapping?: Record<string, string | null>): Promise<PreviewData> => {
-    const text = await file.text();
-    const { lines, delimiterHint } = preprocessCSVContent(text);
-
-    if (lines.length < 2) {
-      throw new Error('Arquivo CSV deve ter cabeçalho e pelo menos uma linha de dados');
-    }
-
-    // Detect delimiter and header row
-    const delimiter = detectDelimiter(lines, delimiterHint);
-    const headerIndex = findHeaderIndex(lines, delimiter);
-    const headerLine = lines[headerIndex];
-    const headers = parseCSVLine(headerLine, delimiter);
-    const detectedHeaders = headers.filter(h => h.trim() !== '');
-
-    // Create column index mapping using custom mapping or robust header matching
-    const columnIndexes: Record<string, number> = {};
-    if (customMapping) {
-      // Use custom mapping
-      Object.entries(customMapping).forEach(([field, csvColumn]) => {
-        if (csvColumn) {
-          const index = headers.findIndex(h => h === csvColumn);
-          if (index !== -1) {
-            columnIndexes[field] = index;
-          }
-        }
-      });
-    } else {
-      // Use automatic header matching
-      headers.forEach((header, index) => {
-        const field = mapHeaderToField(header);
-        if (field) {
-          columnIndexes[field] = index;
-        }
-      });
-    }
-
-    console.log('Detected headers:', detectedHeaders);
-    console.log('Column mapping:', columnIndexes);
-
-    // Process sample rows
-    const dataLines = lines.slice(headerIndex + 1);
-    let totalRevenue = 0;
-    let totalProfit = 0;
-    const sampleRows: PreviewData['sampleRows'] = [];
-
-    for (let i = 0; i < Math.min(5, dataLines.length); i++) {
-      const columns = parseCSVLine(dataLines[i], delimiter);
-      const clientName = columns[columnIndexes.client_name] || '';
-      const revenueStr = columns[columnIndexes.total_amount] || '';
-      const profitStr = columns[columnIndexes.gross_profit] || '';
-      const paymentMethod = columns[columnIndexes.payment_method] || '';
-      const status = columns[columnIndexes.status] || '';
-      const saleDateStr = columns[columnIndexes.sale_date] || '';
-      const parsedSaleDate = parseDate(saleDateStr) || saleDateStr;
-
-      if (clientName && revenueStr) {
-        const revenue = parseNumber(revenueStr);
-        const profit = parseNumber(profitStr);
-        sampleRows.push({
-          client_name: clientName,
-          revenue,
-          profit,
-          payment_method: paymentMethod,
-          status,
-          sale_date: parsedSaleDate
-        });
-      }
-    }
-
-    // Calculate totals for all rows
-    for (let i = 0; i < dataLines.length; i++) {
-      const columns = parseCSVLine(dataLines[i], delimiter);
-      const revenueStr = columns[columnIndexes.total_amount] || '';
-      const profitStr = columns[columnIndexes.gross_profit] || '';
-      if (revenueStr) {
-        totalRevenue += parseNumber(revenueStr);
-        totalProfit += parseNumber(profitStr);
-      }
-    }
-
-    return {
-      totalRevenue,
-      totalProfit,
-      sampleRows,
-      detectedHeaders,
-      rowCount: dataLines.length
-    };
-  };
-
-// Clear all imported sales and related records
-const clearImports = async (): Promise<void> => {
-  // Delete child records first to avoid FK issues
-  const [prodRes, instRes] = await Promise.all([
-    supabase.from('sale_products').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
-    supabase.from('sale_installments').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-  ]);
-
-  // Miles transactions: delete only those linked to sales
-  const { error: milesTxError } = await supabase
-    .from('miles_transactions')
-    .delete()
-    .not('sale_id', 'is', null);
-  if (milesTxError) {
-    throw new Error(`Erro ao limpar transações de milhas: ${milesTxError.message}`);
-  }
-
-  if (prodRes.error) throw new Error(`Erro ao limpar produtos: ${prodRes.error.message}`);
-  if (instRes.error) throw new Error(`Erro ao limpar parcelas: ${instRes.error.message}`);
-
-  // Finally delete sales
-  const { error: salesError } = await supabase
-    .from('sales')
-    .delete()
-    .neq('id', '00000000-0000-0000-0000-000000000000');
-  if (salesError) {
-    throw new Error(`Erro ao limpar vendas: ${salesError.message}`);
-  }
-};
 
   const parseDate = (dateStr: string): string | null => {
     if (!dateStr || dateStr.trim() === '') return null;
@@ -502,6 +400,264 @@ const clearImports = async (): Promise<void> => {
     return method;
   };
 
+  // Map CSV row to sale data using column mapping
+  const mapRowToSale = (row: any, mapping: Record<string, string | null>): SaleData => {
+    const getValue = (field: string) => {
+      const csvColumn = mapping[field];
+      return csvColumn ? (row[csvColumn] || '').toString().trim() : '';
+    };
+
+    const getNumericValue = (field: string) => {
+      const value = getValue(field);
+      return value ? parseNumber(value) : 0;
+    };
+
+    const getDateValue = (field: string) => {
+      const value = getValue(field);
+      return value ? parseDate(value) : null;
+    };
+
+    // Extract all mapped values
+    const sale_date = getValue('sale_date');
+    const client_name = getValue('client_name') || 'Cliente Importado';
+    const total_amount = getNumericValue('total_amount');
+    const payment_method = getValue('payment_method') || 'Não informado';
+    const installments = getNumericValue('installments') || 1;
+    const gross_profit = getNumericValue('gross_profit') || null;
+    const phone = getValue('phone');
+    const notes = getValue('notes');
+    const supplier = getValue('supplier');
+
+    // Product data
+    const product_type = getValue('product_type') || 'outros';
+    const quantity = getNumericValue('quantity') || 1;
+    const price = getNumericValue('price') || total_amount;
+    const cost = getNumericValue('cost');
+    const details = getValue('details');
+
+    // Flight data
+    const ticket_type = getValue('ticket_type');
+    const airline = getValue('airline');
+    const adults = getNumericValue('adults');
+    const children = getNumericValue('children');
+    const origin = getValue('origin');
+    const destination = getValue('destination');
+    const departure_date = getDateValue('departure_date');
+    const return_date = getDateValue('return_date');
+    const tax_value = getNumericValue('tax_value');
+    const card_taxes = getValue('card_taxes');
+    const miles_qty = getNumericValue('miles_qty');
+    const miles_cost_per_thousand = getNumericValue('miles_cost_per_thousand');
+    const locator = getValue('locator');
+
+    // Hotel data
+    const checkin_date = getDateValue('checkin_date');
+    const checkout_date = getDateValue('checkout_date');
+
+    // Vehicle data
+    const vehicle_category = getValue('vehicle_category');
+    const rental_period = getValue('rental_period');
+
+    // Insurance data
+    const coverage_type = getValue('coverage_type');
+
+    // Transfer data
+    const transfer_origin = getValue('transfer_origin');
+    const transfer_destination = getValue('transfer_destination');
+    const transfer_datetime = getValue('transfer_datetime');
+    const vehicle_type = getValue('vehicle_type');
+
+    // Tour data
+    const tour_location = getValue('tour_location');
+    const tour_date = getDateValue('tour_date');
+    const tour_duration = getValue('tour_duration');
+    const tour_people_count = getNumericValue('tour_people_count');
+
+    // Build product based on detected type
+    const product: ProductData = {
+      type: product_type,
+      name: details || `${airline || ''} ${origin || ''}-${destination || ''}`.trim() || 'Produto Importado',
+      quantity: quantity,
+      price: price,
+      cost: cost,
+      details: details
+    };
+
+    // Add type-specific fields
+    if (product_type === 'passagem' || airline || origin || destination) {
+      product.ticketType = ticket_type === 'tarifada' ? 'tarifada' : 'milhas';
+      product.airline = airline;
+      product.adults = adults || 1;
+      product.children = children || 0;
+      product.origin = origin;
+      product.destination = destination;
+      product.trecho1 = departure_date;
+      product.trecho2 = return_date;
+      product.taxValue = tax_value;
+      product.cardTaxes = card_taxes;
+      product.qtdMilhas = miles_qty;
+      product.custoMil = miles_cost_per_thousand;
+      product.locator = locator;
+    } else if (product_type === 'hotel' || checkin_date || checkout_date) {
+      product.checkin = checkin_date;
+      product.checkout = checkout_date;
+    } else if (product_type === 'veiculo' || vehicle_category) {
+      product.categoria = vehicle_category;
+      product.periodo = rental_period;
+    } else if (product_type === 'seguro' || coverage_type) {
+      product.cobertura = coverage_type;
+    } else if (product_type === 'transfer' || transfer_origin) {
+      product.origem = transfer_origin;
+      product.destino = transfer_destination;
+      product.dataHora = transfer_datetime;
+      product.tipoVeiculo = vehicle_type;
+    } else if (product_type === 'passeios' || tour_location) {
+      product.local = tour_location;
+      product.dataPasseio = tour_date;
+      product.duracao = tour_duration;
+      product.numeroPessoas = tour_people_count?.toString();
+    }
+
+    return {
+      sale_date: sale_date ? parseDate(sale_date) || new Date().toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      client_name: client_name,
+      total_amount: total_amount,
+      payment_method: normalizePaymentMethod(payment_method),
+      installments: installments,
+      gross_profit: gross_profit,
+      notes: notes,
+      phone: phone,
+      products: [product]
+    };
+  };
+
+  // Preview CSV data without importing
+  const previewCSV = async (file: File, customMapping?: Record<string, string | null>): Promise<PreviewData> => {
+    const text = await file.text();
+    const { lines, delimiterHint } = preprocessCSVContent(text);
+
+    if (lines.length < 2) {
+      throw new Error('Arquivo CSV deve ter cabeçalho e pelo menos uma linha de dados');
+    }
+
+    // Detect delimiter and header row
+    const delimiter = detectDelimiter(lines, delimiterHint);
+    const headerIndex = findHeaderIndex(lines, delimiter);
+    const headerLine = lines[headerIndex];
+    const headers = parseCSVLine(headerLine, delimiter);
+    const detectedHeaders = headers.filter(h => h.trim() !== '');
+
+    // Create column index mapping using custom mapping or robust header matching
+    const columnIndexes: Record<string, number> = {};
+    if (customMapping) {
+      // Use custom mapping
+      Object.entries(customMapping).forEach(([field, csvColumn]) => {
+        if (csvColumn) {
+          const index = headers.findIndex(h => h === csvColumn);
+          if (index !== -1) {
+            columnIndexes[field] = index;
+          }
+        }
+      });
+    } else {
+      // Use automatic header matching
+      headers.forEach((header, index) => {
+        const field = mapHeaderToField(header);
+        if (field) {
+          columnIndexes[field] = index;
+        }
+      });
+    }
+
+    console.log('Detected headers:', detectedHeaders);
+    console.log('Column mapping:', columnIndexes);
+
+    // Process sample rows using new mapping function
+    const dataLines = lines.slice(headerIndex + 1);
+    let totalRevenue = 0;
+    let totalProfit = 0;
+    const sampleRows: PreviewData['sampleRows'] = [];
+
+    for (let i = 0; i < Math.min(5, dataLines.length); i++) {
+      const columns = parseCSVLine(dataLines[i], delimiter);
+      const row: any = {};
+      headers.forEach((header, index) => {
+        row[header] = columns[index] || '';
+      });
+
+      try {
+        const saleData = mapRowToSale(row, customMapping || {});
+        if (saleData.client_name && saleData.total_amount) {
+          sampleRows.push({
+            client_name: saleData.client_name,
+            revenue: saleData.total_amount,
+            profit: saleData.gross_profit || 0,
+            payment_method: saleData.payment_method,
+            status: 'Importado',
+            sale_date: saleData.sale_date
+          });
+        }
+      } catch (error) {
+        console.warn('Error processing sample row:', error);
+      }
+    }
+
+    // Calculate totals for all rows
+    for (let i = 0; i < dataLines.length; i++) {
+      const columns = parseCSVLine(dataLines[i], delimiter);
+      const row: any = {};
+      headers.forEach((header, index) => {
+        row[header] = columns[index] || '';
+      });
+
+      try {
+        const saleData = mapRowToSale(row, customMapping || {});
+        totalRevenue += saleData.total_amount;
+        totalProfit += saleData.gross_profit || 0;
+      } catch (error) {
+        console.warn('Error processing row for totals:', error);
+      }
+    }
+
+    return {
+      totalRevenue,
+      totalProfit,
+      sampleRows,
+      detectedHeaders,
+      rowCount: dataLines.length
+    };
+  };
+
+  // Clear all imported sales and related records
+  const clearImports = async (): Promise<void> => {
+    // Delete child records first to avoid FK issues
+    const [prodRes, instRes] = await Promise.all([
+      supabase.from('sale_products').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+      supabase.from('sale_installments').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    ]);
+
+    // Miles transactions: delete only those linked to sales
+    const { error: milesTxError } = await supabase
+      .from('miles_transactions')
+      .delete()
+      .not('sale_id', 'is', null);
+    if (milesTxError) {
+      throw new Error(`Erro ao limpar transações de milhas: ${milesTxError.message}`);
+    }
+
+    if (prodRes.error) throw new Error(`Erro ao limpar produtos: ${prodRes.error.message}`);
+    if (instRes.error) throw new Error(`Erro ao limpar parcelas: ${instRes.error.message}`);
+
+    // Finally delete sales
+    const { error: salesError } = await supabase
+      .from('sales')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+    if (salesError) {
+      throw new Error(`Erro ao limpar vendas: ${salesError.message}`);
+    }
+  };
+
   const splitRoute = (route: string): { origin?: string; destination?: string } => {
     if (!route || route.trim() === '') return {};
     
@@ -571,29 +727,7 @@ const clearImports = async (): Promise<void> => {
       const headerIndex = findHeaderIndex(lines, delimiter);
       const headers = parseCSVLine(lines[headerIndex], delimiter);
       
-      // Create column index mapping using custom mapping or robust header matching
-      const columnIndexes: Record<string, number> = {};
-      if (customMapping) {
-        // Use custom mapping
-        Object.entries(customMapping).forEach(([field, csvColumn]) => {
-          if (csvColumn) {
-            const index = headers.findIndex(h => h === csvColumn);
-            if (index !== -1) {
-              columnIndexes[field] = index;
-            }
-          }
-        });
-      } else {
-        // Use automatic header matching
-        headers.forEach((header, index) => {
-          const field = mapHeaderToField(header);
-          if (field) {
-            columnIndexes[field] = index;
-          }
-        });
-      }
-
-      console.log('Detected delimiter:', delimiter, 'headerIndex:', headerIndex, 'column mapping:', columnIndexes);
+      console.log('Detected delimiter:', delimiter, 'headerIndex:', headerIndex);
 
       const dataLines = lines.slice(headerIndex + 1);
       const dataLineNumbers = originalLineNumbers.slice(headerIndex + 1);
@@ -606,85 +740,58 @@ const clearImports = async (): Promise<void> => {
           setProgress(Math.round((i / dataLines.length) * 100));
 
           const columns = parseCSVLine(dataLines[i], delimiter);
-
-          // Extract data using robust header-based mapping
-          const clientName = columns[columnIndexes.client_name] || '';
-          const dateStr = columns[columnIndexes.sale_date] || '';
-          const route = columns[columnIndexes.route] || '';
-          const airline = columns[columnIndexes.airline] || '';
-          const supplierName = columns[columnIndexes.supplier] || '';
-          const txEmbStr = columns[columnIndexes.tx_emb] || '';
-          const cardTaxStr = columns[columnIndexes.card_tax] || '';
-          const milesQtyStr = columns[columnIndexes.miles_qty] || '';
-          const costStr = columns[columnIndexes.cost] || '';
-          const revenueStr = columns[columnIndexes.total_amount] || '';
-          const profitStr = columns[columnIndexes.gross_profit] || '';
-          const paymentMethod = columns[columnIndexes.payment_method] || '';
-          const status = columns[columnIndexes.status] || '';
-          const description = columns[columnIndexes.description] || '';
-
-          console.log(`Linha ${rowNumber}:`, {
-            clientName,
-            paymentMethod,
-            status,
-            dateStr,
-            revenueStr,
-            profitStr,
-            airline
+          const row: any = {};
+          headers.forEach((header, index) => {
+            row[header] = columns[index] || '';
           });
 
-          // Validações básicas
-          if (!clientName || !revenueStr) {
-            result.errors.push(`Linha ${rowNumber}: Dados obrigatórios faltando (PAX ou FATURAMENTO)`);
+          // Use the new mapping function
+          const saleData = mapRowToSale(row, customMapping || {});
+
+          // Basic validations
+          if (!saleData.client_name || saleData.total_amount <= 0) {
+            result.errors.push(`Linha ${rowNumber}: Dados obrigatórios faltando (Cliente ou Valor)`);
             continue;
           }
 
-          const parsedDate = parseDate(dateStr);
-          const revenue = parseNumber(revenueStr);
-          const cost = parseNumber(costStr);
-          const txEmb = parseNumber(txEmbStr);
-          const cardTax = parseNumber(cardTaxStr);
-          const milesUsed = milesQtyStr ? parseNumber(milesQtyStr) * 1000 : 0;
-          const grossProfit = profitStr ? parseNumber(profitStr) : (revenue - cost - txEmb - cardTax);
-
-          if (revenue <= 0) {
-            result.errors.push(`Linha ${rowNumber}: Faturamento inválido`);
-            continue;
-          }
-
-          // Não usar data atual se a data estiver vazia - pular a linha
-          if (!parsedDate) {
-            result.errors.push(`Linha ${rowNumber}: Data da venda é obrigatória`);
-            continue;
-          }
-
-          // Criar ou buscar fornecedor
+          // Create or get supplier if provided
           let supplierId: string | null = null;
+          const supplierName = saleData.products[0]?.airline || '';
           if (supplierName && supplierName.trim() !== '') {
-            supplierId = await createOrGetSupplier(supplierName, airline);
+            supplierId = await createOrGetSupplier(supplierName, supplierName);
             if (supplierId && !createdSuppliers.has(supplierName)) {
               createdSuppliers.add(supplierName);
               result.suppliers++;
             }
           }
 
-          // Preparar dados da venda
-          const saleData: SaleData = {
-            sale_date: parsedDate,
-            client_name: clientName.trim(),
-            total_amount: revenue,
-            payment_method: normalizePaymentMethod(paymentMethod, status),
-            notes: description && description.trim() !== '' ? description.trim() : undefined,
+          // Insert sale using useSales hook structure
+          const saleInput = {
+            client_name: saleData.client_name,
+            sale_date: saleData.sale_date,
+            products: saleData.products,
+            payment_method: saleData.payment_method,
+            installments: saleData.installments || 1,
+            total_amount: saleData.total_amount,
+            gross_profit: saleData.gross_profit,
             supplier_id: supplierId,
-            gross_profit: grossProfit,
-            miles_used: milesUsed > 0 ? milesUsed : undefined
+            notes: saleData.notes
           };
 
-          // Inserir venda
+          // Insert sale
           const { data: sale, error: saleError } = await supabase
-            .from('sales')
-            .insert(saleData)
-            .select('id')
+            .from("sales")
+            .insert([{
+              client_name: saleInput.client_name,
+              payment_method: saleInput.payment_method,
+              installments: saleInput.installments,
+              total_amount: saleInput.total_amount,
+              sale_date: saleInput.sale_date,
+              supplier_id: saleInput.supplier_id,
+              gross_profit: saleInput.gross_profit,
+              notes: saleInput.notes
+            }])
+            .select()
             .single();
 
           if (saleError) {
@@ -692,48 +799,66 @@ const clearImports = async (): Promise<void> => {
             continue;
           }
 
-          // Create installments based on status
-          const saleStatus = status && status.trim().toLowerCase() === 'pago' ? 'paid' : 'pending';
-          const { error: installmentError } = await supabase
-            .from('sale_installments')
-            .insert({
-              sale_id: sale.id,
-              installment_number: 1,
-              due_date: parsedDate,
-              amount: revenue,
-              status: saleStatus,
-              paid_date: saleStatus === 'paid' ? parsedDate : null
-            });
+          // Insert products - map the form fields to database fields
+          const productsForDb = saleInput.products.map(product => ({
+            sale_id: sale.id,
+            type: product.type || 'outros',
+            name: product.name,
+            quantity: product.quantity,
+            price: product.price,
+            cost: product.cost || 0,
+            details: product.details || '',
+            // Map form fields to database fields
+            airline: product.airline,
+            passengers: product.adults && product.children ? `${product.adults} adultos, ${product.children} crianças` : '',
+            origin: product.origin,
+            destination: product.destination,
+            // Convert empty strings to null for date fields
+            departure_date: product.trecho1 || null,
+            return_date: product.trecho2 || null,
+            miles: product.qtdMilhas,
+            miles_cost: product.custoMil,
+            checkin_date: product.checkin || null,
+            checkout_date: product.checkout || null,
+            vehicle_category: product.categoria,
+            rental_period: product.periodo,
+            coverage_type: product.cobertura
+          }));
 
-          if (installmentError) {
-            console.warn(`Erro ao criar parcela para venda ${sale.id}:`, installmentError);
+          const { error: productsError } = await supabase
+            .from("sale_products")
+            .insert(productsForDb);
+
+          if (productsError) {
+            result.errors.push(`Linha ${rowNumber}: Erro ao criar produto - ${productsError.message}`);
+            continue;
           }
 
-          // Preparar dados do produto
-          const { origin, destination } = splitRoute(route);
-          const totalProductCost = cost + txEmb + cardTax;
-          const productData: ProductData = {
-            type: 'passagem',
-            name: 'Passagem Aérea',
-            price: revenue,
-            cost: totalProductCost,
-            origin,
-            destination,
-            airline: airline && airline.trim() !== '' ? airline.trim() : undefined,
-            quantity: 1
-          };
-
-          // Inserir produto da venda
-          const { error: productError } = await supabase
-            .from('sale_products')
-            .insert({
-              sale_id: sale.id,
-              ...productData
+          // Insert sale installments
+          if (saleInput.installments >= 1) {
+            const baseDate = saleInput.sale_date ? new Date(saleInput.sale_date) : new Date();
+            const installmentAmount = saleInput.total_amount / saleInput.installments;
+            
+            const installmentsToInsert = Array.from({ length: saleInput.installments }, (_, index) => {
+              const dueDate = new Date(baseDate);
+              dueDate.setMonth(dueDate.getMonth() + index);
+              
+              return {
+                sale_id: sale.id,
+                installment_number: index + 1,
+                due_date: dueDate.toISOString().split('T')[0],
+                amount: installmentAmount,
+                status: 'pending'
+              };
             });
 
-          if (productError) {
-            result.errors.push(`Linha ${rowNumber}: Erro ao criar produto - ${productError.message}`);
-            continue;
+            const { error: installmentsError } = await supabase
+              .from("sale_installments")
+              .insert(installmentsToInsert);
+
+            if (installmentsError) {
+              console.warn(`Erro ao criar parcelas para venda ${sale.id}:`, installmentsError);
+            }
           }
 
           result.success++;
