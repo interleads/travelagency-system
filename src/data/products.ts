@@ -9,6 +9,7 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
   { id: 2, name: "Cartão de Débito" },
   { id: 3, name: "PIX" },
   { id: 4, name: "Dinheiro" },
-  { id: 5, name: "Transferência Bancária" }
+  { id: 5, name: "Transferência Bancária" },
+  { id: 6, name: "Boleto Bancário" }
 ];
 

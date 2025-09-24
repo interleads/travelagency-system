@@ -60,69 +60,96 @@ const VendasForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-2 max-w-3xl mx-auto">
-      <Card className="mb-2">
-        <CardHeader className="pb-2">
-          <CardTitle>Dados do Cliente</CardTitle>
+    <div className="space-y-4 max-w-4xl mx-auto p-4">
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg">Dados do Cliente</CardTitle>
         </CardHeader>
-        <CardContent className="pt-2 pb-2">
+        <CardContent>
           <Label htmlFor="client">Nome do Cliente</Label>
-          <Input id="client" value={client} onChange={e => setClient(e.target.value)} placeholder="Digite o nome do cliente" />
+          <Input 
+            id="client" 
+            value={client} 
+            onChange={e => setClient(e.target.value)} 
+            placeholder="Digite o nome do cliente"
+            className="mt-1"
+          />
         </CardContent>
       </Card>
-      <Card className="mb-2">
-        <CardHeader className="pb-2">
-          <CardTitle>Produtos / Serviços</CardTitle>
+
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg">Produtos / Serviços</CardTitle>
         </CardHeader>
-        <CardContent className="pt-2 pb-2">
-          <div className="space-y-2">
-            {products.map((product, idx) => (
-              <DynamicProductForm
-                key={idx}
-                value={product}
-                onChange={prod => updateProduct(idx, prod)}
-                onRemove={products.length > 1 ? () => removeProduct(idx) : undefined}
-              />
-            ))}
-            <Button type="button" variant="secondary" onClick={addProduct}>Adicionar Produto</Button>
-          </div>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-3">
+              {products.map((product, idx) => (
+                <DynamicProductForm
+                  key={idx}
+                  value={product}
+                  onChange={prod => updateProduct(idx, prod)}
+                  onRemove={products.length > 1 ? () => removeProduct(idx) : undefined}
+                />
+              ))}
+              <Button type="button" variant="outline" onClick={addProduct} className="w-full">
+                Adicionar Produto
+              </Button>
+            </div>
+          </form>
         </CardContent>
       </Card>
-      <Card className="mb-2">
-        <CardHeader className="pb-2">
-          <CardTitle>Pagamento</CardTitle>
+
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg">Pagamento</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2 pb-2">
-          <div>
-            <Label htmlFor="payment">Método de Pagamento</Label>
-            <select
-              className="w-full mt-1 border rounded-md h-10"
-              id="payment"
-              value={paymentMethod}
-              onChange={e => setPaymentMethod(e.target.value)}
-              required
-            >
-              <option value="">Selecione</option>
-              {PAYMENT_METHODS.map(pm =>
-                <option key={pm.id} value={pm.name}>{pm.name}</option>
-              )}
-            </select>
-          </div>
-          <div>
-            <Label htmlFor="inst">Parcelas</Label>
-            <Input id="inst" type="number" min={1} value={installments} onChange={e => setInstallments(Number(e.target.value))} />
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="payment">Método de Pagamento</Label>
+              <select
+                className="w-full mt-1 border border-input rounded-md h-10 px-3 bg-background"
+                id="payment"
+                value={paymentMethod}
+                onChange={e => setPaymentMethod(e.target.value)}
+                required
+              >
+                <option value="">Selecione</option>
+                {PAYMENT_METHODS.map(pm =>
+                  <option key={pm.id} value={pm.name}>{pm.name}</option>
+                )}
+              </select>
+            </div>
+            {(paymentMethod === "Cartão de Crédito" || paymentMethod === "Boleto Bancário") && (
+              <div>
+                <Label htmlFor="inst">Parcelas</Label>
+                <Input 
+                  id="inst" 
+                  type="number" 
+                  min={1} 
+                  max={12} 
+                  value={installments} 
+                  onChange={e => setInstallments(Number(e.target.value))}
+                  className="mt-1"
+                />
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
+
       <SaleSummary total={total} />
+      
       <Button
         type="submit"
-        className="w-full bg-emerald-600 hover:bg-emerald-700 mt-2"
+        onClick={handleSubmit}
+        className="w-full bg-primary hover:bg-primary/90"
         disabled={createSale.isPending}
       >
         {createSale.isPending ? "Salvando..." : "Registrar Venda"}
       </Button>
-    </form>
+    </div>
   );
 };
 
