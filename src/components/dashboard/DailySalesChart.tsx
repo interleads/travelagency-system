@@ -10,50 +10,73 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { useDashboardDateRange } from "./useDashboardDateRange";
+import { useSales } from "@/hooks/useSales";
 
-// Gera dados de todos dias dos dois anos (para filtrar depois)
-function generateFullSalesData() {
-  const data = [];
-  for (let year = 2023; year <= 2024; year++) {
-    for (let month = 0; month < 12; month++) {
-      const days = new Date(year, month + 1, 0).getDate();
-      for (let day = 1; day <= days; day++) {
-        const dt = new Date(year, month, day);
-        const isWeekend = dt.getDay() === 0 || dt.getDay() === 6;
-        data.push({
-          date: dt,
-          sales: isWeekend ? 0 : Math.floor(Math.random() * 7000) + 1200,
-        });
-      }
+// Agrupa vendas por data e soma o total
+function groupSalesByDate(sales: any[]) {
+  const grouped = sales.reduce((acc, sale) => {
+    // Usa sale_date se disponível, senão created_at
+    const dateKey = sale.sale_date ? 
+      format(parseISO(sale.sale_date), 'yyyy-MM-dd') : 
+      format(new Date(sale.created_at), 'yyyy-MM-dd');
+    
+    if (!acc[dateKey]) {
+      acc[dateKey] = {
+        date: sale.sale_date ? parseISO(sale.sale_date) : new Date(sale.created_at),
+        sales: 0
+      };
     }
-  }
-  return data;
-}
-const allSalesData = generateFullSalesData();
+    acc[dateKey].sales += Number(sale.total_amount);
+    return acc;
+  }, {} as Record<string, { date: Date; sales: number }>);
 
-function isWithin(date, from, to) {
-  if (!from || !to) return true;
-  return date >= from && date <= to;
+  return Object.values(grouped).sort((a: { date: Date; sales: number }, b: { date: Date; sales: number }) => 
+    a.date.getTime() - b.date.getTime()
+  );
 }
 
 export default function DailySalesChart() {
   const { dateRange } = useDashboardDateRange();
+  const { data: sales, isLoading } = useSales(dateRange);
 
-  // Novo filtro: mostra todos dados se from e to indefinidos
   const chartData = React.useMemo(() => {
-    if (!dateRange?.from || !dateRange?.to) {
-      return allSalesData;
+    if (!sales || sales.length === 0) {
+      return [];
     }
-    return allSalesData.filter((d) => isWithin(d.date, dateRange.from, dateRange.to));
-  }, [dateRange]);
+    return groupSalesByDate(sales);
+  }, [sales]);
 
   // Intervalo dinâmico para o eixo X baseado na quantidade de pontos
   const barCount = chartData.length;
   let xAxisInterval: number | "preserveStartEnd" = "preserveStartEnd";
   if (barCount > 60) {
     xAxisInterval = Math.ceil(barCount / 16); // Reduz a quantidade de labels
+  }
+
+  if (isLoading) {
+    return (
+      <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+        <CardContent>
+          <div className="h-72 flex items-center justify-center">
+            <p className="text-gray-500">Carregando dados de vendas...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (chartData.length === 0) {
+    return (
+      <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+        <CardContent>
+          <div className="h-72 flex items-center justify-center">
+            <p className="text-gray-500">Nenhuma venda encontrada no período selecionado</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
