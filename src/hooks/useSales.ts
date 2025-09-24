@@ -149,6 +149,31 @@ export const useCreateSale = () => {
 
       if (productsError) throw productsError;
 
+      // Insert sale installments
+      if (saleData.installments >= 1) {
+        const baseDate = saleData.sale_date ? new Date(saleData.sale_date) : new Date();
+        const installmentAmount = saleData.total_amount / saleData.installments;
+        
+        const installmentsToInsert = Array.from({ length: saleData.installments }, (_, index) => {
+          const dueDate = new Date(baseDate);
+          dueDate.setMonth(dueDate.getMonth() + index);
+          
+          return {
+            sale_id: sale.id,
+            installment_number: index + 1,
+            due_date: dueDate.toISOString().split('T')[0],
+            amount: installmentAmount,
+            status: 'pending'
+          };
+        });
+
+        const { error: installmentsError } = await supabase
+          .from("sale_installments")
+          .insert(installmentsToInsert);
+
+        if (installmentsError) throw installmentsError;
+      }
+
       // Insert financial transaction (revenue)
       const { error: transactionError } = await supabase
         .from("transactions")
@@ -184,6 +209,7 @@ export const useCreateSale = () => {
       queryClient.invalidateQueries({ queryKey: ["sales"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       queryClient.invalidateQueries({ queryKey: ["miles_inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["installments"] });
     },
   });
 };

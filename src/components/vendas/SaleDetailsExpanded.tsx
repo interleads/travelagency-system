@@ -6,6 +6,7 @@ import { CheckCircle, Clock, AlertTriangle } from "lucide-react";
 import { Sale, SaleProductDb } from "@/hooks/useSales";
 import { useInstallments, usePayInstallment } from "@/hooks/useInstallments";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SaleDetailsExpandedProps {
   sale: Sale;
@@ -111,13 +112,21 @@ export function SaleDetailsExpanded({ sale }: SaleDetailsExpandedProps) {
               return labels[type] || labels['outros'];
             };
 
+            // Static class mappings for Tailwind JIT
+            const productClassMap = {
+              'passagem': 'bg-product-passagem text-product-passagem-foreground border-0',
+              'hospedagem': 'bg-product-hospedagem text-product-hospedagem-foreground border-0', 
+              'seguro': 'bg-product-seguro text-product-seguro-foreground border-0',
+              'outros': 'bg-product-outros text-product-outros-foreground border-0'
+            };
+
             return (
               <Card key={product.id} className="p-4">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <Badge 
                       variant="secondary"
-                      className={`bg-product-${product.type} text-product-${product.type}-foreground border-0`}
+                      className={productClassMap[product.type] || productClassMap['outros']}
                     >
                       {getProductTypeLabel(product.type)}
                     </Badge>

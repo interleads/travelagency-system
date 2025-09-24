@@ -25,10 +25,11 @@ import {
 } from "lucide-react";
 import { useSales } from "@/hooks/useSales";
 import { useDateRangeFilter } from "@/components/shared/useDateRangeFilter";
-import { useInstallments } from "@/hooks/useInstallments";
+import { useInstallments, useCreateInstallments } from "@/hooks/useInstallments";
 import { SaleDetailsExpanded } from "./SaleDetailsExpanded";
 import { FullSaleEditDialog } from "./FullSaleEditDialog";
 import { DeleteSaleDialog } from "./DeleteSaleDialog";
+import { supabase } from "@/integrations/supabase/client";
 
 // Component for individual sale row
 function SaleRow({ 
@@ -87,7 +88,14 @@ function SaleRow({
         <TableCell className="text-center">
           <Badge 
             variant="secondary"
-            className={`bg-status-${paymentStatus} text-status-${paymentStatus}-foreground border-0`}
+            className={(() => {
+              const statusClassMap = {
+                'pendente': 'bg-status-pendente text-status-pendente-foreground border-0',
+                'andamento': 'bg-status-andamento text-status-andamento-foreground border-0',
+                'concluido': 'bg-status-concluido text-status-concluido-foreground border-0'
+              };
+              return statusClassMap[paymentStatus] || statusClassMap['pendente'];
+            })()}
           >
             {getStatusLabel(paymentStatus)}
           </Badge>
@@ -135,6 +143,36 @@ export function SalesHistoryTable() {
   const [expandedSales, setExpandedSales] = useState<Set<string>>(new Set());
   const [editingSale, setEditingSale] = useState<any>(null);
   const [deletingSale, setDeletingSale] = useState<any>(null);
+  const createInstallments = useCreateInstallments();
+
+  // Backfill installments for existing sales
+  React.useEffect(() => {
+    const backfillInstallments = async () => {
+      if (sales.length === 0) return;
+      
+      for (const sale of sales) {
+        // Check if sale has installments
+        const { data: existingInstallments } = await supabase
+          .from("sale_installments")
+          .select("id")
+          .eq("sale_id", sale.id)
+          .limit(1);
+          
+        if (!existingInstallments || existingInstallments.length === 0) {
+          // Create missing installments
+          const baseDate = sale.sale_date ? new Date(sale.sale_date) : new Date(sale.created_at);
+          await createInstallments.mutateAsync({
+            saleId: sale.id,
+            installments: sale.installments || 1,
+            totalAmount: Number(sale.total_amount),
+            firstDueDate: baseDate
+          });
+        }
+      }
+    };
+
+    backfillInstallments();
+  }, [sales, createInstallments]);
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('pt-BR', { 
@@ -159,13 +197,22 @@ export function SalesHistoryTable() {
     if (products.length === 0) return <span className="text-muted-foreground">Nenhum produto</span>;
     
     const types = [...new Set(products.map(p => p.type))];
+    
+    // Static class mappings for Tailwind JIT
+    const productClassMap = {
+      'passagem': 'bg-product-passagem text-product-passagem-foreground border-0',
+      'hospedagem': 'bg-product-hospedagem text-product-hospedagem-foreground border-0', 
+      'seguro': 'bg-product-seguro text-product-seguro-foreground border-0',
+      'outros': 'bg-product-outros text-product-outros-foreground border-0'
+    };
+    
     return (
       <div className="flex flex-wrap gap-1 justify-center">
         {types.slice(0, 2).map(type => (
           <Badge 
             key={type} 
             variant="secondary"
-            className={`bg-product-${type} text-product-${type}-foreground border-0`}
+            className={productClassMap[type] || productClassMap['outros']}
           >
             {getProductTypeLabel(type)}
           </Badge>
