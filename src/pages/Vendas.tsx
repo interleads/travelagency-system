@@ -25,53 +25,56 @@ import { DateRangeFilterProvider } from '@/components/shared/useDateRangeFilter'
 const Vendas = () => {
   const { toast } = useToast();
   const [isSaleDialogOpen, setIsSaleDialogOpen] = useState(false);
-
+  const [activeTab, setActiveTab] = useState("historico");
 
   return (
     <DateRangeFilterProvider>
       <DashboardLayout>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-          <div className="flex gap-2">
-            <DateRangeFilter />
-            <Dialog open={isSaleDialogOpen} onOpenChange={setIsSaleDialogOpen}>
-              <DialogTrigger asChild>
-                <Button size="lg" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
-                  <Plus className="h-4 w-4" />
-                  Registrar Nova Venda
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto p-0">
-                <DialogHeader className="bg-gradient-to-r from-primary to-primary/90 text-primary-foreground p-6 rounded-t-lg shadow-lg">
-                  <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-                    <Plus className="h-6 w-6" />
-                    Registrar Nova Venda
-                  </DialogTitle>
-                </DialogHeader>
-                <div className="p-4">
-                  <VendasForm onSaleSuccess={() => setIsSaleDialogOpen(false)} />
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
+          <DateRangeFilter />
         </div>
       
-      <SalesOverviewCards />
-      
-      <Tabs defaultValue="historico" className="mt-6">
-        <TabsList className="grid w-full grid-cols-3 mb-8">
-          <TabsTrigger value="historico" className="flex items-center gap-2">
-            <BarChart2 size={16} />
-            Histórico de Vendas
-          </TabsTrigger>
-          <TabsTrigger value="crm" className="flex items-center gap-2">
-            <Users size={16} />
-            CRM
-          </TabsTrigger>
-          <TabsTrigger value="relatorios" className="flex items-center gap-2">
-            <FileText size={16} />
-            Relatórios
-          </TabsTrigger>
-        </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <TabsList className="grid grid-cols-3 w-full md:w-auto">
+              <TabsTrigger value="historico" className="flex items-center gap-2">
+                <BarChart2 size={16} />
+                Histórico de Vendas
+              </TabsTrigger>
+              <TabsTrigger value="crm" className="flex items-center gap-2">
+                <Users size={16} />
+                CRM
+              </TabsTrigger>
+              <TabsTrigger value="relatorios" className="flex items-center gap-2">
+                <FileText size={16} />
+                Relatórios
+              </TabsTrigger>
+            </TabsList>
+            
+            {activeTab === "historico" && (
+              <Dialog open={isSaleDialogOpen} onOpenChange={setIsSaleDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="lg" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
+                    <Plus className="h-4 w-4" />
+                    Registrar Nova Venda
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto p-0">
+                  <DialogHeader className="bg-gradient-to-r from-primary to-primary/90 text-primary-foreground p-6 rounded-t-lg shadow-lg">
+                    <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                      <Plus className="h-6 w-6" />
+                      Registrar Nova Venda
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="p-4">
+                    <VendasForm onSaleSuccess={() => setIsSaleDialogOpen(false)} />
+                  </div>
+                </DialogContent>
+                </Dialog>
+              )}
+            </div>
+            
+            <SalesOverviewCards activeTab={activeTab} />
         
         <TabsContent value="historico">
           <SalesHistoryTable />
