@@ -27,10 +27,7 @@ export const MilesInventoryTable = () => {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Estoque de Milhas</CardTitle>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         <Table>
           <TableHeader>
             <TableRow>
