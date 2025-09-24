@@ -25,7 +25,7 @@ export type Database = {
           quantity: number
           remaining_quantity: number
           status: string
-          supplier_id: string
+          supplier_id: string | null
           updated_at: string
         }
         Insert: {
@@ -38,7 +38,7 @@ export type Database = {
           quantity: number
           remaining_quantity?: number
           status?: string
-          supplier_id: string
+          supplier_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -51,7 +51,7 @@ export type Database = {
           quantity?: number
           remaining_quantity?: number
           status?: string
-          supplier_id?: string
+          supplier_id?: string | null
           updated_at?: string
         }
         Relationships: [

@@ -25,9 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 const formSchema = z.object({
   name: z.string().min(2, "Nome deve ter no mínimo 2 caracteres"),
   contact: z.string().min(1, "Contato é obrigatório"),
-  accountType: z.string().min(1, "Tipo de conta é obrigatório"),
   program: z.string().min(1, "Programa é obrigatório"),
-  status: z.enum(["Ativo", "Inativo"]),
   notes: z.string().optional(),
 });
 
@@ -35,25 +33,11 @@ interface SupplierFormProps {
   onSubmit: (data: z.infer<typeof formSchema>) => void;
 }
 
-const accountTypes = [
-  "Conta Azul",
-  "Conta SMILES", 
-  "Conta TudoAzul",
-  "Conta Livelo",
-  "Conta Multiplus",
-  "Conta LifeMiles",
-  "Conta Flying Blue",
-  "Outros"
-];
-
 const programs = [
-  "TudoAzul",
-  "SMILES",
-  "Livelo", 
-  "Multiplus",
-  "LifeMiles",
-  "Flying Blue",
-  "MileMania",
+  "Azul",
+  "Smiles",
+  "Latam", 
+  "TAP",
   "Outros"
 ];
 
@@ -63,9 +47,7 @@ export function SupplierForm({ onSubmit }: SupplierFormProps) {
     defaultValues: {
       name: "",
       contact: "",
-      accountType: "",
       program: "",
-      status: "Ativo",
       notes: "",
     },
   });
@@ -104,31 +86,6 @@ export function SupplierForm({ onSubmit }: SupplierFormProps) {
 
           <FormField
             control={form.control}
-            name="accountType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tipo de Conta</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o tipo" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {accountTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
             name="program"
             render={({ field }) => (
               <FormItem>
@@ -145,28 +102,6 @@ export function SupplierForm({ onSubmit }: SupplierFormProps) {
                         {program}
                       </SelectItem>
                     ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Status</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Ativo">Ativo</SelectItem>
-                    <SelectItem value="Inativo">Inativo</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

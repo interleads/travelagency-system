@@ -5,9 +5,7 @@ export interface Supplier {
   id: string;
   name: string;
   contact: string;
-  account_type: string;
   program: string;
-  status: string;
   notes?: string;
   last_used?: string;
   created_at: string;

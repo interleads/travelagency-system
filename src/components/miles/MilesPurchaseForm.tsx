@@ -9,12 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useMilesPrograms, useAddMilesPurchase } from '@/hooks/useMilesInventory';
-import { useSuppliers } from '@/hooks/useSuppliers';
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   program_id: z.string().min(1, "Programa é obrigatório"),
-  supplier_id: z.string().min(1, "Fornecedor é obrigatório"),
   quantity: z.number().min(1, "Quantidade deve ser maior que 0"),
   cost_per_thousand: z.number().min(0.01, "Custo deve ser maior que 0"),
   purchase_date: z.string().min(1, "Data é obrigatória"),
@@ -27,7 +25,6 @@ interface MilesPurchaseFormProps {
 export function MilesPurchaseForm({ onSubmit }: MilesPurchaseFormProps) {
   const { toast } = useToast();
   const { data: programs = [] } = useMilesPrograms();
-  const { data: suppliers = [] } = useSuppliers();
   const addPurchase = useAddMilesPurchase();
 
   // Hooks de formatação
@@ -38,7 +35,6 @@ export function MilesPurchaseForm({ onSubmit }: MilesPurchaseFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       program_id: "",
-      supplier_id: "",
       quantity: 0,
       cost_per_thousand: 0,
       purchase_date: new Date().toISOString().split('T')[0],
@@ -97,30 +93,6 @@ export function MilesPurchaseForm({ onSubmit }: MilesPurchaseFormProps) {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="supplier_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Fornecedor</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o fornecedor" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {suppliers.map((supplier) => (
-                    <SelectItem key={supplier.id} value={supplier.id}>
-                      {supplier.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         <FormField
           control={form.control}
