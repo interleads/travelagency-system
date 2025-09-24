@@ -140,61 +140,29 @@ const DynamicProductForm: React.FC<{
     childrenInput.setValue(value.children || 0);
   }, [value.taxValue, value.price, value.cost, value.custoMil, value.qtdMilhas, value.quantity, value.adults, value.children]);
 
-  // Cálculo do lucro em tempo real
+  // Cálculo do lucro em tempo real usando valores diretos do estado
   const computedProfit = React.useMemo(() => {
-    const venda = priceInput.numericValue * quantityInput.numericValue;
+    const venda = (value.price || 0) * (value.quantity || 1);
     
     if (value.type === "passagem" && value.ticketType === "milhas") {
-      const milhas = qtdMilhasInput.numericValue;
-      const custoMil = custoMilInput.numericValue;
+      const milhas = value.qtdMilhas || 0;
+      const custoMil = value.custoMil || 0;
       if (!milhas || !custoMil) return venda || 0;
       const custoTotal = (milhas / 1000) * custoMil;
-      console.log('Cálculo Lucro Milhas:', { venda, milhas, custoMil, custoTotal, lucro: venda - custoTotal });
       return venda - custoTotal;
     }
     
     // Para passagem tarifada e outros produtos
-    const custo = costInput.numericValue;
-    console.log('Cálculo Lucro Padrão:', { venda, custo, lucro: venda - custo });
+    const custo = value.cost || 0;
     return venda - custo;
-  }, [
-    priceInput.numericValue, quantityInput.numericValue, qtdMilhasInput.numericValue, 
-    custoMilInput.numericValue, costInput.numericValue, value.type, value.ticketType
-  ]);
+  }, [value.price, value.quantity, value.qtdMilhas, value.custoMil, value.cost, value.type, value.ticketType]);
 
-  // Propagar mudanças dos hooks para o estado principal em tempo real
-  const propagateChanges = React.useCallback(() => {
-    console.log('Propagando mudanças dos hooks para estado principal');
-    const updatedProduct = {
-      ...value,
-      taxValue: taxValueInput.numericValue,
-      price: priceInput.numericValue,
-      cost: costInput.numericValue,
-      custoMil: custoMilInput.numericValue,
-      qtdMilhas: qtdMilhasInput.numericValue,
-      quantity: quantityInput.numericValue,
-      adults: adultsInput.numericValue,
-      children: childrenInput.numericValue,
-      profit: computedProfit
-    };
-    
-    // Só propagar se houver diferenças significativas
-    const hasChanges = updatedProduct.price !== value.price ||
-                      updatedProduct.cost !== value.cost ||
-                      updatedProduct.custoMil !== value.custoMil ||
-                      updatedProduct.qtdMilhas !== value.qtdMilhas ||
-                      updatedProduct.quantity !== value.quantity ||
-                      Math.abs((updatedProduct.profit || 0) - (value.profit || 0)) > 0.01;
-    
-    if (hasChanges) {
-      console.log('Mudanças detectadas, propagando:', updatedProduct);
-      onChange(updatedProduct);
-    }
-  }, [value, taxValueInput.numericValue, priceInput.numericValue, costInput.numericValue, custoMilInput.numericValue, qtdMilhasInput.numericValue, quantityInput.numericValue, adultsInput.numericValue, childrenInput.numericValue, computedProfit, onChange]);
-
+  // Atualizar profit no estado quando computedProfit mudar
   React.useEffect(() => {
-    propagateChanges();
-  }, [propagateChanges]);
+    if (Math.abs((value.profit || 0) - computedProfit) > 0.01) {
+      onChange({ ...value, profit: computedProfit });
+    }
+  }, [computedProfit, value, onChange]);
 
   // Atualizar nome automaticamente quando os campos relevantes mudarem
   React.useEffect(() => {
@@ -348,9 +316,9 @@ const DynamicProductForm: React.FC<{
                     }}
                     placeholder="R$ 0,00"
                   />
-                  {custoMilInput.numericValue > 0 && (
+                  {(value.custoMil || 0) > 0 && (
                     <div className="text-xs text-muted-foreground mt-1">
-                      Valor interpretado: R$ {custoMilInput.numericValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 5 })}
+                      Valor interpretado: R$ {(value.custoMil || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 5 })}
                     </div>
                   )}
                 </div>
@@ -530,9 +498,9 @@ const DynamicProductForm: React.FC<{
             }}
             placeholder="R$ 0,00"
           />
-          {priceInput.numericValue > 0 && (
+          {(value.price || 0) > 0 && (
             <div className="text-xs text-muted-foreground mt-1">
-              Valor interpretado: R$ {priceInput.numericValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 5 })}
+              Valor interpretado: R$ {(value.price || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 5 })}
             </div>
           )}
         </div>
