@@ -21,7 +21,6 @@ export type ProductType = "passagem" | "hotel" | "veiculo" | "seguro" | "outros"
 
 export interface SaleProduct {
   type?: ProductType;
-  name: string;
   quantity: number;
   price: number;
   cost: number;
@@ -36,6 +35,7 @@ export interface SaleProduct {
   trecho1?: string;
   trecho2?: string;
   cardTaxes?: string;
+  taxValue?: number; // Valor das taxas
   qtdMilhas?: number;
   custoMil?: number;
   profit?: number;
@@ -45,7 +45,6 @@ export interface SaleProduct {
 // EmptyProduct atualizado
 export const EmptyProduct: SaleProduct = {
   type: undefined,
-  name: "",
   quantity: 1,
   price: 0,
   cost: 0,
@@ -59,6 +58,7 @@ export const EmptyProduct: SaleProduct = {
   trecho1: "",
   trecho2: "",
   cardTaxes: "",
+  taxValue: 0,
   qtdMilhas: 0,
   custoMil: 0,
   profit: 0,
@@ -133,7 +133,7 @@ const DynamicProductForm: React.FC<{
             </div>
 
             {/* Informações Básicas */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-4 gap-3">
               <div>
                 <Label>Adultos</Label>
                 <Input
@@ -151,6 +151,17 @@ const DynamicProductForm: React.FC<{
                   min={0}
                   value={value.children ?? 0}
                   onChange={e => onChange({ ...value, children: Number(e.target.value) })}
+                />
+              </div>
+              <div>
+                <Label>Valor das Taxas</Label>
+                <Input 
+                  type="number" 
+                  min={0} 
+                  step="0.01"
+                  value={value.taxValue || ""} 
+                  onChange={e => onChange({ ...value, taxValue: Number(e.target.value) })} 
+                  placeholder="R$"
                 />
               </div>
               <div>
@@ -185,7 +196,7 @@ const DynamicProductForm: React.FC<{
 
             {/* Campos específicos por tipo */}
             {value.ticketType === "milhas" ? (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <div>
                   <Label>Qtd Milhas</Label>
                   <Input
@@ -205,6 +216,16 @@ const DynamicProductForm: React.FC<{
                     onChange={e => onChange({ ...value, custoMil: Number(e.target.value) })}
                   />
                 </div>
+                <div className="flex items-end">
+                  <div className="w-full">
+                    <Label>Lucro</Label>
+                    <div className="mt-1 px-3 py-2 bg-muted rounded-md h-10 flex items-center">
+                      <span className={`font-medium text-sm ${computedProfit >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                        R$ {isNaN(computedProfit) ? "0,00" : computedProfit?.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
@@ -219,17 +240,19 @@ const DynamicProductForm: React.FC<{
                     placeholder="R$"
                   />
                 </div>
-                <div></div>
+                <div className="flex items-end">
+                  <div className="w-full">
+                    <Label>Lucro</Label>
+                    <div className="mt-1 px-3 py-2 bg-muted rounded-md h-10 flex items-center">
+                      <span className={`font-medium text-sm ${computedProfit >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                        R$ {isNaN(computedProfit) ? "0,00" : computedProfit?.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
-            {/* Preview do lucro */}
-            <div className="rounded-md bg-muted/50 px-3 py-2 flex items-center justify-between border">
-              <span className="font-medium text-sm">Lucro Calculado:</span>
-              <span className={`text-base font-bold ${computedProfit >= 0 ? "text-emerald-600" : "text-red-600"}`}>
-                R$ {isNaN(computedProfit) ? "0,00" : computedProfit?.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-              </span>
-            </div>
           </div>
         );
       case "hotel":
@@ -284,8 +307,8 @@ const DynamicProductForm: React.FC<{
         </Button>
       )}
       
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
-        <div className="md:col-span-2">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div>
           <Label>Tipo</Label>
           <select
             className="w-full mt-1 border border-input rounded-md h-10 px-3 bg-background"
@@ -299,15 +322,6 @@ const DynamicProductForm: React.FC<{
             <option value="">Selecione</option>
             {typeOptions.map(pt => <option key={pt.value} value={pt.value}>{pt.label}</option>)}
           </select>
-        </div>
-        <div className="md:col-span-2">
-          <Label>Nome/Descrição</Label>
-          <Input
-            value={value.name}
-            onChange={e => onChange({ ...value, name: e.target.value })}
-            required
-            placeholder="Nome do produto ou serviço"
-          />
         </div>
         <div>
           <Label>Qtd</Label>
@@ -347,16 +361,16 @@ const DynamicProductForm: React.FC<{
       
       {/* Lucro - Só mostrar para produtos que não sejam passagem (que já tem preview próprio) */}
       {value.type !== "passagem" && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+        <div className="grid grid-cols-2 gap-3 mt-3">
           <div>
             <Label>Lucro do Produto</Label>
             <div className="mt-1 px-3 py-2 bg-muted rounded-md h-10 flex items-center">
-              <span className={`font-medium ${computedProfit >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+              <span className={`font-medium text-sm ${computedProfit >= 0 ? "text-emerald-600" : "text-red-600"}`}>
                 R$ {(computedProfit || 0).toFixed(2)}
               </span>
             </div>
           </div>
-          <div className="md:col-span-2"></div>
+          <div></div>
         </div>
       )}
         

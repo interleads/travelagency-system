@@ -16,6 +16,7 @@ interface VendasFormProps {
 
 const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
   const [client, setClient] = useState('');
+  const [phone, setPhone] = useState('');
   const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0]);
   const [products, setProducts] = useState<SaleProduct[]>([EmptyProduct]);
   const [paymentMethod, setPaymentMethod] = useState('');
@@ -51,7 +52,7 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
       toast({ variant: "destructive", title: "Erro", description: "Escolha o método de pagamento" });
       return;
     }
-    if (!products.length || products.every(p => !p.name)) {
+    if (!products.length || products.every(p => !p.type)) {
       toast({ variant: "destructive", title: "Erro", description: "Adicione ao menos um produto." });
       return;
     }
@@ -69,6 +70,7 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
       onSuccess: () => {
         toast({ title: "Venda registrada no banco com sucesso!", description: `Total: R$ ${total.toFixed(2)}` });
         setClient('');
+        setPhone('');
         setSaleDate(new Date().toISOString().split('T')[0]);
         setProducts([EmptyProduct]);
         setPaymentMethod('');
@@ -90,14 +92,25 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
           <CardTitle className="text-lg text-primary">Dados do Cliente</CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="md:col-span-1">
               <Label htmlFor="client">Nome do Cliente</Label>
               <Input 
                 id="client" 
                 value={client} 
                 onChange={e => setClient(e.target.value)} 
                 placeholder="Digite o nome do cliente"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="phone">Telefone</Label>
+              <Input 
+                id="phone" 
+                type="tel"
+                value={phone} 
+                onChange={e => setPhone(e.target.value)} 
+                placeholder="(11) 99999-9999"
                 className="mt-1"
               />
             </div>
