@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import DynamicProductForm, { EmptyProduct } from "@/components/vendas/DynamicProductForm";
+import DynamicProductForm, { EmptyProduct, generateProductName } from "@/components/vendas/DynamicProductForm";
 import SaleSummary from "@/components/sales/SaleSummary";
 import { PAYMENT_METHODS } from '@/data/products';
 import { useCreateSale, SaleProduct } from '@/hooks/useSales';
@@ -57,6 +57,36 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
       return;
     }
 
+    // Validar se todos os produtos têm campos obrigatórios preenchidos
+    const invalidProducts = products.filter(p => {
+      if (!p.type) return true;
+      if (!p.name && !generateProductName(p)) return true;
+      if (p.price <= 0) return true;
+      return false;
+    });
+
+    if (invalidProducts.length > 0) {
+      toast({ 
+        variant: "destructive", 
+        title: "Erro de validação", 
+        description: "Verifique se todos os produtos têm tipo e preço válidos." 
+      });
+      return;
+    }
+
+    console.log('Dados da venda sendo enviados:', {
+      client_name: client,
+      products: products.map(p => ({
+        type: p.type,
+        name: p.name || generateProductName(p),
+        price: p.price,
+        cost: p.cost,
+        qtdMilhas: p.qtdMilhas,
+        custoMil: p.custoMil
+      })),
+      total_amount: total
+    });
+
     createSale.mutate({
       client_name: client,
       sale_date: saleDate,
@@ -68,7 +98,7 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
       anticipation_date: anticipationDate || undefined,
     }, {
       onSuccess: () => {
-        toast({ title: "Venda registrada no banco com sucesso!", description: `Total: R$ ${total.toFixed(2)}` });
+        toast({ title: "Venda registrada com sucesso!", description: `Total: R$ ${total.toFixed(2)}` });
         setClient('');
         setPhone('');
         setSaleDate(new Date().toISOString().split('T')[0]);
@@ -80,7 +110,8 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
         onSaleSuccess?.();
       },
       onError: (err: any) => {
-        toast({ variant: "destructive", title: "Erro ao salvar no banco", description: err.message });
+        console.error('Erro ao criar venda:', err);
+        toast({ variant: "destructive", title: "Erro ao salvar", description: err.message });
       }
     });
   };

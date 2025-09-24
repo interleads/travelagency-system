@@ -22,6 +22,7 @@ export type ProductType = "passagem" | "hotel" | "veiculo" | "seguro" | "transfe
 
 export interface SaleProduct {
   type?: ProductType;
+  name?: string;
   quantity: number;
   price: number;
   cost: number;
@@ -44,9 +45,40 @@ export interface SaleProduct {
   [key: string]: any;
 }
 
+// Função para gerar nome automático do produto
+export const generateProductName = (product: SaleProduct): string => {
+  if (!product.type) return "";
+  
+  switch (product.type) {
+    case "passagem":
+      if (product.airline && product.origin && product.destination) {
+        return `Passagem ${product.airline} ${product.origin}-${product.destination}`;
+      }
+      return `Passagem ${product.airline || ""}`.trim();
+    case "hotel":
+      return `Hotel ${product.destination || ""}`.trim();
+    case "veiculo":
+      return `Veículo ${product.categoria || ""}`.trim();
+    case "seguro":
+      return `Seguro Viagem ${product.cobertura || ""}`.trim();
+    case "transfer":
+      if (product.origem && product.destino) {
+        return `Transfer ${product.origem}-${product.destino}`;
+      }
+      return "Transfer";
+    case "passeios":
+      return `Passeio ${product.local || ""}`.trim();
+    case "outros":
+      return "Outros";
+    default:
+      return String(product.type).charAt(0).toUpperCase() + String(product.type).slice(1);
+  }
+};
+
 // EmptyProduct atualizado
 export const EmptyProduct: SaleProduct = {
   type: undefined,
+  name: "",
   quantity: 1,
   price: 0,
   cost: 0,
@@ -116,16 +148,26 @@ const DynamicProductForm: React.FC<{
       const custoMil = custoMilInput.numericValue;
       if (!milhas || !custoMil) return venda || 0;
       const custoTotal = (milhas / 1000) * custoMil;
+      console.log('Cálculo Lucro Milhas:', { venda, milhas, custoMil, custoTotal, lucro: venda - custoTotal });
       return venda - custoTotal;
     }
     
     // Para passagem tarifada e outros produtos
     const custo = costInput.numericValue;
+    console.log('Cálculo Lucro Padrão:', { venda, custo, lucro: venda - custo });
     return venda - custo;
   }, [
     priceInput.numericValue, quantityInput.numericValue, qtdMilhasInput.numericValue, 
     custoMilInput.numericValue, costInput.numericValue, value.type, value.ticketType
   ]);
+
+  // Atualizar nome automaticamente quando os campos relevantes mudarem
+  React.useEffect(() => {
+    const autoName = generateProductName(value);
+    if (autoName && autoName !== value.name) {
+      onChange({ ...value, name: autoName });
+    }
+  }, [value.type, value.airline, value.origin, value.destination, value.categoria, value.cobertura, value.local, value.origem, value.destino]);
 
   // Render extra fields REVISADO
   const renderExtraFields = () => {
@@ -457,6 +499,17 @@ const DynamicProductForm: React.FC<{
           </div>
         )}
       </div>
+      
+      {/* Mostrar nome do produto gerado automaticamente */}
+      {value.type && value.name && (
+        <div className="mt-2">
+          <div className="px-3 py-2 bg-muted/50 rounded-md border-l-4 border-primary/30">
+            <p className="text-sm text-muted-foreground">
+              <strong>Produto:</strong> {value.name}
+            </p>
+          </div>
+        </div>
+      )}
       
       {/* Lucro - Só mostrar para produtos que não sejam passagem (que já tem preview próprio) */}
       {value.type !== "passagem" && (
