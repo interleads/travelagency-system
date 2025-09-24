@@ -64,30 +64,98 @@ const COLUMN_MAPPING: Record<string, string> = {
   'DESCRICAO': 'description'
 };
 
+const parseCSVLine = (line: string, delimiter: ',' | ';' = ','): string[] => {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === delimiter && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  result.push(current.trim());
+  return result.map(c => c.replace(/\r$/, ''));
+};
+
+const preprocessCSVContent = (
+  text: string
+): { lines: string[]; originalLineNumbers: number[]; delimiterHint?: ',' | ';' } => {
+  const rawLines = text.split(/\r?\n/);
+  const lines: string[] = [];
+  const originalLineNumbers: number[] = [];
+  let delimiterHint: ',' | ';' | undefined;
+
+  rawLines.forEach((rawLine, index) => {
+    const withoutBom = rawLine.replace(/^\ufeff/, '');
+    const trimmed = withoutBom.trim();
+
+    if (trimmed === '') {
+      return;
+    }
+
+    if (trimmed.toLowerCase().startsWith('sep=')) {
+      const candidate = trimmed.slice(4).trim()[0];
+      if (candidate === ',' || candidate === ';') {
+        delimiterHint = candidate as ',' | ';';
+      }
+      return;
+    }
+
+    lines.push(withoutBom);
+    originalLineNumbers.push(index);
+  });
+
+  return { lines, originalLineNumbers, delimiterHint };
+};
+
 // Detect CSV delimiter by checking recognized header tokens in the first few lines
-const detectDelimiter = (lines: string[]): ',' | ';' => {
+const detectDelimiter = (lines: string[], hint?: ',' | ';'): ',' | ';' => {
+  if (hint) {
+    return hint;
+  }
+
   const candidates: Array<',' | ';'> = [',', ';'];
   let best: ',' | ';' = ',';
   let bestScore = -1;
+  let bestDelimiterHits = -1;
+
   for (const delim of candidates) {
     let score = 0;
+    let delimiterHits = 0;
     for (let i = 0; i < Math.min(5, lines.length); i++) {
-      const cols = parseCSVLine(lines[i], delim);
+      const line = lines[i];
+      delimiterHits += line.split(delim).length - 1;
+      const cols = parseCSVLine(line, delim);
       for (const c of cols) {
         const norm = c.trim().toUpperCase();
-        if (Object.keys(COLUMN_MAPPING).some(k => {
-          const kk = k.toUpperCase();
-          return norm === kk || norm.includes(kk.split(' ')[0]);
-        })) {
+        if (
+          Object.keys(COLUMN_MAPPING).some(k => {
+            const kk = k.toUpperCase();
+            return norm === kk || norm.includes(kk.split(' ')[0]);
+          })
+        ) {
           score++;
         }
       }
     }
-    if (score > bestScore) {
+    if (score > bestScore || (score === bestScore && delimiterHits > bestDelimiterHits)) {
       bestScore = score;
+      bestDelimiterHits = delimiterHits;
       best = delim;
     }
   }
+
   return best;
 };
 
@@ -145,14 +213,14 @@ export function useCSVImport() {
   // Preview CSV data without importing
   const previewCSV = async (file: File): Promise<PreviewData> => {
     const text = await file.text();
-    const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
-    
+    const { lines, delimiterHint } = preprocessCSVContent(text);
+
     if (lines.length < 2) {
       throw new Error('Arquivo CSV deve ter cabeçalho e pelo menos uma linha de dados');
     }
 
     // Detect delimiter and header row
-    const delimiter = detectDelimiter(lines);
+    const delimiter = detectDelimiter(lines, delimiterHint);
     const headerIndex = findHeaderIndex(lines, delimiter);
     const headerLine = lines[headerIndex];
     const headers = parseCSVLine(headerLine, delimiter);
@@ -250,31 +318,6 @@ const clearImports = async (): Promise<void> => {
     throw new Error(`Erro ao limpar vendas: ${salesError.message}`);
   }
 };
-
-  const parseCSVLine = (line: string, delimiter: ',' | ';' = ','): string[] => {
-    const result: string[] = [];
-    let current = '';
-    let inQuotes = false;
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      if (char === '"') {
-        // handle double quotes inside quoted field
-        if (inQuotes && line[i + 1] === '"') {
-          current += '"';
-          i++; // skip escaped quote
-        } else {
-          inQuotes = !inQuotes;
-        }
-      } else if (char === delimiter && !inQuotes) {
-        result.push(current.trim());
-        current = '';
-      } else {
-        current += char;
-      }
-    }
-    result.push(current.trim());
-    return result.map(c => c.replace(/\r$/, ''));
-  };
 
   const parseDate = (dateStr: string): string | null => {
     if (!dateStr || dateStr.trim() === '') return null;
@@ -384,14 +427,14 @@ const clearImports = async (): Promise<void> => {
   const importCSVMutation = useMutation({
     mutationFn: async (file: File): Promise<ImportResult> => {
       const text = await file.text();
-      const lines = text.split('\n').filter(line => line.trim() !== '');
-      
-      if (lines.length < 3) {
+      const { lines, originalLineNumbers, delimiterHint } = preprocessCSVContent(text);
+
+      if (lines.length < 2) {
         throw new Error('Arquivo CSV deve ter pelo menos cabeçalho e uma linha de dados');
       }
 
       // Detect delimiter and header row, then create column mapping
-      const delimiter = detectDelimiter(lines);
+      const delimiter = detectDelimiter(lines, delimiterHint);
       const headerIndex = findHeaderIndex(lines, delimiter);
       const headers = parseCSVLine(lines[headerIndex], delimiter);
       
@@ -409,16 +452,18 @@ const clearImports = async (): Promise<void> => {
 
       console.log('Detected delimiter:', delimiter, 'headerIndex:', headerIndex, 'column mapping:', columnIndexes);
 
-      const dataLines = lines.slice(headerIndex + 1).filter(l => l.trim() !== '');
+      const dataLines = lines.slice(headerIndex + 1);
+      const dataLineNumbers = originalLineNumbers.slice(headerIndex + 1);
       const result: ImportResult = { success: 0, errors: [], suppliers: 0 };
       const createdSuppliers = new Set<string>();
 
       for (let i = 0; i < dataLines.length; i++) {
+        const rowNumber = (dataLineNumbers[i] ?? headerIndex + 1 + i) + 1;
         try {
           setProgress(Math.round((i / dataLines.length) * 100));
-          
+
           const columns = parseCSVLine(dataLines[i], delimiter);
-          
+
           // Extract data using header-based mapping
           const clientName = columns[columnIndexes.client_name] || '';
           const dateStr = columns[columnIndexes.sale_date] || '';
@@ -435,7 +480,7 @@ const clearImports = async (): Promise<void> => {
           const status = columns[columnIndexes.status] || '';
           const description = columns[columnIndexes.description] || '';
 
-          console.log(`Linha ${i + 3}:`, {
+          console.log(`Linha ${rowNumber}:`, {
             clientName,
             paymentMethod,
             status,
@@ -447,7 +492,7 @@ const clearImports = async (): Promise<void> => {
 
           // Validações básicas
           if (!clientName || !revenueStr) {
-            result.errors.push(`Linha ${i + 3}: Dados obrigatórios faltando (PAX ou FATURAMENTO)`);
+            result.errors.push(`Linha ${rowNumber}: Dados obrigatórios faltando (PAX ou FATURAMENTO)`);
             continue;
           }
 
@@ -460,13 +505,13 @@ const clearImports = async (): Promise<void> => {
           const grossProfit = profitStr ? parseNumber(profitStr) : (revenue - cost - txEmb - cardTax);
 
           if (revenue <= 0) {
-            result.errors.push(`Linha ${i + 3}: Faturamento inválido`);
+            result.errors.push(`Linha ${rowNumber}: Faturamento inválido`);
             continue;
           }
 
           // Não usar data atual se a data estiver vazia - pular a linha
           if (!parsedDate) {
-            result.errors.push(`Linha ${i + 3}: Data da venda é obrigatória`);
+            result.errors.push(`Linha ${rowNumber}: Data da venda é obrigatória`);
             continue;
           }
 
@@ -500,7 +545,7 @@ const clearImports = async (): Promise<void> => {
             .single();
 
           if (saleError) {
-            result.errors.push(`Linha ${i + 3}: Erro ao criar venda - ${saleError.message}`);
+            result.errors.push(`Linha ${rowNumber}: Erro ao criar venda - ${saleError.message}`);
             continue;
           }
 
@@ -544,13 +589,13 @@ const clearImports = async (): Promise<void> => {
             });
 
           if (productError) {
-            result.errors.push(`Linha ${i + 3}: Erro ao criar produto - ${productError.message}`);
+            result.errors.push(`Linha ${rowNumber}: Erro ao criar produto - ${productError.message}`);
             continue;
           }
 
           result.success++;
         } catch (error) {
-          result.errors.push(`Linha ${i + 3}: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+          result.errors.push(`Linha ${rowNumber}: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
         }
       }
 
