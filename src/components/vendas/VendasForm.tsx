@@ -12,6 +12,7 @@ import { useCreateSale, SaleProduct } from '@/hooks/useSales';
 
 const VendasForm = () => {
   const [client, setClient] = useState('');
+  const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0]);
   const [products, setProducts] = useState<SaleProduct[]>([EmptyProduct]);
   const [paymentMethod, setPaymentMethod] = useState('');
   const [installments, setInstallments] = useState(1);
@@ -41,6 +42,7 @@ const VendasForm = () => {
 
     createSale.mutate({
       client_name: client,
+      sale_date: saleDate,
       products,
       payment_method: paymentMethod,
       installments,
@@ -49,6 +51,7 @@ const VendasForm = () => {
       onSuccess: () => {
         toast({ title: "Venda registrada no banco com sucesso!", description: `Total: R$ ${total.toFixed(2)}` });
         setClient('');
+        setSaleDate(new Date().toISOString().split('T')[0]);
         setProducts([EmptyProduct]);
         setPaymentMethod('');
         setInstallments(1);
@@ -66,14 +69,28 @@ const VendasForm = () => {
           <CardTitle className="text-lg text-primary">Dados do Cliente</CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <Label htmlFor="client">Nome do Cliente</Label>
-          <Input 
-            id="client" 
-            value={client} 
-            onChange={e => setClient(e.target.value)} 
-            placeholder="Digite o nome do cliente"
-            className="mt-1"
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="client">Nome do Cliente</Label>
+              <Input 
+                id="client" 
+                value={client} 
+                onChange={e => setClient(e.target.value)} 
+                placeholder="Digite o nome do cliente"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="saleDate">Data da Venda</Label>
+              <Input 
+                id="saleDate" 
+                type="date"
+                value={saleDate} 
+                onChange={e => setSaleDate(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+          </div>
         </CardContent>
       </Card>
 

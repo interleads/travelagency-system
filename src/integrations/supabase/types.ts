@@ -270,6 +270,7 @@ export type Database = {
           miles_cost: number | null
           miles_used: number | null
           payment_method: string
+          sale_date: string | null
           supplier_id: string | null
           total_amount: number
           updated_at: string
@@ -283,6 +284,7 @@ export type Database = {
           miles_cost?: number | null
           miles_used?: number | null
           payment_method: string
+          sale_date?: string | null
           supplier_id?: string | null
           total_amount: number
           updated_at?: string
@@ -296,6 +298,7 @@ export type Database = {
           miles_cost?: number | null
           miles_used?: number | null
           payment_method?: string
+          sale_date?: string | null
           supplier_id?: string | null
           total_amount?: number
           updated_at?: string

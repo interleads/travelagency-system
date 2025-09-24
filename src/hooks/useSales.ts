@@ -36,6 +36,7 @@ export interface Sale {
   payment_method: string;
   installments: number;
   total_amount: number;
+  sale_date?: string;
   miles_used?: number;
   miles_cost?: number;
   supplier_id?: string;
@@ -51,6 +52,7 @@ export interface SaleInput {
   payment_method: string;
   installments: number;
   total_amount: number;
+  sale_date?: string;
   miles_used?: number;
   miles_cost?: number;
   supplier_id?: string;
@@ -99,6 +101,7 @@ export const useCreateSale = () => {
           payment_method: saleData.payment_method,
           installments: saleData.installments,
           total_amount: saleData.total_amount,
+          sale_date: saleData.sale_date,
           miles_used: saleData.miles_used,
           miles_cost: saleData.miles_cost,
           supplier_id: saleData.supplier_id,
@@ -190,6 +193,7 @@ export const useUpdateSale = () => {
           payment_method: updates.payment_method,
           installments: updates.installments,
           total_amount: updates.total_amount,
+          sale_date: updates.sale_date,
           miles_used: updates.miles_used,
           miles_cost: updates.miles_cost,
           supplier_id: updates.supplier_id,

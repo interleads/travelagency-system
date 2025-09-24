@@ -61,6 +61,24 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				product: {
+					passagem: 'hsl(var(--product-passagem))',
+					'passagem-foreground': 'hsl(var(--product-passagem-foreground))',
+					hospedagem: 'hsl(var(--product-hospedagem))',
+					'hospedagem-foreground': 'hsl(var(--product-hospedagem-foreground))',
+					seguro: 'hsl(var(--product-seguro))',
+					'seguro-foreground': 'hsl(var(--product-seguro-foreground))',
+					outros: 'hsl(var(--product-outros))',
+					'outros-foreground': 'hsl(var(--product-outros-foreground))'
+				},
+				status: {
+					pendente: 'hsl(var(--status-pendente))',
+					'pendente-foreground': 'hsl(var(--status-pendente-foreground))',
+					andamento: 'hsl(var(--status-andamento))',
+					'andamento-foreground': 'hsl(var(--status-andamento-foreground))',
+					concluido: 'hsl(var(--status-concluido))',
+					'concluido-foreground': 'hsl(var(--status-concluido-foreground))'
 				}
 			},
 			borderRadius: {

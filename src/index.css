@@ -49,6 +49,24 @@
     --sidebar-border: 214 32% 88%;
 
     --sidebar-ring: 217 91% 60%;
+    
+    /* Product type colors - light mode */
+    --product-passagem: 217 91% 95%;
+    --product-passagem-foreground: 217 91% 20%;
+    --product-hospedagem: 142 76% 95%;  
+    --product-hospedagem-foreground: 142 76% 20%;
+    --product-seguro: 262 83% 95%;
+    --product-seguro-foreground: 262 83% 20%;
+    --product-outros: 214 32% 95%;
+    --product-outros-foreground: 215 16% 47%;
+    
+    /* Payment status colors - light mode */
+    --status-pendente: 0 84% 95%;
+    --status-pendente-foreground: 0 84% 20%;
+    --status-andamento: 45 93% 95%;
+    --status-andamento-foreground: 45 93% 20%;
+    --status-concluido: 142 76% 95%;
+    --status-concluido-foreground: 142 76% 20%;
   }
 
   .dark {
@@ -87,6 +105,24 @@
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 217 33% 18%;
     --sidebar-ring: 217 91% 60%;
+    
+    /* Product type colors - dark mode */
+    --product-passagem: 217 91% 15%;
+    --product-passagem-foreground: 217 91% 80%;
+    --product-hospedagem: 142 76% 15%;
+    --product-hospedagem-foreground: 142 76% 80%;
+    --product-seguro: 262 83% 15%;
+    --product-seguro-foreground: 262 83% 20%;
+    --product-outros: 217 33% 15%;
+    --product-outros-foreground: 215 20% 65%;
+    
+    /* Payment status colors - dark mode */
+    --status-pendente: 0 84% 15%;
+    --status-pendente-foreground: 0 84% 80%;
+    --status-andamento: 45 93% 15%;
+    --status-andamento-foreground: 45 93% 80%;
+    --status-concluido: 142 76% 15%;
+    --status-concluido-foreground: 142 76% 80%;
   }
 }
 

@@ -25,9 +25,109 @@ import {
 } from "lucide-react";
 import { useSales } from "@/hooks/useSales";
 import { useDateRangeFilter } from "@/components/shared/useDateRangeFilter";
+import { useInstallments } from "@/hooks/useInstallments";
 import { SaleDetailsExpanded } from "./SaleDetailsExpanded";
-import { EditSaleDialog } from "./EditSaleDialog";
+import { FullSaleEditDialog } from "./FullSaleEditDialog";
 import { DeleteSaleDialog } from "./DeleteSaleDialog";
+
+// Component for individual sale row
+function SaleRow({ 
+  sale, 
+  isExpanded, 
+  onToggleExpanded, 
+  onEdit, 
+  onDelete, 
+  formatCurrency, 
+  formatDate,
+  getProductTypesSummary,
+  getSalePaymentStatus,
+  getStatusLabel
+}: {
+  sale: any;
+  isExpanded: boolean;
+  onToggleExpanded: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  formatCurrency: (value: number) => string;
+  formatDate: (dateString: string) => string;
+  getProductTypesSummary: (products: any[]) => JSX.Element;
+  getSalePaymentStatus: (sale: any, installments: any[]) => string;
+  getStatusLabel: (status: string) => string;
+}) {
+  const { data: installments = [] } = useInstallments(sale.id);
+  const paymentStatus = getSalePaymentStatus(sale, installments);
+
+  return (
+    <React.Fragment>
+      <TableRow className="hover:bg-muted/30">
+        <TableCell>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleExpanded}
+            className="p-1 h-6 w-6"
+          >
+            {isExpanded ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </Button>
+        </TableCell>
+        <TableCell className="font-medium">
+          {formatDate(sale.sale_date || sale.created_at)}
+        </TableCell>
+        <TableCell>{sale.client_name}</TableCell>
+        <TableCell className="max-w-[200px]">
+          {getProductTypesSummary(sale.sale_products)}
+        </TableCell>
+        <TableCell>
+          <Badge variant="outline">{sale.payment_method}</Badge>
+        </TableCell>
+        <TableCell className="text-center">
+          <Badge 
+            variant="secondary"
+            className={`bg-status-${paymentStatus} text-status-${paymentStatus}-foreground border-0`}
+          >
+            {getStatusLabel(paymentStatus)}
+          </Badge>
+        </TableCell>
+        <TableCell className="text-right font-medium">
+          {formatCurrency(Number(sale.total_amount))}
+        </TableCell>
+        <TableCell>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="p-1 h-6 w-6">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={onEdit}>
+                <Edit2 className="mr-2 h-4 w-4" />
+                Editar
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={onDelete}
+                className="text-destructive"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Excluir
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </TableCell>
+      </TableRow>
+      {isExpanded && (
+        <TableRow>
+          <TableCell colSpan={8} className="p-0">
+            <SaleDetailsExpanded sale={sale} />
+          </TableCell>
+        </TableRow>
+      )}
+    </React.Fragment>
+  );
+}
 
 export function SalesHistoryTable() {
   const { dateRange } = useDateRangeFilter();
@@ -45,6 +145,60 @@ export function SalesHistoryTable() {
   const formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString('pt-BR');
 
+  const getProductTypeLabel = (type: string) => {
+    const labels = {
+      'passagem': 'Passagem',
+      'hospedagem': 'Hospedagem', 
+      'seguro': 'Seguro',
+      'outros': 'Outros'
+    };
+    return labels[type] || labels['outros'];
+  };
+
+  const getProductTypesSummary = (products: any[] = []) => {
+    if (products.length === 0) return <span className="text-muted-foreground">Nenhum produto</span>;
+    
+    const types = [...new Set(products.map(p => p.type))];
+    return (
+      <div className="flex flex-wrap gap-1">
+        {types.slice(0, 2).map(type => (
+          <Badge 
+            key={type} 
+            variant="secondary"
+            className={`bg-product-${type} text-product-${type}-foreground border-0`}
+          >
+            {getProductTypeLabel(type)}
+          </Badge>
+        ))}
+        {types.length > 2 && (
+          <Badge variant="outline" className="text-xs">
+            +{types.length - 2}
+          </Badge>
+        )}
+      </div>
+    );
+  };
+
+  const getSalePaymentStatus = (sale: any, installments: any[] = []) => {
+    if (installments.length === 0) return 'pendente';
+    
+    const paidCount = installments.filter(i => i.status === 'paid').length;
+    const totalCount = installments.length;
+    
+    if (paidCount === 0) return 'pendente';
+    if (paidCount === totalCount) return 'concluido';
+    return 'andamento';
+  };
+
+  const getStatusLabel = (status: string) => {
+    const labels = {
+      'pendente': 'Pendente',
+      'andamento': 'Andamento', 
+      'concluido': 'Concluído'
+    };
+    return labels[status] || labels['pendente'];
+  };
+
   const toggleExpanded = (saleId: string) => {
     const newExpanded = new Set(expandedSales);
     if (newExpanded.has(saleId)) {
@@ -55,16 +209,6 @@ export function SalesHistoryTable() {
     setExpandedSales(newExpanded);
   };
 
-  const getProductsSummary = (products: any[] = []) => {
-    if (products.length === 0) return "Nenhum produto";
-    if (products.length === 1) return products[0].name;
-    return `${products[0].name} (+${products.length - 1} outros)`;
-  };
-
-  const getSaleStatus = (sale: any) => {
-    // TODO: Calculate based on installments status when available
-    return "Ativo";
-  };
 
   if (isLoading) {
     return (
@@ -114,72 +258,21 @@ export function SalesHistoryTable() {
                 ) : (
                   sales.map((sale) => {
                     const isExpanded = expandedSales.has(sale.id);
+                    
                     return (
-                      <React.Fragment key={sale.id}>
-                        <TableRow className="hover:bg-muted/30">
-                          <TableCell>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => toggleExpanded(sale.id)}
-                              className="p-1 h-6 w-6"
-                            >
-                              {isExpanded ? (
-                                <ChevronDown className="h-4 w-4" />
-                              ) : (
-                                <ChevronRight className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {formatDate(sale.created_at)}
-                          </TableCell>
-                          <TableCell>{sale.client_name}</TableCell>
-                          <TableCell className="max-w-[200px] truncate">
-                            {getProductsSummary(sale.sale_products)}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{sale.payment_method}</Badge>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Badge variant="default" className="bg-green-100 text-green-800">
-                              {getSaleStatus(sale)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right font-medium">
-                            {formatCurrency(Number(sale.total_amount))}
-                          </TableCell>
-                          <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="p-1 h-6 w-6">
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => setEditingSale(sale)}>
-                                  <Edit2 className="mr-2 h-4 w-4" />
-                                  Editar
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => setDeletingSale(sale)}
-                                  className="text-destructive"
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  Excluir
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                        {isExpanded && (
-                          <TableRow>
-                            <TableCell colSpan={8} className="p-0">
-                              <SaleDetailsExpanded sale={sale} />
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </React.Fragment>
+                      <SaleRow
+                        key={sale.id}
+                        sale={sale}
+                        isExpanded={isExpanded}
+                        onToggleExpanded={() => toggleExpanded(sale.id)}
+                        onEdit={() => setEditingSale(sale)}
+                        onDelete={() => setDeletingSale(sale)}
+                        formatCurrency={formatCurrency}
+                        formatDate={formatDate}
+                        getProductTypesSummary={getProductTypesSummary}
+                        getSalePaymentStatus={getSalePaymentStatus}
+                        getStatusLabel={getStatusLabel}
+                      />
                     );
                   })
                 )}
@@ -190,7 +283,7 @@ export function SalesHistoryTable() {
       </Card>
 
       {editingSale && (
-        <EditSaleDialog
+        <FullSaleEditDialog
           sale={editingSale}
           open={!!editingSale}
           onOpenChange={(open) => !open && setEditingSale(null)}
