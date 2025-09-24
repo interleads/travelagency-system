@@ -23,28 +23,45 @@ interface PreviewData {
   rowCount: number;
 }
 
-// Column mapping based on CSV headers
+// Column mapping based on CSV headers (with common aliases)
 const COLUMN_MAPPING: Record<string, string> = {
   'PASSAGENS AÉREAS': 'type',
+  'PASSAGEM AÉREA': 'type',
   'DATA DA VENDA': 'sale_date',
+  'DATA VENDA': 'sale_date',
+  'DATA': 'sale_date',
   'TRECHO': 'route',
+  'ROTA': 'route',
   'DATA T1': 'date_t1',
   'DATA T2': 'date_t2', 
   'PAX': 'client_name',
+  'CLIENTE': 'client_name',
   'LOC': 'locator',
+  'LOCALIZADOR': 'locator',
   'MALA': 'baggage',
   'CIA': 'airline',
+  'CIA AÉREA': 'airline',
+  'CIA AEREA': 'airline',
+  'COMPANHIA': 'airline',
   'CONTA USADA': 'supplier',
   'TX EMB': 'tx_emb',
+  'TX DE EMBARQUE': 'tx_emb',
+  'TX EMBARQUE': 'tx_emb',
   'CARTAO TX': 'card_tax',
+  'CARTÃO TX': 'card_tax',
   'QTD MILHAS': 'miles_qty',
   'CUSTO (k)': 'cost',
+  'CUSTO': 'cost',
   'FATURAMENTO': 'revenue',
   'LUCRO': 'profit',
   'PGTO': 'payment_method',
+  'PAGAMENTO': 'payment_method',
+  'FORMA DE PAGAMENTO': 'payment_method',
   'STATUS': 'status',
   'COMISSÃO': 'commission',
-  'DESCRIÇÃO': 'description'
+  'COMISSAO': 'commission',
+  'DESCRIÇÃO': 'description',
+  'DESCRICAO': 'description'
 };
 
 interface SaleData {
@@ -152,17 +169,35 @@ export function useCSVImport() {
     };
   };
 
-  // Clear all imported sales
-  const clearImports = async (): Promise<void> => {
-    const { error } = await supabase
-      .from('sales')
-      .delete()
-      .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
-    
-    if (error) {
-      throw new Error(`Erro ao limpar dados: ${error.message}`);
-    }
-  };
+// Clear all imported sales and related records
+const clearImports = async (): Promise<void> => {
+  // Delete child records first to avoid FK issues
+  const [prodRes, instRes] = await Promise.all([
+    supabase.from('sale_products').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+    supabase.from('sale_installments').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+  ]);
+
+  // Miles transactions: delete only those linked to sales
+  const { error: milesTxError } = await supabase
+    .from('miles_transactions')
+    .delete()
+    .not('sale_id', 'is', null);
+  if (milesTxError) {
+    throw new Error(`Erro ao limpar transações de milhas: ${milesTxError.message}`);
+  }
+
+  if (prodRes.error) throw new Error(`Erro ao limpar produtos: ${prodRes.error.message}`);
+  if (instRes.error) throw new Error(`Erro ao limpar parcelas: ${instRes.error.message}`);
+
+  // Finally delete sales
+  const { error: salesError } = await supabase
+    .from('sales')
+    .delete()
+    .neq('id', '00000000-0000-0000-0000-000000000000');
+  if (salesError) {
+    throw new Error(`Erro ao limpar vendas: ${salesError.message}`);
+  }
+};
 
   const parseCSVLine = (line: string): string[] => {
     const result: string[] = [];
@@ -213,17 +248,26 @@ export function useCSVImport() {
 
   const normalizePaymentMethod = (method: string): string => {
     if (!method) return 'Outros';
-    
     const normalized = method.toLowerCase().trim();
-    
-    if (normalized.includes('infinity') || normalized.includes('infinte') || 
-        normalized.includes('sumup') || normalized.includes('mercado pago')) {
+
+    if (
+      normalized.includes('infinity') ||
+      normalized.includes('infinte') ||
+      normalized.includes('sumup') ||
+      normalized.includes('mercado pago') ||
+      normalized.includes('cartao') ||
+      normalized.includes('cartão') ||
+      normalized.includes('credito') ||
+      normalized.includes('crédito') ||
+      normalized.includes('debito') ||
+      normalized.includes('débito')
+    ) {
       return 'Cartão';
     }
-    
+
     if (normalized.includes('pix')) return 'PIX';
     if (normalized.includes('cliente')) return 'Cliente';
-    
+
     return method;
   };
 
