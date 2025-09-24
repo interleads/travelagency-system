@@ -43,16 +43,18 @@ const Vendas = () => {
         <div className="flex gap-2">
           <Dialog open={isSaleDialogOpen} onOpenChange={setIsSaleDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2" />
-                Registrar Venda
+              <Button size="lg" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
+                <Plus className="h-4 w-4" />
+                Registrar Nova Venda
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Registrar Nova Venda</DialogTitle>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader className="bg-primary text-primary-foreground p-6 -m-6 mb-6 rounded-t-lg">
+                <DialogTitle className="text-xl font-semibold">Registrar Nova Venda</DialogTitle>
               </DialogHeader>
-              <VendasForm />
+              <div className="px-2">
+                <VendasForm />
+              </div>
             </DialogContent>
           </Dialog>
         </div>

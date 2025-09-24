@@ -61,11 +61,11 @@ const VendasForm = () => {
 
   return (
     <div className="space-y-4 max-w-4xl mx-auto p-4">
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg">Dados do Cliente</CardTitle>
+      <Card className="border-primary/20">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg text-primary">Dados do Cliente</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <Label htmlFor="client">Nome do Cliente</Label>
           <Input 
             id="client" 
@@ -77,11 +77,11 @@ const VendasForm = () => {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg">Produtos / Serviços</CardTitle>
+      <Card className="border-primary/20">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg text-primary">Produtos / Serviços</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-3">
               {products.map((product, idx) => (
@@ -100,11 +100,11 @@ const VendasForm = () => {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg">Pagamento</CardTitle>
+      <Card className="border-primary/20">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg text-primary">Pagamento</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="payment">Método de Pagamento</Label>
