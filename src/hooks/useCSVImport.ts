@@ -64,6 +64,58 @@ const COLUMN_MAPPING: Record<string, string> = {
   'DESCRICAO': 'description'
 };
 
+// Detect CSV delimiter by checking recognized header tokens in the first few lines
+const detectDelimiter = (lines: string[]): ',' | ';' => {
+  const candidates: Array<',' | ';'> = [',', ';'];
+  let best: ',' | ';' = ',';
+  let bestScore = -1;
+  for (const delim of candidates) {
+    let score = 0;
+    for (let i = 0; i < Math.min(5, lines.length); i++) {
+      const cols = parseCSVLine(lines[i], delim);
+      for (const c of cols) {
+        const norm = c.trim().toUpperCase();
+        if (Object.keys(COLUMN_MAPPING).some(k => {
+          const kk = k.toUpperCase();
+          return norm === kk || norm.includes(kk.split(' ')[0]);
+        })) {
+          score++;
+        }
+      }
+    }
+    if (score > bestScore) {
+      bestScore = score;
+      best = delim;
+    }
+  }
+  return best;
+};
+
+// Find which line contains the header row
+const findHeaderIndex = (lines: string[], delimiter: ',' | ';'): number => {
+  let bestIndex = 1; // common case
+  let bestScore = -1;
+  for (let i = 0; i < Math.min(5, lines.length); i++) {
+    const cols = parseCSVLine(lines[i], delimiter);
+    const recognized = cols.filter(c => {
+      const norm = c.trim().toUpperCase();
+      return Object.keys(COLUMN_MAPPING).some(k => {
+        const kk = k.toUpperCase();
+        return norm === kk || norm.includes(kk.split(' ')[0]);
+      });
+    });
+    let score = recognized.length;
+    // bonus if includes critical headers
+    const crit = ['PAX', 'FATURAMENTO', 'PGTO', 'DATA DA VENDA'];
+    if (cols.some(c => crit.includes(c.trim().toUpperCase()))) score += 2;
+    if (score > bestScore) {
+      bestScore = score;
+      bestIndex = i;
+    }
+  }
+  return bestIndex;
+};
+
 interface SaleData {
   sale_date: string;
   client_name: string;
@@ -93,15 +145,17 @@ export function useCSVImport() {
   // Preview CSV data without importing
   const previewCSV = async (file: File): Promise<PreviewData> => {
     const text = await file.text();
-    const lines = text.split('\n').filter(line => line.trim() !== '');
+    const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
     
-    if (lines.length < 3) {
-      throw new Error('Arquivo CSV deve ter pelo menos cabeçalho e uma linha de dados');
+    if (lines.length < 2) {
+      throw new Error('Arquivo CSV deve ter cabeçalho e pelo menos uma linha de dados');
     }
 
-    // Get headers from second line (first line is often title)
-    const headerLine = lines[1];
-    const headers = parseCSVLine(headerLine);
+    // Detect delimiter and header row
+    const delimiter = detectDelimiter(lines);
+    const headerIndex = findHeaderIndex(lines, delimiter);
+    const headerLine = lines[headerIndex];
+    const headers = parseCSVLine(headerLine, delimiter);
     const detectedHeaders = headers.filter(h => h.trim() !== '');
 
     // Create column index mapping
@@ -118,42 +172,40 @@ export function useCSVImport() {
     });
 
     // Process sample rows
-    const dataLines = lines.slice(2);
+    const dataLines = lines.slice(headerIndex + 1);
     let totalRevenue = 0;
     let totalProfit = 0;
     const sampleRows: PreviewData['sampleRows'] = [];
 
     for (let i = 0; i < Math.min(5, dataLines.length); i++) {
-      const columns = parseCSVLine(dataLines[i]);
-      
+      const columns = parseCSVLine(dataLines[i], delimiter);
       const clientName = columns[columnIndexes.client_name] || '';
       const revenueStr = columns[columnIndexes.revenue] || '';
       const profitStr = columns[columnIndexes.profit] || '';
       const paymentMethod = columns[columnIndexes.payment_method] || '';
       const status = columns[columnIndexes.status] || '';
       const saleDateStr = columns[columnIndexes.sale_date] || '';
+      const parsedSaleDate = parseDate(saleDateStr) || saleDateStr;
 
       if (clientName && revenueStr) {
         const revenue = parseNumber(revenueStr);
         const profit = parseNumber(profitStr);
-        
         sampleRows.push({
           client_name: clientName,
           revenue,
           profit,
           payment_method: paymentMethod,
           status,
-          sale_date: saleDateStr
+          sale_date: parsedSaleDate
         });
       }
     }
 
     // Calculate totals for all rows
     for (let i = 0; i < dataLines.length; i++) {
-      const columns = parseCSVLine(dataLines[i]);
+      const columns = parseCSVLine(dataLines[i], delimiter);
       const revenueStr = columns[columnIndexes.revenue] || '';
       const profitStr = columns[columnIndexes.profit] || '';
-      
       if (revenueStr) {
         totalRevenue += parseNumber(revenueStr);
         totalProfit += parseNumber(profitStr);
@@ -199,26 +251,29 @@ const clearImports = async (): Promise<void> => {
   }
 };
 
-  const parseCSVLine = (line: string): string[] => {
+  const parseCSVLine = (line: string, delimiter: ',' | ';' = ','): string[] => {
     const result: string[] = [];
     let current = '';
     let inQuotes = false;
-    
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
-      
       if (char === '"') {
-        inQuotes = !inQuotes;
-      } else if (char === ',' && !inQuotes) {
+        // handle double quotes inside quoted field
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i++; // skip escaped quote
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === delimiter && !inQuotes) {
         result.push(current.trim());
         current = '';
       } else {
         current += char;
       }
     }
-    
     result.push(current.trim());
-    return result;
+    return result.map(c => c.replace(/\r$/, ''));
   };
 
   const parseDate = (dateStr: string): string | null => {
@@ -335,9 +390,10 @@ const clearImports = async (): Promise<void> => {
         throw new Error('Arquivo CSV deve ter pelo menos cabeçalho e uma linha de dados');
       }
 
-      // Get headers and create column mapping
-      const headerLine = lines[1];
-      const headers = parseCSVLine(headerLine);
+      // Detect delimiter and header row, then create column mapping
+      const delimiter = detectDelimiter(lines);
+      const headerIndex = findHeaderIndex(lines, delimiter);
+      const headers = parseCSVLine(lines[headerIndex], delimiter);
       
       const columnIndexes: Record<string, number> = {};
       headers.forEach((header, index) => {
@@ -351,9 +407,9 @@ const clearImports = async (): Promise<void> => {
         }
       });
 
-      console.log('Detected column mapping:', columnIndexes);
+      console.log('Detected delimiter:', delimiter, 'headerIndex:', headerIndex, 'column mapping:', columnIndexes);
 
-      const dataLines = lines.slice(2);
+      const dataLines = lines.slice(headerIndex + 1).filter(l => l.trim() !== '');
       const result: ImportResult = { success: 0, errors: [], suppliers: 0 };
       const createdSuppliers = new Set<string>();
 
@@ -361,7 +417,7 @@ const clearImports = async (): Promise<void> => {
         try {
           setProgress(Math.round((i / dataLines.length) * 100));
           
-          const columns = parseCSVLine(dataLines[i]);
+          const columns = parseCSVLine(dataLines[i], delimiter);
           
           // Extract data using header-based mapping
           const clientName = columns[columnIndexes.client_name] || '';
