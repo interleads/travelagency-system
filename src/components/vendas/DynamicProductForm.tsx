@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { useCurrencyInput, useQuantityInput } from "@/lib/utils";
+import { useCurrencyInput, useQuantityInput, parseCurrency, parseQuantity } from "@/lib/utils";
 
 // Componente select reutilizável
 const airlines = [
@@ -248,7 +248,8 @@ const DynamicProductForm: React.FC<{
                   value={adultsInput.displayValue}
                   onChange={(e) => {
                     adultsInput.handleChange(e);
-                    onChange({ ...value, adults: adultsInput.numericValue });
+                    const parsed = parseQuantity(e.target.value);
+                    onChange({ ...value, adults: parsed });
                   }}
                   placeholder="1"
                   required
@@ -261,7 +262,8 @@ const DynamicProductForm: React.FC<{
                   value={childrenInput.displayValue}
                   onChange={(e) => {
                     childrenInput.handleChange(e);
-                    onChange({ ...value, children: childrenInput.numericValue });
+                    const parsed = parseQuantity(e.target.value);
+                    onChange({ ...value, children: parsed });
                   }}
                   placeholder="0"
                 />
@@ -273,7 +275,8 @@ const DynamicProductForm: React.FC<{
                   value={taxValueInput.displayValue}
                   onChange={(e) => {
                     taxValueInput.handleChange(e);
-                    onChange({ ...value, taxValue: taxValueInput.numericValue });
+                    const parsed = parseCurrency(e.target.value);
+                    onChange({ ...value, taxValue: parsed });
                   }}
                   placeholder="R$ 0,00"
                 />
@@ -327,7 +330,8 @@ const DynamicProductForm: React.FC<{
                     value={qtdMilhasInput.displayValue}
                     onChange={(e) => {
                       qtdMilhasInput.handleChange(e);
-                      onChange({ ...value, qtdMilhas: qtdMilhasInput.numericValue });
+                      const parsed = parseQuantity(e.target.value);
+                      onChange({ ...value, qtdMilhas: parsed });
                     }}
                     placeholder="0"
                   />
@@ -339,7 +343,8 @@ const DynamicProductForm: React.FC<{
                     value={custoMilInput.displayValue}
                     onChange={(e) => {
                       custoMilInput.handleChange(e);
-                      onChange({ ...value, custoMil: custoMilInput.numericValue });
+                      const parsed = parseCurrency(e.target.value);
+                      onChange({ ...value, custoMil: parsed });
                     }}
                     placeholder="R$ 0,00"
                   />
@@ -369,7 +374,8 @@ const DynamicProductForm: React.FC<{
                     value={costInput.displayValue}
                     onChange={(e) => {
                       costInput.handleChange(e);
-                      onChange({ ...value, cost: costInput.numericValue });
+                      const parsed = parseCurrency(e.target.value);
+                      onChange({ ...value, cost: parsed });
                     }}
                     placeholder="R$ 0,00"
                   />
@@ -506,7 +512,8 @@ const DynamicProductForm: React.FC<{
             value={quantityInput.displayValue}
             onChange={(e) => {
               quantityInput.handleChange(e);
-              onChange({ ...value, quantity: quantityInput.numericValue });
+              const parsed = parseQuantity(e.target.value);
+              onChange({ ...value, quantity: parsed });
             }}
             placeholder="1"
           />
@@ -518,7 +525,8 @@ const DynamicProductForm: React.FC<{
             value={priceInput.displayValue}
             onChange={(e) => {
               priceInput.handleChange(e);
-              onChange({ ...value, price: priceInput.numericValue });
+              const parsed = parseCurrency(e.target.value);
+              onChange({ ...value, price: parsed });
             }}
             placeholder="R$ 0,00"
           />
