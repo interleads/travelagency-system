@@ -149,29 +149,37 @@ export const useCreateSale = () => {
 
       if (productsError) throw productsError;
 
-      // Insert sale installments
+      // Insert sale installments with duplicate prevention
       if (saleData.installments >= 1) {
-        const baseDate = saleData.sale_date ? new Date(saleData.sale_date) : new Date();
-        const installmentAmount = saleData.total_amount / saleData.installments;
-        
-        const installmentsToInsert = Array.from({ length: saleData.installments }, (_, index) => {
-          const dueDate = new Date(baseDate);
-          dueDate.setMonth(dueDate.getMonth() + index);
-          
-          return {
-            sale_id: sale.id,
-            installment_number: index + 1,
-            due_date: dueDate.toISOString().split('T')[0],
-            amount: installmentAmount,
-            status: 'pending'
-          };
-        });
-
-        const { error: installmentsError } = await supabase
+        // Double-check no installments exist (race condition prevention)
+        const { count } = await supabase
           .from("sale_installments")
-          .insert(installmentsToInsert);
+          .select("*", { count: 'exact', head: true })
+          .eq("sale_id", sale.id);
+          
+        if (count === 0) {
+          const baseDate = saleData.sale_date ? new Date(saleData.sale_date) : new Date();
+          const installmentAmount = saleData.total_amount / saleData.installments;
+          
+          const installmentsToInsert = Array.from({ length: saleData.installments }, (_, index) => {
+            const dueDate = new Date(baseDate);
+            dueDate.setMonth(dueDate.getMonth() + index);
+            
+            return {
+              sale_id: sale.id,
+              installment_number: index + 1,
+              due_date: dueDate.toISOString().split('T')[0],
+              amount: installmentAmount,
+              status: 'pending'
+            };
+          });
 
-        if (installmentsError) throw installmentsError;
+          const { error: installmentsError } = await supabase
+            .from("sale_installments")
+            .insert(installmentsToInsert);
+
+          if (installmentsError) throw installmentsError;
+        }
       }
 
       // Insert financial transaction (revenue)

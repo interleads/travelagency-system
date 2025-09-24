@@ -145,34 +145,50 @@ export function SalesHistoryTable() {
   const [deletingSale, setDeletingSale] = useState<any>(null);
   const createInstallments = useCreateInstallments();
 
-  // Backfill installments for existing sales
+  // Backfill installments for existing sales (executar apenas uma vez por venda)
+  const [processedSales, setProcessedSales] = React.useState<Set<string>>(new Set());
+  
   React.useEffect(() => {
     const backfillInstallments = async () => {
       if (sales.length === 0) return;
       
       for (const sale of sales) {
-        // Check if sale has installments
-        const { data: existingInstallments } = await supabase
-          .from("sale_installments")
-          .select("id")
-          .eq("sale_id", sale.id)
-          .limit(1);
+        // Skip if already processed
+        if (processedSales.has(sale.id)) continue;
+        
+        try {
+          // Check with COUNT for more robust verification
+          const { count, error } = await supabase
+            .from("sale_installments")
+            .select("*", { count: 'exact', head: true })
+            .eq("sale_id", sale.id);
+            
+          if (error) {
+            console.error(`Error checking installments for sale ${sale.id}:`, error);
+            continue;
+          }
           
-        if (!existingInstallments || existingInstallments.length === 0) {
-          // Create missing installments
-          const baseDate = sale.sale_date ? new Date(sale.sale_date) : new Date(sale.created_at);
-          await createInstallments.mutateAsync({
-            saleId: sale.id,
-            installments: sale.installments || 1,
-            totalAmount: Number(sale.total_amount),
-            firstDueDate: baseDate
-          });
+          // Only create if no installments exist
+          if (count === 0) {
+            const baseDate = sale.sale_date ? new Date(sale.sale_date) : new Date(sale.created_at);
+            await createInstallments.mutateAsync({
+              saleId: sale.id,
+              installments: sale.installments || 1,
+              totalAmount: Number(sale.total_amount),
+              firstDueDate: baseDate
+            });
+          }
+          
+          // Mark as processed
+          setProcessedSales(prev => new Set(prev).add(sale.id));
+        } catch (error) {
+          console.error(`Error in backfill for sale ${sale.id}:`, error);
         }
       }
     };
 
     backfillInstallments();
-  }, [sales, createInstallments]);
+  }, [sales, createInstallments, processedSales]);
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('pt-BR', { 
