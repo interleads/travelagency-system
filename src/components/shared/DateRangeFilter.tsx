@@ -41,19 +41,16 @@ const PRESETS = [
 export function DateRangeFilter() {
   const { dateRange, setDateRange } = useDateRangeFilter();
   const [selectedPreset, setSelectedPreset] = useState(0);
-  const [showCustomCalendar, setShowCustomCalendar] = useState(false);
 
   const handlePresetClick = (idx: number) => {
     setSelectedPreset(idx);
     const range = PRESETS[idx].getRange();
     setDateRange(range);
-    setShowCustomCalendar(idx === 3);
   };
 
   const handleCustomRange = (range: DateRange | undefined) => {
     if (range) {
       setDateRange(range);
-      setShowCustomCalendar(true);
       setSelectedPreset(3);
     }
   };
@@ -72,7 +69,7 @@ export function DateRangeFilter() {
           {formatDateRange()}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="end">
+      <PopoverContent className="p-0 min-w-[680px]" align="end">
         <div className="flex">
           <div className="border-r">
             <div className="p-3 space-y-1">
@@ -88,15 +85,13 @@ export function DateRangeFilter() {
               ))}
             </div>
           </div>
-          {showCustomCalendar && (
-            <Calendar
-              mode="range"
-              selected={dateRange}
-              onSelect={handleCustomRange}
-              numberOfMonths={2}
-              className="p-3 pointer-events-auto"
-            />
-          )}
+          <Calendar
+            mode="range"
+            selected={dateRange}
+            onSelect={handleCustomRange}
+            numberOfMonths={2}
+            className="p-3 pointer-events-auto"
+          />
         </div>
       </PopoverContent>
     </Popover>
