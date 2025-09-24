@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useSales } from "@/hooks/useSales";
+import { useSales, type SaleProductDb } from "@/hooks/useSales";
+import { useDateRangeFilter } from "@/components/shared/useDateRangeFilter";
 import { TrendingUp, TrendingDown, DollarSign, Calculator, BarChart3 } from "lucide-react";
 
 interface SalesOverviewCardsProps {
@@ -8,15 +9,15 @@ interface SalesOverviewCardsProps {
 }
 
 export function SalesOverviewCards({ activeTab }: SalesOverviewCardsProps) {
-  const { data: sales = [], isLoading } = useSales();
+  const { dateRange } = useDateRangeFilter();
+  const { data: sales = [], isLoading } = useSales(dateRange);
   
   const totalSales = sales.length;
   const totalRevenue = sales.reduce((sum, sale) => sum + Number(sale.total_amount), 0);
-  const averageTicket = totalSales > 0 ? totalRevenue / totalSales : 0;
   
   // Calcular custo total e lucro bruto
   const totalCost = sales.reduce((sum, sale) => {
-    const saleCost = sale.sale_products?.reduce((productSum: number, product: any) => {
+    const saleCost = sale.sale_products?.reduce((productSum: number, product: SaleProductDb) => {
       if (product.type === 'passagem') {
         if (product.miles && product.miles_cost) {
           return productSum + Number(product.miles_cost);
