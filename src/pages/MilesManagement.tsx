@@ -14,6 +14,8 @@ import { MilesDashboard } from '@/components/miles/MilesDashboard';
 import { MilesPurchaseForm } from '@/components/miles/MilesPurchaseForm';
 import { SuppliersTable } from '@/components/finance/SuppliersTable';
 import { useToast } from "@/hooks/use-toast";
+import { DateRangeFilter } from '@/components/shared/DateRangeFilter';
+import { DateRangeFilterProvider } from '@/components/shared/useDateRangeFilter';
 
 const MilesManagement = () => {
   const { toast } = useToast();
@@ -29,24 +31,28 @@ const MilesManagement = () => {
   };
 
   return (
-    <DashboardLayout>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold text-gray-800">Gestão de Milhas</h2>
-        <Dialog open={isPurchaseDialogOpen} onOpenChange={setIsPurchaseDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2" />
-              Comprar Milhas
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Comprar Milhas</DialogTitle>
-            </DialogHeader>
-            <MilesPurchaseForm onSubmit={handlePurchaseSubmit} />
-          </DialogContent>
-        </Dialog>
-      </div>
+    <DateRangeFilterProvider>
+      <DashboardLayout>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <h2 className="text-3xl font-bold text-gray-800">Gestão de Milhas</h2>
+          <div className="flex gap-2">
+            <DateRangeFilter />
+            <Dialog open={isPurchaseDialogOpen} onOpenChange={setIsPurchaseDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="mr-2" />
+                  Comprar Milhas
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Comprar Milhas</DialogTitle>
+                </DialogHeader>
+                <MilesPurchaseForm onSubmit={handlePurchaseSubmit} />
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
       
       <Tabs defaultValue="inventory">
         <TabsList className="grid w-full grid-cols-2 mb-8">
@@ -63,6 +69,7 @@ const MilesManagement = () => {
         </TabsContent>
       </Tabs>
     </DashboardLayout>
+  </DateRangeFilterProvider>
   );
 };
 

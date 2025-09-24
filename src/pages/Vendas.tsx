@@ -19,6 +19,8 @@ import VendasForm from "@/components/vendas/VendasForm";
 import { SalesOverviewCards } from "@/components/vendas/SalesOverviewCards";
 import { SalesHistoryTable } from "@/components/vendas/SalesHistoryTable";
 import CRMKanban from "@/components/crm/CRMKanban";
+import { DateRangeFilter } from '@/components/shared/DateRangeFilter';
+import { DateRangeFilterProvider } from '@/components/shared/useDateRangeFilter';
 
 const Vendas = () => {
   const { toast } = useToast();
@@ -34,31 +36,33 @@ const Vendas = () => {
   };
 
   return (
-    <DashboardLayout>
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-3xl font-bold">Módulo Vendas</h2>
-          <p className="text-muted-foreground">Gerencie vendas, clientes e relatórios em um só lugar</p>
+    <DateRangeFilterProvider>
+      <DashboardLayout>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <div>
+            <h2 className="text-3xl font-bold">Módulo Vendas</h2>
+            <p className="text-muted-foreground">Gerencie vendas, clientes e relatórios em um só lugar</p>
+          </div>
+          <div className="flex gap-2">
+            <DateRangeFilter />
+            <Dialog open={isSaleDialogOpen} onOpenChange={setIsSaleDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="lg" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
+                  <Plus className="h-4 w-4" />
+                  Registrar Nova Venda
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader className="bg-primary text-primary-foreground p-6 -m-6 mb-6 rounded-t-lg">
+                  <DialogTitle className="text-xl font-semibold">Registrar Nova Venda</DialogTitle>
+                </DialogHeader>
+                <div className="px-2">
+                  <VendasForm />
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Dialog open={isSaleDialogOpen} onOpenChange={setIsSaleDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="lg" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
-                <Plus className="h-4 w-4" />
-                Registrar Nova Venda
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader className="bg-primary text-primary-foreground p-6 -m-6 mb-6 rounded-t-lg">
-                <DialogTitle className="text-xl font-semibold">Registrar Nova Venda</DialogTitle>
-              </DialogHeader>
-              <div className="px-2">
-                <VendasForm />
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
       
       <SalesOverviewCards />
       
@@ -98,6 +102,7 @@ const Vendas = () => {
         </TabsContent>
       </Tabs>
     </DashboardLayout>
+  </DateRangeFilterProvider>
   );
 };
 

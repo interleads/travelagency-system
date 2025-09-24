@@ -17,8 +17,9 @@ import { CashFlowTableReal } from '@/components/finance/CashFlowTableReal';
 import { useAddTransaction } from '@/hooks/useTransactions';
 import { FinanceOverviewCards } from '@/components/finance/FinanceOverviewCards';
 import { FinanceChart } from '@/components/finance/FinanceChart';
-import { RecentTransactionsTable } from '@/components/finance/RecentTransactionsTable';
-import { AccountsManagement } from '@/components/finance/AccountsManagement';
+import { UnifiedAccountsTable } from '@/components/finance/UnifiedAccountsTable';
+import { DateRangeFilter } from '@/components/shared/DateRangeFilter';
+import { DateRangeFilterProvider } from '@/components/shared/useDateRangeFilter';
 
 const Finance = () => {
   const { toast } = useToast();
@@ -43,47 +44,47 @@ const Finance = () => {
   };
 
   return (
-    <DashboardLayout>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold text-gray-800">Módulo Financeiro</h2>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2" />
-              Nova Transação
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Nova Transação</DialogTitle>
-            </DialogHeader>
-            <TransactionForm onSubmit={handleTransactionSubmit} />
-          </DialogContent>
-        </Dialog>
-      </div>
-      
-      <Tabs defaultValue="financial">
-        <TabsList className="grid w-full grid-cols-2 mb-8">
-          <TabsTrigger value="financial">Financeiro</TabsTrigger>
-          <TabsTrigger value="accounts">Contas</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="financial" className="space-y-6">
-          <FinanceOverviewCards />
-          <FinanceChart />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <RecentTransactionsTable />
-            <div>
-              <CashFlowTableReal />
-            </div>
+    <DateRangeFilterProvider>
+      <DashboardLayout>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <h2 className="text-3xl font-bold text-gray-800">Módulo Financeiro</h2>
+          <div className="flex gap-2">
+            <DateRangeFilter />
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="mr-2" />
+                  Nova Transação
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Nova Transação</DialogTitle>
+                </DialogHeader>
+                <TransactionForm onSubmit={handleTransactionSubmit} />
+              </DialogContent>
+            </Dialog>
           </div>
-        </TabsContent>
+        </div>
+      
+        <Tabs defaultValue="financial">
+          <TabsList className="grid w-full grid-cols-2 mb-8">
+            <TabsTrigger value="financial">Fluxo de Caixa</TabsTrigger>
+            <TabsTrigger value="accounts">Contas</TabsTrigger>
+          </TabsList>
         
-        <TabsContent value="accounts">
-          <AccountsManagement />
-        </TabsContent>
-      </Tabs>
-    </DashboardLayout>
+          <TabsContent value="financial" className="space-y-6">
+            <FinanceOverviewCards />
+            <FinanceChart />
+            <CashFlowTableReal />
+          </TabsContent>
+        
+          <TabsContent value="accounts">
+            <UnifiedAccountsTable />
+          </TabsContent>
+        </Tabs>
+      </DashboardLayout>
+    </DateRangeFilterProvider>
   );
 };
 
