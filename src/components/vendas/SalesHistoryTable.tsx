@@ -74,14 +74,14 @@ function SaleRow({
             )}
           </Button>
         </TableCell>
-        <TableCell className="font-medium">
+        <TableCell className="text-center font-medium">
           {formatDate(sale.sale_date || sale.created_at)}
         </TableCell>
-        <TableCell>{sale.client_name}</TableCell>
-        <TableCell className="max-w-[200px]">
+        <TableCell className="text-center">{sale.client_name}</TableCell>
+        <TableCell className="text-center max-w-[200px]">
           {getProductTypesSummary(sale.sale_products)}
         </TableCell>
-        <TableCell>
+        <TableCell className="text-center">
           <Badge variant="outline">{sale.payment_method}</Badge>
         </TableCell>
         <TableCell className="text-center">
@@ -95,7 +95,7 @@ function SaleRow({
         <TableCell className="text-right font-medium">
           {formatCurrency(Number(sale.total_amount))}
         </TableCell>
-        <TableCell>
+        <TableCell className="text-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="p-1 h-6 w-6">
@@ -160,7 +160,7 @@ export function SalesHistoryTable() {
     
     const types = [...new Set(products.map(p => p.type))];
     return (
-      <div className="flex flex-wrap gap-1">
+      <div className="flex flex-wrap gap-1 justify-center">
         {types.slice(0, 2).map(type => (
           <Badge 
             key={type} 
