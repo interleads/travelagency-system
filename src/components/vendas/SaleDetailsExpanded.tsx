@@ -175,6 +175,14 @@ export function SaleDetailsExpanded({ sale }: SaleDetailsExpandedProps) {
                     </div>
                   )}
 
+                  {/* Localizador */}
+                  {product.locator && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>🎫</span>
+                      <span className="font-mono">{product.locator}</span>
+                    </div>
+                  )}
+
                   {product.type === 'veiculo' && product.vehicle_category && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <span>🚗</span>

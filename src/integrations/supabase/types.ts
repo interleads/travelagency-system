@@ -183,6 +183,7 @@ export type Database = {
       sale_products: {
         Row: {
           airline: string | null
+          card_taxes: string | null
           checkin_date: string | null
           checkout_date: string | null
           cost: number | null
@@ -205,11 +206,13 @@ export type Database = {
           return_date: string | null
           sale_id: string
           supplier_id: string | null
+          tax_value: number | null
           type: string
           vehicle_category: string | null
         }
         Insert: {
           airline?: string | null
+          card_taxes?: string | null
           checkin_date?: string | null
           checkout_date?: string | null
           cost?: number | null
@@ -232,11 +235,13 @@ export type Database = {
           return_date?: string | null
           sale_id: string
           supplier_id?: string | null
+          tax_value?: number | null
           type: string
           vehicle_category?: string | null
         }
         Update: {
           airline?: string | null
+          card_taxes?: string | null
           checkin_date?: string | null
           checkout_date?: string | null
           cost?: number | null
@@ -259,6 +264,7 @@ export type Database = {
           return_date?: string | null
           sale_id?: string
           supplier_id?: string | null
+          tax_value?: number | null
           type?: string
           vehicle_category?: string | null
         }

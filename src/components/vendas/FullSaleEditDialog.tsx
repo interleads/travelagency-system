@@ -72,6 +72,9 @@ export function FullSaleEditDialog({ sale, open, onOpenChange }: FullSaleEditDia
                 cobertura: p.coverage_type || '',
                 details: p.details || '',
                 fornecedor: p.fornecedor || '',
+                // Map tax-related fields
+                taxValue: Number(p.tax_value || 0),
+                cardTaxes: p.card_taxes || '',
                 // Map miles-related fields that were missing
                 useOwnMiles: p.miles && p.miles > 0,
                 milesSourceType: p.miles && p.miles > 0 ? "estoque" : undefined,
@@ -138,6 +141,9 @@ export function FullSaleEditDialog({ sale, open, onOpenChange }: FullSaleEditDia
                 cobertura: p.coverage_type || '',
                 details: p.details || '',
                 fornecedor: p.fornecedor || '',
+                // Map tax-related fields
+                taxValue: Number(p.tax_value || 0),
+                cardTaxes: p.card_taxes || '',
                 // Map miles-related fields that were missing
                 useOwnMiles: p.miles && p.miles > 0,
                 milesSourceType: p.miles && p.miles > 0 ? "estoque" : undefined,

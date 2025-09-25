@@ -35,6 +35,8 @@ export interface SaleProductDb {
   dataPasseio?: string; // Data do passeio
   duracao?: string; // Duração do passeio/serviço
   locator?: string; // Campo localizador
+  tax_value?: number; // Valor das taxas
+  card_taxes?: string; // Informações do cartão das taxas
   created_at: string;
 }
 
@@ -216,7 +218,10 @@ export const useCreateSale = () => {
           checkout_date: product.checkout || null,
           vehicle_category: product.categoria,
           rental_period: product.periodo,
-          coverage_type: product.cobertura
+          coverage_type: product.cobertura,
+          locator: product.locator || null,
+          tax_value: product.taxValue || null,
+          card_taxes: product.cardTaxes || null
         };
       });
 
@@ -397,7 +402,10 @@ export const useUpdateSale = () => {
             checkout_date: product.checkout || null,
             vehicle_category: product.categoria,
             rental_period: product.periodo,
-            coverage_type: product.cobertura
+            coverage_type: product.cobertura,
+            locator: product.locator || null,
+            tax_value: product.taxValue || null,
+            card_taxes: product.cardTaxes || null
           };
         });
 
