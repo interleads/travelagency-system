@@ -20,17 +20,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useAddSupplier } from "@/hooks/useSuppliers";
 
 const formSchema = z.object({
   name: z.string().min(2, "Nome deve ter no mínimo 2 caracteres"),
   contact: z.string().min(1, "Contato é obrigatório"),
+  accountType: z.string().min(1, "Tipo de conta é obrigatório"),
   program: z.string().min(1, "Programa é obrigatório"),
+  status: z.string().min(1, "Status é obrigatório"),
   notes: z.string().optional(),
 });
 
 interface SupplierFormProps {
   onSubmit: (data: z.infer<typeof formSchema>) => void;
+  defaultValues?: Partial<z.infer<typeof formSchema>>;
 }
 
 const programs = [
@@ -41,33 +43,34 @@ const programs = [
   "Outros"
 ];
 
-export function SupplierForm({ onSubmit }: SupplierFormProps) {
-  const addSupplier = useAddSupplier();
-  
+const accountTypes = [
+  "Pessoal",
+  "Comercial",
+  "Empresa",
+  "Outros"
+];
+
+const statuses = [
+  "Ativo",
+  "Inativo"
+];
+
+export function SupplierForm({ onSubmit, defaultValues }: SupplierFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      contact: "",
-      program: "",
-      notes: "",
+      name: defaultValues?.name || "",
+      contact: defaultValues?.contact || "",
+      accountType: defaultValues?.accountType || "",
+      program: defaultValues?.program || "",
+      status: defaultValues?.status || "Ativo",
+      notes: defaultValues?.notes || "",
     },
   });
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      const supplierData = {
-        name: values.name,
-        contact: values.contact,
-        program: values.program,
-        notes: values.notes || undefined
-      };
-      await addSupplier.mutateAsync(supplierData);
-      onSubmit(values);
-      form.reset();
-    } catch (error) {
-      console.error("Error adding supplier:", error);
-    }
+    onSubmit(values);
+    form.reset();
   };
 
   return (
@@ -104,6 +107,31 @@ export function SupplierForm({ onSubmit }: SupplierFormProps) {
 
           <FormField
             control={form.control}
+            name="accountType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de Conta</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {accountTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="program"
             render={({ field }) => (
               <FormItem>
@@ -118,6 +146,31 @@ export function SupplierForm({ onSubmit }: SupplierFormProps) {
                     {programs.map((program) => (
                       <SelectItem key={program} value={program}>
                         {program}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Status</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o status" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {statuses.map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {status}
                       </SelectItem>
                     ))}
                   </SelectContent>

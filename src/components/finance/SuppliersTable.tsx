@@ -18,17 +18,39 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, User, Loader2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Plus, User, Loader2, MoreVertical, ChevronDown, ChevronRight, Edit, Trash2, Eye } from "lucide-react";
 import { SupplierForm } from './SupplierForm';
+import { EditSupplierDialog } from './EditSupplierDialog';
+import { DeleteSupplierDialog } from './DeleteSupplierDialog';
+import { SupplierDetailsExpanded } from './SupplierDetailsExpanded';
 import { useToast } from "@/hooks/use-toast";
 import { useSuppliers, useAddSupplier, type Supplier } from '@/hooks/useSuppliers';
 
 export function SuppliersTable() {
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [expandedSuppliers, setExpandedSuppliers] = useState<Set<string>>(new Set());
+  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
+  const [deletingSupplier, setDeletingSupplier] = useState<Supplier | null>(null);
   
   const { data: suppliers = [], isLoading } = useSuppliers();
   const addSupplier = useAddSupplier();
+
+  const toggleSupplierExpansion = (supplierId: string) => {
+    const newExpanded = new Set(expandedSuppliers);
+    if (newExpanded.has(supplierId)) {
+      newExpanded.delete(supplierId);
+    } else {
+      newExpanded.add(supplierId);
+    }
+    setExpandedSuppliers(newExpanded);
+  };
 
   const handleSupplierSubmit = async (data: any) => {
     console.log('Novo fornecedor:', data);
@@ -148,6 +170,7 @@ export function SuppliersTable() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12"></TableHead>
                   <TableHead>Nome</TableHead>
                   <TableHead>Contato</TableHead>
                   <TableHead>Tipo de Conta</TableHead>
@@ -155,35 +178,109 @@ export function SuppliersTable() {
                   <TableHead>Status</TableHead>
                   <TableHead>Último Uso</TableHead>
                   <TableHead>Observações</TableHead>
+                  <TableHead className="w-12"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {suppliers.map((supplier: any) => (
-                  <TableRow key={supplier.id}>
-                    <TableCell className="font-medium">{supplier.name}</TableCell>
-                    <TableCell>{supplier.contact}</TableCell>
-                    <TableCell>{supplier.account_type}</TableCell>
-                    <TableCell>
-                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                        {supplier.program}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(supplier.status)}`}>
-                        {supplier.status}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {supplier.last_used ? new Date(supplier.last_used).toLocaleDateString() : 'Nunca'}
-                    </TableCell>
-                    <TableCell className="max-w-xs truncate">{supplier.notes || '-'}</TableCell>
-                  </TableRow>
+                  <React.Fragment key={supplier.id}>
+                    <TableRow>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleSupplierExpansion(supplier.id)}
+                        >
+                          {expandedSuppliers.has(supplier.id) ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </TableCell>
+                      <TableCell className="font-medium">{supplier.name}</TableCell>
+                      <TableCell>{supplier.contact}</TableCell>
+                      <TableCell>{supplier.account_type}</TableCell>
+                      <TableCell>
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                          {supplier.program}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(supplier.status)}`}>
+                          {supplier.status}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {supplier.last_used ? new Date(supplier.last_used).toLocaleDateString() : 'Nunca'}
+                      </TableCell>
+                      <TableCell className="max-w-xs truncate">{supplier.notes || '-'}</TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => toggleSupplierExpansion(supplier.id)}
+                            >
+                              <Eye className="mr-2 h-4 w-4" />
+                              Ver Histórico
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => setEditingSupplier(supplier)}
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => setDeletingSupplier(supplier)}
+                              className="text-red-600 focus:text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                    {expandedSuppliers.has(supplier.id) && (
+                      <TableRow>
+                        <TableCell colSpan={9} className="p-0">
+                          <SupplierDetailsExpanded
+                            supplierId={supplier.id}
+                            supplierName={supplier.name}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
                 ))}
               </TableBody>
             </Table>
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Supplier Dialog */}
+      {editingSupplier && (
+        <EditSupplierDialog
+          supplier={editingSupplier}
+          open={!!editingSupplier}
+          onOpenChange={(open) => !open && setEditingSupplier(null)}
+        />
+      )}
+
+      {/* Delete Supplier Dialog */}
+      {deletingSupplier && (
+        <DeleteSupplierDialog
+          supplier={deletingSupplier}
+          open={!!deletingSupplier}
+          onOpenChange={(open) => !open && setDeletingSupplier(null)}
+        />
+      )}
     </div>
   );
 }

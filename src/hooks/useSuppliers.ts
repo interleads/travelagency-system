@@ -5,7 +5,9 @@ export interface Supplier {
   id: string;
   name: string;
   contact: string;
+  account_type: string;
   program: string;
+  status: string;
   notes?: string;
   last_used?: string;
   created_at: string;
@@ -34,10 +36,10 @@ export const useAddSupplier = () => {
       const { error } = await supabase.from("suppliers").insert([{
         name: data.name,
         contact: data.contact,
+        account_type: data.account_type,
         program: data.program,
+        status: data.status,
         notes: data.notes,
-        account_type: '', // Set empty string for backward compatibility
-        status: 'Ativo' // Set default status
       }]);
       if (error) throw error;
     },
