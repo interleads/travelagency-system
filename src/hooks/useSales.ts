@@ -15,6 +15,7 @@ export interface SaleProductDb {
   price: number;
   cost: number;
   details?: string;
+  fornecedor?: string; // Campo fornecedor para todos os produtos
   airline?: string;
   passengers?: string;
   origin?: string;
@@ -25,9 +26,14 @@ export interface SaleProductDb {
   miles_cost?: number;
   checkin_date?: string;
   checkout_date?: string;
+  checkin?: string; // Alias para checkin_date
+  checkout?: string; // Alias para checkout_date
   vehicle_category?: string;
   rental_period?: string;
+  periodo?: string; // Alias para rental_period
   coverage_type?: string;
+  dataPasseio?: string; // Data do passeio
+  duracao?: string; // Duração do passeio/serviço
   created_at: string;
 }
 
@@ -130,6 +136,7 @@ export const useCreateSale = () => {
           price: product.price,
           cost: product.cost || 0,
           details: product.details || '',
+          fornecedor: product.fornecedor || '', // Campo fornecedor
           // Map form fields to database fields
           airline: product.airline,
           passengers: product.adults && product.children ? `${product.adults} adultos, ${product.children} crianças` : '',

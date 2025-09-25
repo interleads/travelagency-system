@@ -27,6 +27,7 @@ export interface SaleProduct {
   price: number;
   cost: number;
   details: string;
+  fornecedor?: string; // Campo fornecedor para todos os produtos
   // Campos só para passagem
   ticketType?: "milhas" | "tarifada";
   airline?: string;
@@ -49,29 +50,31 @@ export interface SaleProduct {
 export const generateProductName = (product: SaleProduct): string => {
   if (!product.type) return "";
   
+  const fornecedorSuffix = product.fornecedor ? ` - ${product.fornecedor}` : "";
+  
   switch (product.type) {
     case "passagem":
       if (product.airline && product.origin && product.destination) {
-        return `Passagem ${product.airline} ${product.origin}-${product.destination}`;
+        return `Passagem ${product.airline} ${product.origin}-${product.destination}${fornecedorSuffix}`;
       }
-      return `Passagem ${product.airline || ""}`.trim();
+      return `Passagem ${product.airline || ""}${fornecedorSuffix}`.trim();
     case "hotel":
-      return `Hotel ${product.destination || ""}`.trim();
+      return `Hotel ${product.destination || ""}${fornecedorSuffix}`.trim();
     case "veiculo":
-      return `Veículo ${product.categoria || ""}`.trim();
+      return `Veículo ${product.categoria || ""}${fornecedorSuffix}`.trim();
     case "seguro":
-      return `Seguro Viagem ${product.cobertura || ""}`.trim();
+      return `Seguro Viagem ${product.cobertura || ""}${fornecedorSuffix}`.trim();
     case "transfer":
       if (product.origem && product.destino) {
-        return `Transfer ${product.origem}-${product.destino}`;
+        return `Transfer ${product.origem}-${product.destino}${fornecedorSuffix}`;
       }
-      return "Transfer";
+      return `Transfer${fornecedorSuffix}`;
     case "passeios":
-      return `Passeio ${product.local || ""}`.trim();
+      return `Passeio ${product.local || ""}${fornecedorSuffix}`.trim();
     case "outros":
-      return "Outros";
+      return `Outros${fornecedorSuffix}`;
     default:
-      return String(product.type).charAt(0).toUpperCase() + String(product.type).slice(1);
+      return String(product.type).charAt(0).toUpperCase() + String(product.type).slice(1) + fornecedorSuffix;
   }
 };
 
@@ -83,6 +86,7 @@ export const EmptyProduct: SaleProduct = {
   price: 0,
   cost: 0,
   details: "",
+  fornecedor: "", // Campo fornecedor inicializado vazio
   ticketType: "milhas",
   airline: "",
   adults: 1,
@@ -195,7 +199,7 @@ const DynamicProductForm: React.FC<{
     if (autoName && autoName !== value.name) {
       onChange({ ...value, name: autoName });
     }
-  }, [value.type, value.airline, value.origin, value.destination, value.categoria, value.cobertura, value.local, value.origem, value.destino]);
+  }, [value.type, value.airline, value.origin, value.destination, value.categoria, value.cobertura, value.local, value.origem, value.destino, value.fornecedor]);
 
   // Render extra fields REVISADO
   const renderExtraFields = () => {
@@ -398,11 +402,21 @@ const DynamicProductForm: React.FC<{
               </div>
             )}
 
+            {/* Campo Fornecedor para passagens */}
+            <div>
+              <Label>Fornecedor</Label>
+              <Input value={value.fornecedor || ""} onChange={e => onChange({ ...value, fornecedor: e.target.value })} placeholder="Ex: CVC, Decolar, etc" />
+            </div>
+
           </div>
         );
       case "hotel":
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div>
+              <Label>Fornecedor</Label>
+              <Input value={value.fornecedor || ""} onChange={e => onChange({ ...value, fornecedor: e.target.value })} placeholder="Ex: Booking, Expedia, etc" />
+            </div>
             <div>
               <Label>Check-in</Label>
               <Input type="date" value={value.checkin || ""} onChange={e => onChange({ ...value, checkin: e.target.value })} />
@@ -415,7 +429,11 @@ const DynamicProductForm: React.FC<{
         );
       case "veiculo":
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <div>
+              <Label>Fornecedor</Label>
+              <Input value={value.fornecedor || ""} onChange={e => onChange({ ...value, fornecedor: e.target.value })} placeholder="Ex: Hertz, Localiza, etc" />
+            </div>
             <div>
               <Label>Categoria do Veículo</Label>
               <Input value={value.categoria || ""} onChange={e => onChange({ ...value, categoria: e.target.value })} />
@@ -428,14 +446,24 @@ const DynamicProductForm: React.FC<{
         );
       case "seguro":
         return (
-          <div>
-            <Label>Tipo de Cobertura</Label>
-            <Input value={value.cobertura || ""} onChange={e => onChange({ ...value, cobertura: e.target.value })} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div>
+              <Label>Fornecedor</Label>
+              <Input value={value.fornecedor || ""} onChange={e => onChange({ ...value, fornecedor: e.target.value })} placeholder="Ex: Porto Seguro, Assist Card, etc" />
+            </div>
+            <div>
+              <Label>Tipo de Cobertura</Label>
+              <Input value={value.cobertura || ""} onChange={e => onChange({ ...value, cobertura: e.target.value })} />
+            </div>
           </div>
         );
       case "transfer":
         return (
           <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Fornecedor</Label>
+              <Input value={value.fornecedor || ""} onChange={e => onChange({ ...value, fornecedor: e.target.value })} placeholder="Ex: Easy Transfer, etc" />
+            </div>
             <div>
               <Label>Origem</Label>
               <Input value={value.origem || ""} onChange={e => onChange({ ...value, origem: e.target.value })} />
@@ -458,6 +486,10 @@ const DynamicProductForm: React.FC<{
         return (
           <div className="grid grid-cols-2 gap-3">
             <div>
+              <Label>Fornecedor</Label>
+              <Input value={value.fornecedor || ""} onChange={e => onChange({ ...value, fornecedor: e.target.value })} placeholder="Ex: CityTour, GetYourGuide, etc" />
+            </div>
+            <div>
               <Label>Local do Passeio</Label>
               <Input value={value.local || ""} onChange={e => onChange({ ...value, local: e.target.value })} />
             </div>
@@ -473,6 +505,13 @@ const DynamicProductForm: React.FC<{
               <Label>Nº de Pessoas</Label>
               <Input type="number" value={value.numeroPessoas || ""} onChange={e => onChange({ ...value, numeroPessoas: e.target.value })} />
             </div>
+          </div>
+        );
+      case "outros":
+        return (
+          <div>
+            <Label>Fornecedor</Label>
+            <Input value={value.fornecedor || ""} onChange={e => onChange({ ...value, fornecedor: e.target.value })} placeholder="Ex: Fornecedor do produto/serviço" />
           </div>
         );
       default:

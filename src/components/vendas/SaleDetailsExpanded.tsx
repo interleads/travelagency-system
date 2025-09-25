@@ -144,6 +144,13 @@ export function SaleDetailsExpanded({ sale }: SaleDetailsExpandedProps) {
                     </div>
                   </div>
 
+                  {/* Fornecedor - destacado quando disponível */}
+                  {product.fornecedor && (
+                    <div className="text-sm font-medium text-primary">
+                      📋 {product.fornecedor}
+                    </div>
+                  )}
+
                   {product.details && (
                     <div className="text-sm text-muted-foreground">{product.details}</div>
                   )}
@@ -154,12 +161,34 @@ export function SaleDetailsExpanded({ sale }: SaleDetailsExpandedProps) {
                     </div>
                   )}
 
+                  {/* Período/Datas quando disponível */}
                   {product.departure_date && (
                     <div className="text-sm text-muted-foreground">
                       <div>Partida: {formatDate(product.departure_date)}</div>
                       {product.return_date && (
                         <div>Retorno: {formatDate(product.return_date)}</div>
                       )}
+                    </div>
+                  )}
+
+                  {/* Datas específicas por tipo de produto */}
+                  {product.checkin && product.checkout && (
+                    <div className="text-sm text-muted-foreground">
+                      <div>Check-in: {formatDate(product.checkin)}</div>
+                      <div>Check-out: {formatDate(product.checkout)}</div>
+                    </div>
+                  )}
+
+                  {product.dataPasseio && (
+                    <div className="text-sm text-muted-foreground">
+                      <div>Data: {formatDate(product.dataPasseio)}</div>
+                      {product.duracao && <div>Duração: {product.duracao}</div>}
+                    </div>
+                  )}
+
+                  {product.periodo && (
+                    <div className="text-sm text-muted-foreground">
+                      Período: {product.periodo}
                     </div>
                   )}
                 </div>
