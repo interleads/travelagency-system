@@ -64,6 +64,23 @@ export function SaleDetailsExpanded({ sale }: SaleDetailsExpandedProps) {
     }
   };
 
+  // Cálculo do custo total
+  const totalCost = sale.sale_products?.reduce((sum, product) => {
+    if (product.type === 'passagem' && product.miles && product.miles_cost) {
+      // Para passagens com milhas
+      const milhasCost = (Number(product.miles) / 1000) * Number(product.miles_cost);
+      return sum + milhasCost;
+    }
+    // Para outros produtos
+    return sum + (Number(product.cost) || 0);
+  }, 0) || 0;
+
+  // Cálculos financeiros
+  const saleValue = Number(sale.total_amount);
+  const profit = saleValue - totalCost;
+  const profitMargin = saleValue > 0 ? (profit / saleValue) * 100 : 0;
+
+  // Para controle de parcelas
   const totalPaid = installments.filter(i => i.status === 'paid').reduce((sum, i) => sum + Number(i.amount), 0);
   const totalPending = installments.filter(i => i.status !== 'paid').reduce((sum, i) => sum + Number(i.amount), 0);
 
@@ -73,26 +90,30 @@ export function SaleDetailsExpanded({ sale }: SaleDetailsExpandedProps) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
-            <div className="text-sm text-muted-foreground">Total do Contrato</div>
-            <div className="text-lg font-bold text-primary">{formatCurrency(Number(sale.total_amount))}</div>
+            <div className="text-sm text-muted-foreground">Valor da Venda</div>
+            <div className="text-lg font-bold text-primary">{formatCurrency(saleValue)}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <div className="text-sm text-muted-foreground">Total Pago</div>
-            <div className="text-lg font-bold text-green-600">{formatCurrency(totalPaid)}</div>
+            <div className="text-sm text-muted-foreground">Custo</div>
+            <div className="text-lg font-bold text-orange-600">{formatCurrency(totalCost)}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <div className="text-sm text-muted-foreground">Custo Base</div>
-            <div className="text-lg font-bold text-orange-600">{formatCurrency(Number(sale.miles_cost || 0))}</div>
+            <div className="text-sm text-muted-foreground">Lucro</div>
+            <div className={`text-lg font-bold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {formatCurrency(profit)}
+            </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <div className="text-sm text-muted-foreground">Restante</div>
-            <div className="text-lg font-bold text-red-600">{formatCurrency(totalPending)}</div>
+            <div className="text-sm text-muted-foreground">Margem de Lucro</div>
+            <div className={`text-lg font-bold ${profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {profitMargin.toFixed(1)}%
+            </div>
           </CardContent>
         </Card>
       </div>
