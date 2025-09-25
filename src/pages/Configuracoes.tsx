@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Card, CardContent, CardHeader, CardTitle 
 } from "@/components/ui/card";
@@ -16,13 +16,15 @@ import {
 } from "@/components/ui/table";
 import { 
   Settings, Users, 
-  Plus, Edit, Trash2, Save 
+  Plus, Edit, Trash2, Save, AlertTriangle, RotateCcw 
 } from "lucide-react";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { useToast } from "@/hooks/use-toast";
+import { ClearAllDataDialog } from "@/components/shared/ClearAllDataDialog";
 
 const Configuracoes = () => {
   const { toast } = useToast();
+  const [clearDataDialogOpen, setClearDataDialogOpen] = useState(false);
 
   const handleSaveSettings = () => {
     toast({
@@ -38,9 +40,10 @@ const Configuracoes = () => {
       </div>
       
       <Tabs defaultValue="usuarios">
-        <TabsList className="grid w-full grid-cols-2 mb-8">
+        <TabsList className="grid w-full grid-cols-3 mb-8">
           <TabsTrigger value="usuarios">Usuários</TabsTrigger>
           <TabsTrigger value="sistema">Sistema</TabsTrigger>
+          <TabsTrigger value="manutencao">Manutenção</TabsTrigger>
         </TabsList>
         
         <TabsContent value="usuarios">
@@ -159,7 +162,53 @@ const Configuracoes = () => {
             </CardContent>
           </Card>
         </TabsContent>
+        
+        <TabsContent value="manutencao">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <RotateCcw className="h-5 w-5" />
+                Manutenção do Sistema
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="p-4 border border-destructive/20 rounded-lg bg-destructive/5">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" />
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-destructive mb-2">Reset do Sistema</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Esta ação irá remover permanentemente todos os dados transacionais do sistema, incluindo:
+                    </p>
+                    <ul className="text-sm text-muted-foreground space-y-1 mb-4 ml-4">
+                      <li>• Todas as vendas e produtos vendidos</li>
+                      <li>• Inventário de milhas</li>
+                      <li>• Transações financeiras</li>
+                      <li>• Parcelamentos</li>
+                    </ul>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      <strong>Dados preservados:</strong> Configurações do sistema, usuários e fornecedores.
+                    </p>
+                    <Button 
+                      variant="destructive" 
+                      onClick={() => setClearDataDialogOpen(true)}
+                      className="mt-2"
+                    >
+                      <RotateCcw className="mr-2 h-4 w-4" />
+                      Reset Sistema
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
+      
+      <ClearAllDataDialog 
+        open={clearDataDialogOpen}
+        onOpenChange={setClearDataDialogOpen}
+      />
     </DashboardLayout>
   );
 };
