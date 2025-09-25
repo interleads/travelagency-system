@@ -43,62 +43,8 @@ const Vendas = () => {
   return (
     <DateRangeFilterProvider>
       <DashboardLayout>
-        <div className="flex flex-col lg:flex-row gap-4 mb-6">
+        <div className="mb-6">
           <DateRangeFilter />
-          
-          {/* Filtros adicionais */}
-          <div className="flex flex-col sm:flex-row gap-3 flex-1">
-            {/* Busca por cliente */}
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Buscar por cliente, local ou grupo..."
-                value={searchFilter}
-                onChange={(e) => setSearchFilter(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            {/* Filtros de período, ano e status */}
-            <div className="flex gap-2">
-              <Select value={periodFilter} onValueChange={setPeriodFilter}>
-                <SelectTrigger className="w-[130px]">
-                  <SelectValue placeholder="Período" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos</SelectItem>
-                  <SelectItem value="hoje">Hoje</SelectItem>
-                  <SelectItem value="semana">Esta Semana</SelectItem>
-                  <SelectItem value="mes">Este Mês</SelectItem>
-                  <SelectItem value="trimestre">Trimestre</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select value={yearFilter} onValueChange={setYearFilter}>
-                <SelectTrigger className="w-[100px]">
-                  <SelectValue placeholder="Ano" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos</SelectItem>
-                  <SelectItem value="2024">2024</SelectItem>
-                  <SelectItem value="2023">2023</SelectItem>
-                  <SelectItem value="2022">2022</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos</SelectItem>
-                  <SelectItem value="pendente">Pendente</SelectItem>
-                  <SelectItem value="andamento">Andamento</SelectItem>
-                  <SelectItem value="concluido">Concluído</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
         </div>
       
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
@@ -142,9 +88,65 @@ const Vendas = () => {
                 </Dialog>
               </div>
             )}
-            </div>
+          </div>
             
-            <SalesOverviewCards activeTab={activeTab} />
+          <SalesOverviewCards activeTab={activeTab} />
+
+          {/* Filtros adicionais - movidos para baixo dos cards */}
+          <div className="flex flex-col lg:flex-row gap-4 my-6">
+            <div className="flex flex-col sm:flex-row gap-3 flex-1">
+              {/* Busca por cliente */}
+              <div className="relative flex-1 min-w-[200px]">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Buscar por cliente, local ou grupo..."
+                  value={searchFilter}
+                  onChange={(e) => setSearchFilter(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              
+              {/* Filtros de período, ano e status */}
+              <div className="flex gap-2">
+                <Select value={periodFilter} onValueChange={setPeriodFilter}>
+                  <SelectTrigger className="w-[130px]">
+                    <SelectValue placeholder="Período" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    <SelectItem value="hoje">Hoje</SelectItem>
+                    <SelectItem value="semana">Esta Semana</SelectItem>
+                    <SelectItem value="mes">Este Mês</SelectItem>
+                    <SelectItem value="trimestre">Trimestre</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select value={yearFilter} onValueChange={setYearFilter}>
+                  <SelectTrigger className="w-[100px]">
+                    <SelectValue placeholder="Ano" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    <SelectItem value="2024">2024</SelectItem>
+                    <SelectItem value="2023">2023</SelectItem>
+                    <SelectItem value="2022">2022</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    <SelectItem value="pendente">Pendente</SelectItem>
+                    <SelectItem value="andamento">Andamento</SelectItem>
+                    <SelectItem value="concluido">Concluído</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
         
         <TabsContent value="historico">
           <SalesHistoryTable 
