@@ -1,5 +1,5 @@
 // Renomeado de Operacional.tsx para Vendas.tsx
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Card, CardContent, CardHeader, CardTitle 
 } from "@/components/ui/card";
@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Plus, BarChart2, Users, FileText, Search } from "lucide-react";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { useToast } from "@/hooks/use-toast";
@@ -39,6 +40,17 @@ const Vendas = () => {
   const [periodFilter, setPeriodFilter] = useState("todos");
   const [yearFilter, setYearFilter] = useState("todos");
   const [statusFilter, setStatusFilter] = useState("todos");
+  const [isColumnDialogOpen, setIsColumnDialogOpen] = useState(false);
+  const [newColumnTitle, setNewColumnTitle] = useState('');
+  const addColumnFnRef = useRef<((title: string) => void) | null>(null);
+
+  const handleAddColumn = () => {
+    if (newColumnTitle.trim() && addColumnFnRef.current) {
+      addColumnFnRef.current(newColumnTitle.trim());
+      setNewColumnTitle('');
+      setIsColumnDialogOpen(false);
+    }
+  };
 
   return (
     <DateRangeFilterProvider>
@@ -93,60 +105,113 @@ const Vendas = () => {
           <SalesOverviewCards activeTab={activeTab} />
 
           {/* Filtros adicionais - movidos para baixo dos cards */}
-          <div className="flex flex-col lg:flex-row gap-4 my-6">
-            <div className="flex flex-col sm:flex-row gap-3 flex-1">
-              {/* Busca por cliente */}
-              <div className="relative flex-1 min-w-[200px]">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder="Buscar por cliente, local ou grupo..."
-                  value={searchFilter}
-                  onChange={(e) => setSearchFilter(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              
-              {/* Filtros de período, ano e status */}
-              <div className="flex gap-2">
-                <Select value={periodFilter} onValueChange={setPeriodFilter}>
-                  <SelectTrigger className="w-[130px]">
-                    <SelectValue placeholder="Período" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="todos">Todos</SelectItem>
-                    <SelectItem value="hoje">Hoje</SelectItem>
-                    <SelectItem value="semana">Esta Semana</SelectItem>
-                    <SelectItem value="mes">Este Mês</SelectItem>
-                    <SelectItem value="trimestre">Trimestre</SelectItem>
-                  </SelectContent>
-                </Select>
+          {activeTab === "historico" && (
+            <div className="flex flex-col lg:flex-row gap-4 my-6">
+              <div className="flex flex-col sm:flex-row gap-3 flex-1">
+                {/* Busca por cliente */}
+                <div className="relative w-full md:max-w-[380px]">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    placeholder="Buscar por cliente, local ou grupo..."
+                    value={searchFilter}
+                    onChange={(e) => setSearchFilter(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
                 
-                <Select value={yearFilter} onValueChange={setYearFilter}>
-                  <SelectTrigger className="w-[100px]">
-                    <SelectValue placeholder="Ano" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="todos">Todos</SelectItem>
-                    <SelectItem value="2024">2024</SelectItem>
-                    <SelectItem value="2023">2023</SelectItem>
-                    <SelectItem value="2022">2022</SelectItem>
-                  </SelectContent>
-                </Select>
-                
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[120px]">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="todos">Todos</SelectItem>
-                    <SelectItem value="pendente">Pendente</SelectItem>
-                    <SelectItem value="andamento">Andamento</SelectItem>
-                    <SelectItem value="concluido">Concluído</SelectItem>
-                  </SelectContent>
-                </Select>
+                {/* Filtros de período, ano e status */}
+                <div className="flex gap-2">
+                  <Select value={periodFilter} onValueChange={setPeriodFilter}>
+                    <SelectTrigger className="w-[130px]">
+                      <SelectValue placeholder="Período" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="todos">Todos</SelectItem>
+                      <SelectItem value="hoje">Hoje</SelectItem>
+                      <SelectItem value="semana">Esta Semana</SelectItem>
+                      <SelectItem value="mes">Este Mês</SelectItem>
+                      <SelectItem value="trimestre">Trimestre</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select value={yearFilter} onValueChange={setYearFilter}>
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue placeholder="Ano" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="todos">Todos</SelectItem>
+                      <SelectItem value="2024">2024</SelectItem>
+                      <SelectItem value="2023">2023</SelectItem>
+                      <SelectItem value="2022">2022</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-[120px]">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="todos">Todos</SelectItem>
+                      <SelectItem value="pendente">Pendente</SelectItem>
+                      <SelectItem value="andamento">Andamento</SelectItem>
+                      <SelectItem value="concluido">Concluído</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {activeTab === "crm" && (
+            <div className="flex flex-col lg:flex-row gap-4 my-6">
+              <div className="flex flex-col sm:flex-row gap-3 flex-1">
+                {/* Busca por cliente no CRM */}
+                <div className="relative w-full md:max-w-[380px]">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    placeholder="Buscar clientes..."
+                    className="pl-10"
+                  />
+                </div>
+                
+                {/* Botão Nova Coluna na linha dos filtros */}
+                <div className="flex gap-2 items-center">
+                  <Dialog open={isColumnDialogOpen} onOpenChange={setIsColumnDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" variant="outline">
+                        <Plus size={16} className="mr-2" />
+                        Nova Coluna
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Adicionar Nova Coluna</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 pt-4">
+                        <div>
+                          <Label htmlFor="column-title">Título da Coluna</Label>
+                          <Input 
+                            id="column-title"
+                            value={newColumnTitle}
+                            onChange={(e) => setNewColumnTitle(e.target.value)}
+                            placeholder="Ex: Em Progresso"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleAddColumn();
+                              }
+                            }}
+                          />
+                        </div>
+                        <Button onClick={handleAddColumn} className="w-full">
+                          Adicionar Coluna
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </div>
+            </div>
+          )}
         
         <TabsContent value="historico">
           <SalesHistoryTable 
@@ -158,7 +223,7 @@ const Vendas = () => {
         </TabsContent>
         
         <TabsContent value="crm">
-          <CRMKanban />
+          <CRMKanban registerAddColumn={(fn) => (addColumnFnRef.current = fn)} />
         </TabsContent>
         
         <TabsContent value="relatorios">

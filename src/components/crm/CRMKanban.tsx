@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2, UserPlus, MoreVertical } from "lucide-react";
@@ -101,7 +101,11 @@ const initialColumns: KanbanColumn[] = [
   }
 ];
 
-const CRMKanban = () => {
+interface CRMKanbanProps {
+  registerAddColumn?: (fn: (title: string) => void) => void;
+}
+
+const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
   const [columns, setColumns] = useState<KanbanColumn[]>(initialColumns);
   const [newColumnTitle, setNewColumnTitle] = useState('');
   const [editingCard, setEditingCard] = useState<KanbanCard | null>(null);
@@ -114,11 +118,57 @@ const CRMKanban = () => {
   });
   const [targetColumnId, setTargetColumnId] = useState<string | null>(null);
   const [draggedColumnId, setDraggedColumnId] = useState<string | null>(null);
+  const [availableHeight, setAvailableHeight] = useState<number>(0);
+  const boardRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   
   // Phone input hooks
   const newCardPhoneInput = usePhoneInput('');
   const editCardPhoneInput = usePhoneInput('');
+
+  // Register add column function with parent
+  useEffect(() => {
+    if (registerAddColumn) {
+      registerAddColumn((title: string) => {
+        if (title.trim() === '') {
+          toast({
+            variant: "destructive",
+            title: "Erro",
+            description: "O título da coluna não pode estar vazio"
+          });
+          return;
+        }
+        
+        const newColumn: KanbanColumn = {
+          id: `column-${Date.now()}`,
+          title,
+          cards: []
+        };
+        
+        setColumns(prev => [...prev, newColumn]);
+        
+        toast({
+          title: "Coluna adicionada",
+          description: `Nova coluna "${title}" foi adicionada`
+        });
+      });
+    }
+  }, [registerAddColumn, toast]);
+
+  // Calculate available height for the board
+  useEffect(() => {
+    const calculateHeight = () => {
+      if (boardRef.current) {
+        const rect = boardRef.current.getBoundingClientRect();
+        const availableSpace = window.innerHeight - rect.top - 20; // 20px margin
+        setAvailableHeight(Math.max(400, availableSpace));
+      }
+    };
+
+    calculateHeight();
+    window.addEventListener('resize', calculateHeight);
+    return () => window.removeEventListener('resize', calculateHeight);
+  }, []);
 
   // Add new column
   const addColumn = () => {
@@ -312,40 +362,12 @@ const CRMKanban = () => {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Compact toolbar */}
-      <div className="flex justify-end items-center py-2 px-1 border-b border-border/50">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button size="sm" variant="outline">
-              <Plus size={16} className="mr-2" />
-              Nova Coluna
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Adicionar Nova Coluna</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 pt-4">
-              <div>
-                <Label htmlFor="column-title">Título da Coluna</Label>
-                <Input 
-                  id="column-title"
-                  value={newColumnTitle}
-                  onChange={(e) => setNewColumnTitle(e.target.value)}
-                  placeholder="Ex: Em Progresso"
-                />
-              </div>
-              <Button onClick={addColumn} className="w-full">Adicionar Coluna</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-      
-      {/* Kanban board with fixed headers */}
-      <div className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full">
-          <div className="flex space-x-4 p-4 min-w-max">
+    <div 
+      ref={boardRef}
+      className="h-full overflow-x-auto overflow-y-hidden"
+      style={{ height: availableHeight > 0 ? `${availableHeight}px` : '100%' }}
+    >
+      <div className="flex space-x-4 p-4 min-w-max h-full">
             {columns.map(column => (
               <div 
                 key={column.id}
@@ -355,7 +377,7 @@ const CRMKanban = () => {
                 onDragOver={handleColumnDragOver}
                 onDrop={(e) => handleColumnDrop(e, column.id)}
               >
-                <Card className="h-[calc(100vh-140px)] flex flex-col">
+                <Card className="h-full flex flex-col" style={{ height: availableHeight > 0 ? `${availableHeight - 32}px` : '100%' }}>
                   {/* Fixed header */}
                   <CardHeader 
                     className="bg-muted/50 flex-shrink-0 cursor-move border-b"
@@ -559,17 +581,14 @@ const CRMKanban = () => {
                           </div>
                         </CardContent>
                           </Card>
-                        ))}
+                         ))}
                       </CardContent>
                     </ScrollArea>
                   </div>
                 </Card>
               </div>
             ))}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </div>
+        </div>
     </div>
   );
 };
