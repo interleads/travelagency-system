@@ -75,15 +75,15 @@ export const MilesOverviewCards = ({ activeTab }: MilesOverviewCardsProps) => {
             <Card key={program.id} className={`relative overflow-hidden bg-gradient-to-br from-card to-card/50 border-l-4 ${theme.border} hover:shadow-lg transition-all duration-300`}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">{program.name}</CardTitle>
-                <div className={`p-2 ${theme.icon} rounded-full flex items-center justify-center`}>
+                <div className={`p-3 ${theme.icon} rounded-full flex items-center justify-center`}>
                   {logoSrc ? (
                     <img 
                       src={logoSrc} 
                       alt={`${program.name} logo`}
-                      className="h-4 w-4 object-contain"
+                      className="h-8 w-8 object-contain"
                     />
                   ) : (
-                    <Package className={`h-4 w-4 ${theme.text}`} />
+                    <Package className={`h-6 w-6 ${theme.text}`} />
                   )}
                 </div>
               </CardHeader>
