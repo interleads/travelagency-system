@@ -172,10 +172,32 @@ export function SaleDetailsExpanded({ sale }: SaleDetailsExpandedProps) {
                   )}
 
                   {/* Datas específicas por tipo de produto */}
-                  {product.checkin && product.checkout && (
+                  {product.checkin_date && product.checkout_date && (
                     <div className="text-sm text-muted-foreground">
-                      <div>Check-in: {formatDate(product.checkin)}</div>
-                      <div>Check-out: {formatDate(product.checkout)}</div>
+                      <div>📅 Check-in: {formatDate(product.checkin_date)}</div>
+                      <div>📅 Check-out: {formatDate(product.checkout_date)}</div>
+                    </div>
+                  )}
+
+                  {/* Informações específicas por tipo */}
+                  {product.type === 'passagem' && product.airline && (
+                    <div className="text-sm text-muted-foreground">
+                      ✈️ {product.airline}
+                      {product.miles && product.miles > 0 && (
+                        <span className="ml-2">• {product.miles.toLocaleString('pt-BR')} milhas</span>
+                      )}
+                    </div>
+                  )}
+
+                  {product.type === 'veiculo' && product.vehicle_category && (
+                    <div className="text-sm text-muted-foreground">
+                      🚗 {product.vehicle_category}
+                    </div>
+                  )}
+
+                  {product.type === 'seguro' && product.coverage_type && (
+                    <div className="text-sm text-muted-foreground">
+                      🛡️ {product.coverage_type}
                     </div>
                   )}
 
