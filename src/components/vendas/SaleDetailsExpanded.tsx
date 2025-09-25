@@ -146,14 +146,18 @@ export function SaleDetailsExpanded({ sale }: SaleDetailsExpandedProps) {
 
                   {/* Fornecedor - destacado quando disponível */}
                   {product.fornecedor && (
-                    <div className="text-sm font-medium text-primary">
-                      📋 {product.fornecedor}
+                    <div className="text-sm font-medium text-primary bg-primary/10 px-2 py-1 rounded">
+                      🏢 Fornecedor: {product.fornecedor}
                     </div>
                   )}
 
-                  {product.details && (
-                    <div className="text-sm text-muted-foreground">{product.details}</div>
+                  {/* Anotações/Detalhes - destacado quando disponível */}
+                  {product.details && product.details.trim() && (
+                    <div className="text-sm text-muted-foreground bg-muted/50 px-2 py-1 rounded">
+                      💬 Anotações: {product.details}
+                    </div>
                   )}
+
 
                   {product.origin && product.destination && (
                     <div className="text-sm font-medium">

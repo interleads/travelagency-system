@@ -34,6 +34,7 @@ export interface SaleProductDb {
   coverage_type?: string;
   dataPasseio?: string; // Data do passeio
   duracao?: string; // Duração do passeio/serviço
+  locator?: string; // Campo localizador
   created_at: string;
 }
 

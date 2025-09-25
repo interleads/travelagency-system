@@ -191,6 +191,7 @@ export type Database = {
           departure_date: string | null
           destination: string | null
           details: string | null
+          fornecedor: string | null
           id: string
           locator: string | null
           miles: number | null
@@ -216,6 +217,7 @@ export type Database = {
           departure_date?: string | null
           destination?: string | null
           details?: string | null
+          fornecedor?: string | null
           id?: string
           locator?: string | null
           miles?: number | null
@@ -241,6 +243,7 @@ export type Database = {
           departure_date?: string | null
           destination?: string | null
           details?: string | null
+          fornecedor?: string | null
           id?: string
           locator?: string | null
           miles?: number | null
