@@ -152,6 +152,38 @@ export const useUpdateMilesInventory = () => {
   });
 };
 
+export const useClearMilesInventory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      // First, delete all miles transactions
+      const { error: transactionsError } = await supabase
+        .from("miles_transactions")
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all records
+      if (transactionsError) throw transactionsError;
+
+      // Then, delete all miles inventory records
+      const { error: inventoryError } = await supabase
+        .from("miles_inventory")
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all records
+      if (inventoryError) throw inventoryError;
+
+      // Also delete related financial transactions (despesas de milhas)
+      const { error: financeError } = await supabase
+        .from("transactions")
+        .delete()
+        .eq('category', 'Milhas');
+      if (financeError) throw financeError;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["miles_inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    },
+  });
+};
+
 export const useDeleteMilesInventory = () => {
   const queryClient = useQueryClient();
   return useMutation({
