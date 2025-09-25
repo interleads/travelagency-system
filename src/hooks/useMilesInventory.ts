@@ -156,6 +156,14 @@ export const useDeleteMilesInventory = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
+      // First, delete related miles transactions
+      const { error: transactionsError } = await supabase
+        .from("miles_transactions")
+        .delete()
+        .eq('miles_inventory_id', id);
+      if (transactionsError) throw transactionsError;
+
+      // Then, delete the miles inventory record
       const { error } = await supabase
         .from("miles_inventory")
         .delete()
@@ -164,6 +172,7 @@ export const useDeleteMilesInventory = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["miles_inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
     },
   });
 };
