@@ -122,39 +122,7 @@ export function SalesOverviewCards({ activeTab }: SalesOverviewCardsProps) {
     }
 
     if (activeTab === "crm") {
-      return (
-        <>
-          <Card>
-            <CardHeader>
-              <CardTitle>Total de Leads</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-purple-600">127</p>
-              <p className="text-sm text-gray-500">Leads ativos</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Taxa de Conversão</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-green-600">23.5%</p>
-              <p className="text-sm text-gray-500">Últimos 30 dias</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Próximos Follow-ups</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-orange-600">18</p>
-              <p className="text-sm text-gray-500">Esta semana</p>
-            </CardContent>
-          </Card>
-        </>
-      );
+      return null;
     }
 
     if (activeTab === "relatorios") {

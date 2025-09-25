@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useToast } from '@/components/ui/use-toast';
 import { usePhoneInput, unformatPhoneNumber } from '@/lib/phoneMask';
 
@@ -309,205 +310,210 @@ const CRMKanban = () => {
         </Dialog>
       </div>
       
-      <div className="flex space-x-4 overflow-x-auto pb-6">
-        {columns.map(column => (
-          <div 
-            key={column.id}
-            className="flex-shrink-0 w-80"
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, column.id)}
-          >
-            <Card>
-              <CardHeader className="bg-muted/50">
-                <div className="flex justify-between items-center">
-                  <CardTitle>{column.title}</CardTitle>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => setTargetColumnId(column.id)}
+      <ScrollArea className="w-full">
+        <div className="flex space-x-4 pb-6 min-w-max">
+          {columns.map(column => (
+            <div 
+              key={column.id}
+              className="flex-shrink-0 w-80"
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, column.id)}
+            >
+              <Card className="h-[calc(100vh-200px)]">
+                <CardHeader className="bg-muted/50 flex-shrink-0">
+                  <div className="flex justify-between items-center">
+                    <CardTitle>{column.title}</CardTitle>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={() => setTargetColumnId(column.id)}
+                        >
+                          <UserPlus size={16} />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Adicionar Cliente</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 pt-4">
+                          <div>
+                            <Label htmlFor="title">Título</Label>
+                            <Input 
+                              id="title"
+                              value={newCard.title || ''}
+                              onChange={(e) => setNewCard({...newCard, title: e.target.value})}
+                              placeholder="Ex: Pacote Cancún"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="client">Nome do Cliente</Label>
+                            <Input 
+                              id="client"
+                              value={newCard.client || ''}
+                              onChange={(e) => setNewCard({...newCard, client: e.target.value})}
+                              placeholder="Ex: João Silva"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="email">Email</Label>
+                            <Input 
+                              id="email"
+                              type="email"
+                              value={newCard.email || ''}
+                              onChange={(e) => setNewCard({...newCard, email: e.target.value})}
+                              placeholder="Ex: joao@email.com"
+                            />
+                          </div>
+                           <div>
+                             <Label htmlFor="phone">Telefone</Label>
+                             <Input 
+                               id="phone"
+                               type="tel"
+                               value={newCardPhoneInput.displayValue}
+                               onChange={newCardPhoneInput.handleChange}
+                               placeholder="(11) 99999-9999"
+                               maxLength={15}
+                             />
+                           </div>
+                          <div>
+                            <Label htmlFor="description">Descrição</Label>
+                            <Textarea 
+                              id="description"
+                              value={newCard.description || ''}
+                              onChange={(e) => setNewCard({...newCard, description: e.target.value})}
+                              placeholder="Detalhes sobre o cliente e sua solicitação..."
+                              rows={3}
+                            />
+                          </div>
+                          <Button onClick={addCard} className="w-full">Adicionar Cliente</Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {column.cards.length} {column.cards.length === 1 ? 'cliente' : 'clientes'}
+                  </div>
+                </CardHeader>
+                <ScrollArea className="flex-1">
+                  <CardContent className="space-y-3 py-4">
+                    {column.cards.map(card => (
+                      <Card 
+                        key={card.id}
+                        className="bg-card shadow-sm cursor-move hover:shadow-md transition-shadow"
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, card.id, column.id)}
                       >
-                        <UserPlus size={16} />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Adicionar Cliente</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4 pt-4">
-                        <div>
-                          <Label htmlFor="title">Título</Label>
-                          <Input 
-                            id="title"
-                            value={newCard.title || ''}
-                            onChange={(e) => setNewCard({...newCard, title: e.target.value})}
-                            placeholder="Ex: Pacote Cancún"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="client">Nome do Cliente</Label>
-                          <Input 
-                            id="client"
-                            value={newCard.client || ''}
-                            onChange={(e) => setNewCard({...newCard, client: e.target.value})}
-                            placeholder="Ex: João Silva"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="email">Email</Label>
-                          <Input 
-                            id="email"
-                            type="email"
-                            value={newCard.email || ''}
-                            onChange={(e) => setNewCard({...newCard, email: e.target.value})}
-                            placeholder="Ex: joao@email.com"
-                          />
-                        </div>
-                         <div>
-                           <Label htmlFor="phone">Telefone</Label>
-                           <Input 
-                             id="phone"
-                             type="tel"
-                             value={newCardPhoneInput.displayValue}
-                             onChange={newCardPhoneInput.handleChange}
-                             placeholder="(11) 99999-9999"
-                             maxLength={15}
-                           />
-                         </div>
-                        <div>
-                          <Label htmlFor="description">Descrição</Label>
-                          <Textarea 
-                            id="description"
-                            value={newCard.description || ''}
-                            onChange={(e) => setNewCard({...newCard, description: e.target.value})}
-                            placeholder="Detalhes sobre o cliente e sua solicitação..."
-                            rows={3}
-                          />
-                        </div>
-                        <Button onClick={addCard} className="w-full">Adicionar Cliente</Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {column.cards.length} {column.cards.length === 1 ? 'cliente' : 'clientes'}
-                </div>
-              </CardHeader>
-              <CardContent className="max-h-[70vh] overflow-y-auto space-y-3 py-4">
-                {column.cards.map(card => (
-                  <Card 
-                    key={card.id}
-                    className="bg-card shadow-sm cursor-move hover:shadow-md transition-shadow"
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, card.id, column.id)}
-                  >
-                    <CardContent className="p-3">
-                      <h4 className="font-medium">{card.title}</h4>
-                      <p className="text-sm text-muted-foreground mt-1">{card.client}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{card.description}</p>
-                      
-                      <div className="flex justify-end mt-2">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button 
-                              size="sm" 
-                              variant="ghost"
-                              className="h-8 w-8 p-0"
-                            >
-                              <MoreVertical size={14} />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48">
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <DropdownMenuItem 
-                                  onSelect={(e) => {
-                                    e.preventDefault();
-                                    setEditingCard(card);
-                                    editCardPhoneInput.setDisplayValue(card.phone || '');
-                                  }}
-                                  className="cursor-pointer"
+                        <CardContent className="p-3">
+                          <h4 className="font-medium">{card.title}</h4>
+                          <p className="text-sm text-muted-foreground mt-1">{card.client}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{card.description}</p>
+                          
+                          <div className="flex justify-end mt-2">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost"
+                                  className="h-8 w-8 p-0"
                                 >
-                                  <Edit size={14} className="mr-2" />
-                                  Editar Cliente
+                                  <MoreVertical size={14} />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-48">
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <DropdownMenuItem 
+                                      onSelect={(e) => {
+                                        e.preventDefault();
+                                        setEditingCard(card);
+                                        editCardPhoneInput.setDisplayValue(card.phone || '');
+                                      }}
+                                      className="cursor-pointer"
+                                    >
+                                      <Edit size={14} className="mr-2" />
+                                      Editar Cliente
+                                    </DropdownMenuItem>
+                                  </DialogTrigger>
+                                  <DialogContent>
+                                    <DialogHeader>
+                                      <DialogTitle>Editar Cliente</DialogTitle>
+                                    </DialogHeader>
+                                    {editingCard && (
+                                      <div className="space-y-4 pt-4">
+                                        <div>
+                                          <Label htmlFor="edit-title">Título</Label>
+                                          <Input 
+                                            id="edit-title"
+                                            value={editingCard.title}
+                                            onChange={(e) => setEditingCard({...editingCard, title: e.target.value})}
+                                          />
+                                        </div>
+                                        <div>
+                                          <Label htmlFor="edit-client">Nome do Cliente</Label>
+                                          <Input 
+                                            id="edit-client"
+                                            value={editingCard.client}
+                                            onChange={(e) => setEditingCard({...editingCard, client: e.target.value})}
+                                          />
+                                        </div>
+                                        <div>
+                                          <Label htmlFor="edit-email">Email</Label>
+                                          <Input 
+                                            id="edit-email"
+                                            type="email"
+                                            value={editingCard.email}
+                                            onChange={(e) => setEditingCard({...editingCard, email: e.target.value})}
+                                          />
+                                        </div>
+                                         <div>
+                                           <Label htmlFor="edit-phone">Telefone</Label>
+                                           <Input 
+                                             id="edit-phone"
+                                             type="tel"
+                                             value={editCardPhoneInput.displayValue}
+                                             onChange={editCardPhoneInput.handleChange}
+                                             placeholder="(11) 99999-9999"
+                                             maxLength={15}
+                                           />
+                                         </div>
+                                        <div>
+                                          <Label htmlFor="edit-description">Descrição</Label>
+                                          <Textarea 
+                                            id="edit-description"
+                                            value={editingCard.description}
+                                            onChange={(e) => setEditingCard({...editingCard, description: e.target.value})}
+                                            rows={3}
+                                          />
+                                        </div>
+                                        <Button onClick={updateCard} className="w-full">Salvar Alterações</Button>
+                                      </div>
+                                    )}
+                                  </DialogContent>
+                                </Dialog>
+                                
+                                <DropdownMenuItem 
+                                  onSelect={() => deleteCard(column.id, card.id)}
+                                  className="cursor-pointer text-destructive focus:text-destructive"
+                                >
+                                  <Trash2 size={14} className="mr-2" />
+                                  Excluir Cliente
                                 </DropdownMenuItem>
-                              </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Editar Cliente</DialogTitle>
-                                </DialogHeader>
-                                {editingCard && (
-                                  <div className="space-y-4 pt-4">
-                                    <div>
-                                      <Label htmlFor="edit-title">Título</Label>
-                                      <Input 
-                                        id="edit-title"
-                                        value={editingCard.title}
-                                        onChange={(e) => setEditingCard({...editingCard, title: e.target.value})}
-                                      />
-                                    </div>
-                                    <div>
-                                      <Label htmlFor="edit-client">Nome do Cliente</Label>
-                                      <Input 
-                                        id="edit-client"
-                                        value={editingCard.client}
-                                        onChange={(e) => setEditingCard({...editingCard, client: e.target.value})}
-                                      />
-                                    </div>
-                                    <div>
-                                      <Label htmlFor="edit-email">Email</Label>
-                                      <Input 
-                                        id="edit-email"
-                                        type="email"
-                                        value={editingCard.email}
-                                        onChange={(e) => setEditingCard({...editingCard, email: e.target.value})}
-                                      />
-                                    </div>
-                                     <div>
-                                       <Label htmlFor="edit-phone">Telefone</Label>
-                                       <Input 
-                                         id="edit-phone"
-                                         type="tel"
-                                         value={editCardPhoneInput.displayValue}
-                                         onChange={editCardPhoneInput.handleChange}
-                                         placeholder="(11) 99999-9999"
-                                         maxLength={15}
-                                       />
-                                     </div>
-                                    <div>
-                                      <Label htmlFor="edit-description">Descrição</Label>
-                                      <Textarea 
-                                        id="edit-description"
-                                        value={editingCard.description}
-                                        onChange={(e) => setEditingCard({...editingCard, description: e.target.value})}
-                                        rows={3}
-                                      />
-                                    </div>
-                                    <Button onClick={updateCard} className="w-full">Salvar Alterações</Button>
-                                  </div>
-                                )}
-                              </DialogContent>
-                            </Dialog>
-                            
-                            <DropdownMenuItem 
-                              onSelect={() => deleteCard(column.id, card.id)}
-                              className="cursor-pointer text-destructive focus:text-destructive"
-                            >
-                              <Trash2 size={14} className="mr-2" />
-                              Excluir Cliente
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-        ))}
-      </div>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </CardContent>
+                </ScrollArea>
+              </Card>
+            </div>
+          ))}
+        </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
     </div>
   );
 };
