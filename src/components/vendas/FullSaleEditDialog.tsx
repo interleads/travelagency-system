@@ -30,27 +30,28 @@ export function FullSaleEditDialog({ sale, open, onOpenChange }: FullSaleEditDia
   );
   const [products, setProducts] = useState<SaleProduct[]>(
     sale.sale_products && sale.sale_products.length > 0 
-      ? sale.sale_products.map(p => ({
-          name: p.name,
-          type: p.type as ProductType,
-          price: Number(p.price),
-          cost: Number(p.cost || 0),
-          quantity: p.quantity,
-          // Map database fields back to form fields
-          trecho1: p.departure_date || '',
-          trecho2: p.return_date || '',
-          adults: 0,
-          children: 0,
-          airline: p.airline || '',
-          qtdMilhas: p.miles || 0,
-          custoMil: Number(p.miles_cost || 0),
-          checkin: p.checkin_date || '',
-          checkout: p.checkout_date || '',
-          categoria: p.vehicle_category || '',
-          periodo: p.rental_period || '',
-          cobertura: p.coverage_type || '',
-          details: p.details || ''
-        }))
+          ? sale.sale_products.map(p => ({
+              name: p.name,
+              type: p.type as ProductType,
+              price: Number(p.price),
+              cost: Number(p.cost || 0),
+              quantity: p.quantity,
+              // Map database fields back to form fields
+              trecho1: p.departure_date || '',
+              trecho2: p.return_date || '',
+              adults: 0,
+              children: 0,
+              airline: p.airline || '',
+              qtdMilhas: p.miles || 0,
+              custoMil: Number(p.miles_cost || 0),
+              checkin: p.checkin_date || '',
+              checkout: p.checkout_date || '',
+              categoria: p.vehicle_category || '',
+              periodo: p.rental_period || '',
+              cobertura: p.coverage_type || '',
+              details: p.details || '',
+              fornecedor: p.fornecedor || '' // Incluir campo fornecedor
+            }))
       : [EmptyProduct]
   );
   const [paymentMethod, setPaymentMethod] = useState(sale.payment_method);
@@ -88,7 +89,8 @@ export function FullSaleEditDialog({ sale, open, onOpenChange }: FullSaleEditDia
               categoria: p.vehicle_category || '',
               periodo: p.rental_period || '',
               cobertura: p.coverage_type || '',
-              details: p.details || ''
+              details: p.details || '',
+              fornecedor: p.fornecedor || '' // Incluir campo fornecedor
             }))
           : [EmptyProduct]
       );
@@ -151,6 +153,7 @@ export function FullSaleEditDialog({ sale, open, onOpenChange }: FullSaleEditDia
         payment_method: paymentMethod,
         installments,
         total_amount: total,
+        products: products // Incluir produtos na atualização
       });
       
       toast({

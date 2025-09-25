@@ -238,7 +238,8 @@ export const useCreateSale = () => {
 export const useUpdateSale = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string } & Partial<SaleInput>) => {
+    mutationFn: async ({ id, products, ...updates }: { id: string; products?: SaleProduct[] } & Partial<SaleInput>) => {
+      // Update sale data
       const { data, error } = await supabase
         .from("sales")
         .update({
@@ -257,6 +258,53 @@ export const useUpdateSale = () => {
         .single();
 
       if (error) throw error;
+
+      // Update products if provided
+      if (products && products.length > 0) {
+        // First, delete existing products
+        const { error: deleteError } = await supabase
+          .from("sale_products")
+          .delete()
+          .eq("sale_id", id);
+
+        if (deleteError) throw deleteError;
+
+        // Then insert updated products
+        const productsForDb = products.map(product => {
+          const productName = product.name || generateProductName(product) || `${product.type || 'Produto'}`;
+          
+          return {
+            sale_id: id,
+            type: product.type || 'outros',
+            name: productName,
+            quantity: product.quantity,
+            price: product.price,
+            cost: product.cost || 0,
+            details: product.details || '',
+            fornecedor: product.fornecedor || '', // Campo fornecedor
+            airline: product.airline,
+            passengers: product.adults && product.children ? `${product.adults} adultos, ${product.children} crianças` : '',
+            origin: product.origin,
+            destination: product.destination,
+            departure_date: product.trecho1 || null,
+            return_date: product.trecho2 || null,
+            miles: product.qtdMilhas,
+            miles_cost: product.custoMil,
+            checkin_date: product.checkin || null,
+            checkout_date: product.checkout || null,
+            vehicle_category: product.categoria,
+            rental_period: product.periodo,
+            coverage_type: product.cobertura
+          };
+        });
+
+        const { error: productsError } = await supabase
+          .from("sale_products")
+          .insert(productsForDb);
+
+        if (productsError) throw productsError;
+      }
+
       return data;
     },
     onSuccess: () => {
