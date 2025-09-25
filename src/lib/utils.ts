@@ -34,7 +34,6 @@ export const parseCurrency = (value: string): number => {
   }
   
   const result = parseFloat(cleanValue) || 0;
-  console.log('Parsing currency:', { original: value, cleaned: cleanValue, result });
   return result;
 };
 
@@ -67,6 +66,10 @@ export const useCurrencyInput = (initialValue: number = 0) => {
     setDisplayValue(inputValue);
   }, []);
 
+  const handleBlur = useCallback(() => {
+    setDisplayValue(numericValue > 0 ? formatCurrency(numericValue) : '');
+  }, [numericValue]);
+
   const setValue = useCallback((value: number) => {
     setNumericValue(value);
     setDisplayValue(value > 0 ? formatCurrency(value) : '');
@@ -76,6 +79,7 @@ export const useCurrencyInput = (initialValue: number = 0) => {
     displayValue,
     numericValue,
     handleChange,
+    handleBlur,
     setValue,
   };
 };
@@ -102,6 +106,10 @@ export const useQuantityInput = (initialValue: number = 0) => {
     }
   }, []);
 
+  const handleBlur = useCallback(() => {
+    setDisplayValue(numericValue > 0 ? formatQuantity(numericValue) : '');
+  }, [numericValue]);
+
   const setValue = useCallback((value: number) => {
     setNumericValue(value);
     setDisplayValue(value > 0 ? formatQuantity(value) : '');
@@ -111,6 +119,7 @@ export const useQuantityInput = (initialValue: number = 0) => {
     displayValue,
     numericValue,
     handleChange,
+    handleBlur,
     setValue,
   };
 };

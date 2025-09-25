@@ -115,6 +115,16 @@ const DynamicProductForm: React.FC<{
   onRemove?: () => void;
 }> = ({ value, onChange, onRemove }) => {
 
+  // Refs para os inputs para evitar formatação durante digitação
+  const priceRef = React.useRef<HTMLInputElement>(null);
+  const costRef = React.useRef<HTMLInputElement>(null);
+  const taxValueRef = React.useRef<HTMLInputElement>(null);
+  const custoMilRef = React.useRef<HTMLInputElement>(null);
+  const quantityRef = React.useRef<HTMLInputElement>(null);
+  const qtdMilhasRef = React.useRef<HTMLInputElement>(null);
+  const adultsRef = React.useRef<HTMLInputElement>(null);
+  const childrenRef = React.useRef<HTMLInputElement>(null);
+
   // Hooks de formatação para campos monetários
   const taxValueInput = useCurrencyInput(value.taxValue || 0);
   const priceInput = useCurrencyInput(value.price || 0);
@@ -127,17 +137,32 @@ const DynamicProductForm: React.FC<{
   const adultsInput = useQuantityInput(value.adults || 1);
   const childrenInput = useQuantityInput(value.children || 0);
 
-  // Sincronizar valores quando o produto mudar externamente
+  // Sincronizar valores quando o produto mudar externamente (somente se campo não estiver focado)
   React.useEffect(() => {
-    console.log('Sincronizando hooks com valores externos:', value);
-    taxValueInput.setValue(value.taxValue || 0);
-    priceInput.setValue(value.price || 0);
-    costInput.setValue(value.cost || 0);
-    custoMilInput.setValue(value.custoMil || 0);
-    qtdMilhasInput.setValue(value.qtdMilhas || 0);
-    quantityInput.setValue(value.quantity || 1);
-    adultsInput.setValue(value.adults || 1);
-    childrenInput.setValue(value.children || 0);
+    if (document.activeElement !== taxValueRef.current) {
+      taxValueInput.setValue(value.taxValue || 0);
+    }
+    if (document.activeElement !== priceRef.current) {
+      priceInput.setValue(value.price || 0);
+    }
+    if (document.activeElement !== costRef.current) {
+      costInput.setValue(value.cost || 0);
+    }
+    if (document.activeElement !== custoMilRef.current) {
+      custoMilInput.setValue(value.custoMil || 0);
+    }
+    if (document.activeElement !== qtdMilhasRef.current) {
+      qtdMilhasInput.setValue(value.qtdMilhas || 0);
+    }
+    if (document.activeElement !== quantityRef.current) {
+      quantityInput.setValue(value.quantity || 1);
+    }
+    if (document.activeElement !== adultsRef.current) {
+      adultsInput.setValue(value.adults || 1);
+    }
+    if (document.activeElement !== childrenRef.current) {
+      childrenInput.setValue(value.children || 0);
+    }
   }, [value.taxValue, value.price, value.cost, value.custoMil, value.qtdMilhas, value.quantity, value.adults, value.children]);
 
   // Cálculo do lucro em tempo real usando valores diretos do estado
@@ -212,6 +237,7 @@ const DynamicProductForm: React.FC<{
               <div>
                 <Label>Adultos</Label>
                 <Input
+                  ref={adultsRef}
                   type="text"
                   value={adultsInput.displayValue}
                   onChange={(e) => {
@@ -219,6 +245,7 @@ const DynamicProductForm: React.FC<{
                     const parsed = parseQuantity(e.target.value);
                     onChange({ ...value, adults: parsed });
                   }}
+                  onBlur={adultsInput.handleBlur}
                   placeholder="1"
                   required
                 />
@@ -226,6 +253,7 @@ const DynamicProductForm: React.FC<{
               <div>
                 <Label>Crianças</Label>
                 <Input
+                  ref={childrenRef}
                   type="text"
                   value={childrenInput.displayValue}
                   onChange={(e) => {
@@ -233,12 +261,14 @@ const DynamicProductForm: React.FC<{
                     const parsed = parseQuantity(e.target.value);
                     onChange({ ...value, children: parsed });
                   }}
+                  onBlur={childrenInput.handleBlur}
                   placeholder="0"
                 />
               </div>
               <div>
                 <Label>Valor das Taxas</Label>
                 <Input 
+                  ref={taxValueRef}
                   type="text" 
                   value={taxValueInput.displayValue}
                   onChange={(e) => {
@@ -246,6 +276,7 @@ const DynamicProductForm: React.FC<{
                     const parsed = parseCurrency(e.target.value);
                     onChange({ ...value, taxValue: parsed });
                   }}
+                  onBlur={taxValueInput.handleBlur}
                   placeholder="R$ 0,00"
                 />
               </div>
@@ -294,6 +325,7 @@ const DynamicProductForm: React.FC<{
                 <div>
                   <Label>Qtd Milhas</Label>
                   <Input
+                    ref={qtdMilhasRef}
                     type="text"
                     value={qtdMilhasInput.displayValue}
                     onChange={(e) => {
@@ -301,12 +333,14 @@ const DynamicProductForm: React.FC<{
                       const parsed = parseQuantity(e.target.value);
                       onChange({ ...value, qtdMilhas: parsed });
                     }}
+                    onBlur={qtdMilhasInput.handleBlur}
                     placeholder="0"
                   />
                 </div>
                 <div>
                   <Label>Custo por 1k</Label>
                   <Input
+                    ref={custoMilRef}
                     type="text"
                     value={custoMilInput.displayValue}
                     onChange={(e) => {
@@ -314,6 +348,7 @@ const DynamicProductForm: React.FC<{
                       const parsed = parseCurrency(e.target.value);
                       onChange({ ...value, custoMil: parsed });
                     }}
+                    onBlur={custoMilInput.handleBlur}
                     placeholder="R$ 0,00"
                   />
                   {(value.custoMil || 0) > 0 && (
@@ -338,6 +373,7 @@ const DynamicProductForm: React.FC<{
                 <div>
                   <Label>Custo da Passagem</Label>
                   <Input
+                    ref={costRef}
                     type="text"
                     value={costInput.displayValue}
                     onChange={(e) => {
@@ -345,6 +381,7 @@ const DynamicProductForm: React.FC<{
                       const parsed = parseCurrency(e.target.value);
                       onChange({ ...value, cost: parsed });
                     }}
+                    onBlur={costInput.handleBlur}
                     placeholder="R$ 0,00"
                   />
                 </div>
@@ -476,6 +513,7 @@ const DynamicProductForm: React.FC<{
         <div>
           <Label>Qtd</Label>
           <Input
+            ref={quantityRef}
             type="text"
             value={quantityInput.displayValue}
             onChange={(e) => {
@@ -483,12 +521,14 @@ const DynamicProductForm: React.FC<{
               const parsed = parseQuantity(e.target.value);
               onChange({ ...value, quantity: parsed });
             }}
+            onBlur={quantityInput.handleBlur}
             placeholder="1"
           />
         </div>
         <div>
           <Label>Valor</Label>
           <Input
+            ref={priceRef}
             type="text"
             value={priceInput.displayValue}
             onChange={(e) => {
@@ -496,6 +536,7 @@ const DynamicProductForm: React.FC<{
               const parsed = parseCurrency(e.target.value);
               onChange({ ...value, price: parsed });
             }}
+            onBlur={priceInput.handleBlur}
             placeholder="R$ 0,00"
           />
           {(value.price || 0) > 0 && (
@@ -509,12 +550,15 @@ const DynamicProductForm: React.FC<{
           <div>
             <Label>Custo</Label>
             <Input
+              ref={costRef}
               type="text"
               value={costInput.displayValue}
               onChange={(e) => {
                 costInput.handleChange(e);
-                onChange({ ...value, cost: costInput.numericValue });
+                const parsed = parseCurrency(e.target.value);
+                onChange({ ...value, cost: parsed });
               }}
+              onBlur={costInput.handleBlur}
               placeholder="R$ 0,00"
             />
           </div>
