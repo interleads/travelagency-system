@@ -17,7 +17,7 @@ import { CompactCard } from './CompactCard';
 import { CardDetailsModal } from './CardDetailsModal';
 import { ColumnHeader } from './ColumnHeader';
 import { CardQuickActions } from './CardQuickActions';
-import { useCRMPersistence, KanbanCard, KanbanColumn } from '@/hooks/useCRMPersistence';
+import { useCRMSupabase, KanbanCard, KanbanColumn } from '@/hooks/useCRMSupabase';
 
 // Types are now imported from the hook
 
@@ -38,7 +38,7 @@ interface CRMKanbanProps {
 }
 
 const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
-  // Use the persistence hook
+  // Use the Supabase hook
   const {
     columns,
     isLoaded,
@@ -47,7 +47,7 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
     updateCard: updateCardInPersistence,
     deleteCard: deleteCardFromPersistence,
     moveCard
-  } = useCRMPersistence();
+  } = useCRMSupabase();
 
   const [detailsCard, setDetailsCard] = useState<KanbanCard | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
