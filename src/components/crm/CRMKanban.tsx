@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -137,6 +137,42 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
   const { toast } = useToast();
   
   const newCardPhoneInput = usePhoneInput('');
+
+  // Register add column function with parent
+  useEffect(() => {
+    if (registerAddColumn) {
+      registerAddColumn((title: string) => {
+        console.log('Tentando adicionar coluna:', title);
+        
+        if (title.trim() === '') {
+          toast({
+            variant: "destructive",
+            title: "Erro",
+            description: "O título da coluna não pode estar vazio"
+          });
+          return;
+        }
+        
+        const newColumn: KanbanColumn = {
+          id: `column-${Date.now()}`,
+          title,
+          cards: []
+        };
+        
+        console.log('Nova coluna criada:', newColumn);
+        setColumns(prev => {
+          const updatedColumns = [...prev, newColumn];
+          console.log('Colunas atualizadas:', updatedColumns);
+          return updatedColumns;
+        });
+        
+        toast({
+          title: "Coluna adicionada",
+          description: `Nova coluna "${title}" foi adicionada`
+        });
+      });
+    }
+  }, [registerAddColumn, toast]);
 
   // Calculate available height
   useEffect(() => {
@@ -312,6 +348,9 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
                     <DialogContent className="max-w-md">
                       <DialogHeader>
                         <DialogTitle>Adicionar Cliente</DialogTitle>
+                        <DialogDescription>
+                          Preencha as informações básicas do novo cliente.
+                        </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4 pt-4">
                         <div>

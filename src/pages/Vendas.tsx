@@ -48,10 +48,15 @@ const Vendas = () => {
   const addColumnFnRef = useRef<((title: string) => void) | null>(null);
 
   const handleAddColumn = () => {
+    console.log('handleAddColumn chamado - newColumnTitle:', newColumnTitle);
+    console.log('addColumnFnRef.current:', addColumnFnRef.current);
+    
     if (newColumnTitle.trim() && addColumnFnRef.current) {
       addColumnFnRef.current(newColumnTitle.trim());
       setNewColumnTitle('');
       setIsColumnDialogOpen(false);
+    } else {
+      console.log('Erro: título vazio ou função não registrada');
     }
   };
 
