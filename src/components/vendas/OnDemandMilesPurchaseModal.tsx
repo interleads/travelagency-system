@@ -163,12 +163,12 @@ export const OnDemandMilesPurchaseModal: React.FC<OnDemandMilesPurchaseModalProp
                     />
                   </div>
                   <div>
-                    <Label htmlFor="supplier-contact">Contato</Label>
+                    <Label htmlFor="supplier-contact">Contato (opcional)</Label>
                     <Input
                       id="supplier-contact"
                       value={supplierContact}
                       onChange={(e) => setSupplierContact(e.target.value)}
-                      placeholder="Telefone, email ou WhatsApp"
+                      placeholder="Telefone, email ou WhatsApp (opcional)"
                     />
                   </div>
                   <div>
@@ -299,7 +299,7 @@ export const OnDemandMilesPurchaseModal: React.FC<OnDemandMilesPurchaseModalProp
                 !isValidCost ||
                 quantity <= 0 ||
                 !programId ||
-                (isNewSupplier && (!supplierName || !supplierContact || !supplierAccountType)) ||
+                (isNewSupplier && (!supplierName || !supplierAccountType)) ||
                 (!isNewSupplier && !selectedSupplierId)
               }
             >
