@@ -35,7 +35,10 @@ import { ImportCSV } from '@/components/vendas/ImportCSV';
 const Vendas = () => {
   const { toast } = useToast();
   const [isSaleDialogOpen, setIsSaleDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("historico");
+  const [activeTab, setActiveTab] = useState(() => {
+    // Se vier da rota CRM, ativar a aba CRM automaticamente
+    return window.location.pathname === '/crm' ? 'crm' : 'historico';
+  });
   const [searchFilter, setSearchFilter] = useState("");
   const [periodFilter, setPeriodFilter] = useState("todos");
   const [yearFilter, setYearFilter] = useState("todos");

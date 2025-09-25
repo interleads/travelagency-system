@@ -20,6 +20,10 @@ import { usePhoneInput, unformatPhoneNumber } from '@/lib/phoneMask';
 import { LabelBadge, Label as LabelType } from './LabelBadge';
 import { LabelSelector } from './LabelSelector';
 import { DueDateBadge } from './DueDateBadge';
+import { ChecklistComponent, ChecklistItem } from './ChecklistComponent';
+import { PriorityBadge, Priority } from './PriorityBadge';
+import { DealValueBadge } from './DealValueBadge';
+import { LeadSourceBadge, LeadSource } from './LeadSourceBadge';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -41,6 +45,14 @@ interface KanbanCard {
   phone: string;
   labels: LabelType[];
   dueDate?: Date;
+  checklist: ChecklistItem[];
+  dealValue?: number;
+  leadSource?: LeadSource;
+  probability?: number;
+  priority: Priority;
+  assignedTo?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // Available labels
@@ -69,7 +81,19 @@ const initialColumns: KanbanColumn[] = [
         email: 'joao.silva@email.com',
         phone: '(11) 98765-4321',
         labels: [availableLabels[0], availableLabels[4]], // Urgente, Familia
-        dueDate: new Date(2025, 0, 15) // 15/01/2025
+        dueDate: new Date(2025, 0, 15), // 15/01/2025
+        checklist: [
+          { id: '1', text: 'Consultar disponibilidade de voos', completed: true, createdAt: new Date() },
+          { id: '2', text: 'Verificar documentação necessária', completed: true, createdAt: new Date() },
+          { id: '3', text: 'Preparar orçamento detalhado', completed: false, createdAt: new Date() }
+        ],
+        dealValue: 25000,
+        leadSource: 'referral' as LeadSource,
+        probability: 80,
+        priority: 'high' as Priority,
+        assignedTo: 'Ana Costa',
+        createdAt: new Date(2024, 11, 10),
+        updatedAt: new Date(2024, 11, 20)
       },
       {
         id: '2',
@@ -79,7 +103,18 @@ const initialColumns: KanbanColumn[] = [
         email: 'maria.oliveira@email.com',
         phone: '(11) 91234-5678',
         labels: [availableLabels[3]], // Promoção
-        dueDate: new Date(2025, 0, 20) // 20/01/2025
+        dueDate: new Date(2025, 0, 20), // 20/01/2025
+        checklist: [
+          { id: '4', text: 'Enviar proposta inicial', completed: true, createdAt: new Date() },
+          { id: '5', text: 'Agendar reunião de apresentação', completed: false, createdAt: new Date() }
+        ],
+        dealValue: 15000,
+        leadSource: 'website' as LeadSource,
+        probability: 60,
+        priority: 'medium' as Priority,
+        assignedTo: 'Pedro Santos',
+        createdAt: new Date(2024, 11, 15),
+        updatedAt: new Date(2024, 11, 18)
       }
     ]
   },
@@ -95,7 +130,20 @@ const initialColumns: KanbanColumn[] = [
         email: 'pedro.santos@email.com',
         phone: '(11) 95678-1234',
         labels: [availableLabels[2], availableLabels[4]], // VIP, Familia
-        dueDate: new Date(2025, 0, 10) // 10/01/2025
+        dueDate: new Date(2025, 0, 10), // 10/01/2025
+        checklist: [
+          { id: '6', text: 'Confirmar datas com o cliente', completed: true, createdAt: new Date() },
+          { id: '7', text: 'Negociar desconto especial', completed: true, createdAt: new Date() },
+          { id: '8', text: 'Finalizar contrato', completed: false, createdAt: new Date() },
+          { id: '9', text: 'Processar pagamento', completed: false, createdAt: new Date() }
+        ],
+        dealValue: 45000,
+        leadSource: 'phone' as LeadSource,
+        probability: 90,
+        priority: 'urgent' as Priority,
+        assignedTo: 'Carlos Mendes',
+        createdAt: new Date(2024, 10, 25),
+        updatedAt: new Date(2024, 11, 22)
       }
     ]
   },
@@ -111,7 +159,19 @@ const initialColumns: KanbanColumn[] = [
         email: 'ana.costa@email.com',
         phone: '(11) 94321-8765',
         labels: [availableLabels[6]], // Lua de Mel
-        dueDate: new Date(2024, 11, 25) // 25/12/2024 (overdue)
+        dueDate: new Date(2024, 11, 25), // 25/12/2024 (overdue)
+        checklist: [
+          { id: '10', text: 'Documentação enviada', completed: true, createdAt: new Date() },
+          { id: '11', text: 'Pagamento processado', completed: true, createdAt: new Date() },
+          { id: '12', text: 'Vouchers emitidos', completed: true, createdAt: new Date() }
+        ],
+        dealValue: 32000,
+        leadSource: 'social' as LeadSource,
+        probability: 100,
+        priority: 'low' as Priority,
+        assignedTo: 'Ana Costa',
+        createdAt: new Date(2024, 9, 15),
+        updatedAt: new Date(2024, 11, 1)
       }
     ]
   },
@@ -127,7 +187,19 @@ const initialColumns: KanbanColumn[] = [
         email: 'carlos.mendes@email.com',
         phone: '(11) 93456-7890',
         labels: [availableLabels[5]], // Corporativo
-        dueDate: new Date(2024, 11, 20) // 20/12/2024 (completed)
+        dueDate: new Date(2024, 11, 20), // 20/12/2024 (completed)
+        checklist: [
+          { id: '13', text: 'Viagem realizada', completed: true, createdAt: new Date() },
+          { id: '14', text: 'Feedback coletado', completed: true, createdAt: new Date() },
+          { id: '15', text: 'Follow-up pós-viagem', completed: false, createdAt: new Date() }
+        ],
+        dealValue: 18000,
+        leadSource: 'email' as LeadSource,
+        probability: 100,
+        priority: 'low' as Priority,
+        assignedTo: 'Pedro Santos',
+        createdAt: new Date(2024, 8, 10),
+        updatedAt: new Date(2024, 11, 20)
       }
     ]
   }
@@ -148,7 +220,13 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
     email: '',
     phone: '',
     labels: [],
-    dueDate: undefined
+    dueDate: undefined,
+    checklist: [],
+    dealValue: undefined,
+    leadSource: undefined,
+    probability: undefined,
+    priority: 'medium',
+    assignedTo: undefined
   });
   const [targetColumnId, setTargetColumnId] = useState<string | null>(null);
   const [draggedColumnId, setDraggedColumnId] = useState<string | null>(null);
@@ -252,7 +330,15 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
       email: newCard.email || '',
       phone: newCardPhoneInput.rawValue,
       labels: newCard.labels || [],
-      dueDate: newCard.dueDate
+      dueDate: newCard.dueDate,
+      checklist: newCard.checklist || [],
+      dealValue: newCard.dealValue,
+      leadSource: newCard.leadSource,
+      probability: newCard.probability,
+      priority: newCard.priority || 'medium',
+      assignedTo: newCard.assignedTo,
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     
     setColumns(columns.map(col => 
@@ -268,7 +354,13 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
       email: '',
       phone: '',
       labels: [],
-      dueDate: undefined
+      dueDate: undefined,
+      checklist: [],
+      dealValue: undefined,
+      leadSource: undefined,
+      probability: undefined,
+      priority: 'medium',
+      assignedTo: undefined
     });
     newCardPhoneInput.setDisplayValue('');
     setTargetColumnId(null);
@@ -439,7 +531,13 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
                               email: '',
                               phone: '',
                               labels: [],
-                              dueDate: undefined
+                              dueDate: undefined,
+                              checklist: [],
+                              dealValue: undefined,
+                              leadSource: undefined,
+                              probability: undefined,
+                              priority: 'medium',
+                              assignedTo: undefined
                             });
                             newCardPhoneInput.setDisplayValue('');
                             setTargetColumnId(null);
@@ -517,6 +615,85 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
                             selectedLabels={newCard.labels || []}
                             onLabelsChange={(labels) => setNewCard({...newCard, labels})}
                             availableLabels={availableLabels}
+                          />
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label>Prioridade</Label>
+                              <select
+                                value={newCard.priority || 'medium'}
+                                onChange={(e) => setNewCard({...newCard, priority: e.target.value as Priority})}
+                                className="w-full h-9 px-3 py-1 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                              >
+                                <option value="low">Baixa</option>
+                                <option value="medium">Média</option>
+                                <option value="high">Alta</option>
+                                <option value="urgent">Urgente</option>
+                              </select>
+                            </div>
+
+                            <div>
+                              <Label>Origem do Lead</Label>
+                              <select
+                                value={newCard.leadSource || 'other'}
+                                onChange={(e) => setNewCard({...newCard, leadSource: e.target.value as LeadSource})}
+                                className="w-full h-9 px-3 py-1 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                              >
+                                <option value="website">Site</option>
+                                <option value="referral">Indicação</option>
+                                <option value="phone">Telefone</option>
+                                <option value="email">Email</option>
+                                <option value="social">Redes Sociais</option>
+                                <option value="advertisement">Anúncio</option>
+                                <option value="search">Busca Online</option>
+                                <option value="event">Evento</option>
+                                <option value="other">Outro</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label htmlFor="dealValue">Valor do Negócio (R$)</Label>
+                              <Input 
+                                id="dealValue"
+                                type="number"
+                                value={newCard.dealValue || ''}
+                                onChange={(e) => setNewCard({...newCard, dealValue: e.target.value ? Number(e.target.value) : undefined})}
+                                placeholder="25000"
+                                min="0"
+                                step="1000"
+                              />
+                            </div>
+
+                            <div>
+                              <Label htmlFor="probability">Probabilidade (%)</Label>
+                              <Input 
+                                id="probability"
+                                type="number"
+                                value={newCard.probability || ''}
+                                onChange={(e) => setNewCard({...newCard, probability: e.target.value ? Number(e.target.value) : undefined})}
+                                placeholder="80"
+                                min="0"
+                                max="100"
+                                step="5"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <Label htmlFor="assignedTo">Responsável</Label>
+                            <Input 
+                              id="assignedTo"
+                              value={newCard.assignedTo || ''}
+                              onChange={(e) => setNewCard({...newCard, assignedTo: e.target.value})}
+                              placeholder="Ex: Ana Costa"
+                            />
+                          </div>
+
+                          <ChecklistComponent
+                            items={newCard.checklist || []}
+                            onItemsChange={(checklist) => setNewCard({...newCard, checklist})}
                           />
 
                           <div>
@@ -661,6 +838,40 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
                                               availableLabels={availableLabels}
                                             />
 
+                                            <ChecklistComponent
+                                              items={editingCard.checklist || []}
+                                              onItemsChange={(checklist) => setEditingCard({...editingCard, checklist})}
+                                            />
+
+                                            <div className="grid grid-cols-2 gap-3">
+                                              <div>
+                                                <Label>Prioridade</Label>
+                                                <select
+                                                  value={editingCard.priority || 'medium'}
+                                                  onChange={(e) => setEditingCard({...editingCard, priority: e.target.value as Priority})}
+                                                  className="w-full h-9 px-3 py-1 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                                                >
+                                                  <option value="low">Baixa</option>
+                                                  <option value="medium">Média</option>
+                                                  <option value="high">Alta</option>
+                                                  <option value="urgent">Urgente</option>
+                                                </select>
+                                              </div>
+
+                                              <div>
+                                                <Label htmlFor="edit-dealValue">Valor do Negócio (R$)</Label>
+                                                <Input 
+                                                  id="edit-dealValue"
+                                                  type="number"
+                                                  value={editingCard.dealValue || ''}
+                                                  onChange={(e) => setEditingCard({...editingCard, dealValue: e.target.value ? Number(e.target.value) : undefined})}
+                                                  placeholder="25000"
+                                                  min="0"
+                                                  step="1000"
+                                                />
+                                              </div>
+                                            </div>
+
                                             <div>
                                               <Label>Data de Vencimento</Label>
                                               <Popover>
@@ -714,9 +925,51 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
                                 </div>
                               )}
 
-                              {/* Due date */}
-                              {card.dueDate && (
-                                <DueDateBadge dueDate={card.dueDate} />
+                              {/* Priority and Deal Value */}
+                              <div className="flex gap-2 flex-wrap">
+                                <PriorityBadge priority={card.priority} />
+                                {card.dealValue && card.dealValue > 0 && (
+                                  <DealValueBadge value={card.dealValue} />
+                                )}
+                                {card.leadSource && (
+                                  <LeadSourceBadge source={card.leadSource} />
+                                )}
+                              </div>
+
+                              {/* Checklist Progress */}
+                              {card.checklist && card.checklist.length > 0 && (
+                                <div className="flex items-center gap-2 text-xs">
+                                  <ChecklistComponent
+                                    items={card.checklist}
+                                    onItemsChange={(checklist) => {
+                                      const updatedColumns = columns.map(col => ({
+                                        ...col,
+                                        cards: col.cards.map(c => 
+                                          c.id === card.id ? { ...c, checklist, updatedAt: new Date() } : c
+                                        )
+                                      }));
+                                      setColumns(updatedColumns);
+                                    }}
+                                    isExpanded={false}
+                                  />
+                                </div>
+                              )}
+
+                              {/* Probability and Assigned */}
+                              {(card.probability || card.assignedTo) && (
+                                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                  {card.probability && (
+                                    <span className="flex items-center gap-1">
+                                      <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                                      {card.probability}% chance
+                                    </span>
+                                  )}
+                                  {card.assignedTo && (
+                                    <span className="font-medium">
+                                      📋 {card.assignedTo}
+                                    </span>
+                                  )}
+                                </div>
                               )}
 
                               {/* Client info */}
