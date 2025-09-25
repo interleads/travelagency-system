@@ -873,7 +873,8 @@ const DynamicProductForm: React.FC<{
   };
 
   return (
-    <div className="relative border border-border rounded-lg p-4 mb-4 bg-card">
+    <>
+      <div className="relative border border-border rounded-lg p-4 mb-4 bg-card">
       {onRemove && (
         <Button
           size="icon"
@@ -997,19 +998,19 @@ const DynamicProductForm: React.FC<{
             placeholder="Ex: Observações (vencimento, fornecedor...)"
           />
         </div>
-    </div>
-    
-    {/* On-Demand Miles Purchase Modal */}
-    <OnDemandMilesPurchaseModal
-      open={isOnDemandModalOpen}
-      onOpenChange={setIsOnDemandModalOpen}
-      onSubmit={handleOnDemandPurchase}
-      requiredMiles={value.qtdMilhas || 0}
-      maxCostPerThousand={maxCostPerThousand}
-      loading={onDemandMilesPurchase.isPending}
-    />
+      </div>
+      
+      {/* On-Demand Miles Purchase Modal */}
+      <OnDemandMilesPurchaseModal
+        open={isOnDemandModalOpen}
+        onOpenChange={setIsOnDemandModalOpen}
+        onSubmit={handleOnDemandPurchase}
+        requiredMiles={value.qtdMilhas || 0}
+        maxCostPerThousand={maxCostPerThousand}
+        loading={onDemandMilesPurchase.isPending}
+      />
+    </>
   );
-};
 };
 
 export default DynamicProductForm;
