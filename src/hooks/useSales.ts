@@ -303,6 +303,44 @@ export const useUpdateSale = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, products, ...updates }: { id: string; products?: SaleProduct[] } & Partial<SaleInput>) => {
+      // First, revert any previous miles transactions for this sale to prevent double deductions
+      const { data: previousMilesTransactions } = await supabase
+        .from("miles_transactions")
+        .select("*")
+        .eq("sale_id", id)
+        .eq("type", "sale");
+
+      if (previousMilesTransactions && previousMilesTransactions.length > 0) {
+        // Revert the miles back to inventory
+        for (const transaction of previousMilesTransactions) {
+          if (transaction.miles_inventory_id) {
+            // Get current inventory data
+            const { data: currentInventory } = await supabase
+              .from("miles_inventory")
+              .select("remaining_quantity")
+              .eq("id", transaction.miles_inventory_id)
+              .single();
+
+            if (currentInventory) {
+              await supabase
+                .from("miles_inventory")
+                .update({
+                  remaining_quantity: currentInventory.remaining_quantity + transaction.quantity,
+                  status: 'Ativo'
+                })
+                .eq("id", transaction.miles_inventory_id);
+            }
+          }
+        }
+
+        // Delete the previous miles transactions
+        await supabase
+          .from("miles_transactions")
+          .delete()
+          .eq("sale_id", id)
+          .eq("type", "sale");
+      }
+
       // Update sale data
       const { data, error } = await supabase
         .from("sales")
@@ -333,7 +371,7 @@ export const useUpdateSale = () => {
 
         if (deleteError) throw deleteError;
 
-        // Then insert updated products
+        // Then insert updated products and handle miles transactions
         const productsForDb = products.map(product => {
           const productName = product.name || generateProductName(product) || `${product.type || 'Produto'}`;
           
@@ -368,6 +406,56 @@ export const useUpdateSale = () => {
           .insert(productsForDb);
 
         if (productsError) throw productsError;
+
+        // Handle new miles transactions for products that use miles
+        for (const product of products) {
+          if (product.useOwnMiles && product.qtdMilhas && product.qtdMilhas > 0) {
+            if (product.milesSourceType === "estoque" && product.milesProgram) {
+              // Use existing inventory (FIFO approach)
+              const { data: availableInventory } = await supabase
+                .from("miles_inventory")
+                .select("*")
+                .eq("program_id", product.milesProgram)
+                .eq("status", "Ativo")
+                .gt("remaining_quantity", 0)
+                .order("purchase_date", { ascending: true });
+
+              if (availableInventory) {
+                let remainingMiles = product.qtdMilhas;
+                
+                for (const inventory of availableInventory) {
+                  if (remainingMiles <= 0) break;
+                  
+                  const milesToUse = Math.min(remainingMiles, inventory.remaining_quantity);
+                  
+                  // Update inventory
+                  await supabase
+                    .from("miles_inventory")
+                    .update({
+                      remaining_quantity: inventory.remaining_quantity - milesToUse,
+                      status: inventory.remaining_quantity - milesToUse <= 0 ? 'Esgotado' : 'Ativo'
+                    })
+                    .eq("id", inventory.id);
+
+                  // Create miles transaction
+                  await supabase
+                    .from("miles_transactions")
+                    .insert({
+                      miles_inventory_id: inventory.id,
+                      sale_id: id,
+                      type: 'sale',
+                      quantity: milesToUse,
+                      cost_per_thousand: inventory.cost_per_thousand,
+                      total_value: (milesToUse / 1000) * inventory.cost_per_thousand,
+                      description: `Venda - ${product.name}`
+                    });
+
+                  remainingMiles -= milesToUse;
+                }
+              }
+            }
+          }
+        }
       }
 
       return data;

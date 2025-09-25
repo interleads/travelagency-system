@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -9,10 +9,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Trash2, Plus } from "lucide-react";
 import { useCurrencyInput, useQuantityInput, parseCurrency, parseQuantity } from "@/lib/utils";
 import { useSuppliers } from "@/hooks/useSuppliers";
-import { useMilesPrograms } from "@/hooks/useMilesInventory";
+import { useMilesPrograms } from '@/hooks/useMilesInventory';
 import { SupplierForm } from "@/components/finance/SupplierForm";
 import { OnDemandMilesPurchaseModal } from "./OnDemandMilesPurchaseModal";
 import { useOnDemandMilesPurchase } from "@/hooks/useOnDemandMilesPurchase";
+import { useAvailableMilesForProgram } from '@/hooks/useAvailableMiles';
 
 // Componente select reutilizável
 const airlines = [
@@ -134,11 +135,15 @@ const DynamicProductForm: React.FC<{
   onChange: (product: SaleProduct) => void;
   onRemove?: () => void;
 }> = ({ value, onChange, onRemove }) => {
-  const { data: suppliers } = useSuppliers();
-  const { data: milesPrograms } = useMilesPrograms();
-  const [isSupplierDialogOpen, setIsSupplierDialogOpen] = React.useState(false);
-  const [isOnDemandModalOpen, setIsOnDemandModalOpen] = React.useState(false);
+  const { data: suppliers = [] } = useSuppliers();
+  const { data: milesPrograms = [] } = useMilesPrograms();
   const onDemandMilesPurchase = useOnDemandMilesPurchase();
+  const { data: availableMiles = 0 } = useAvailableMilesForProgram(
+    value.useOwnMiles && value.milesSourceType === "estoque" ? value.milesProgram : null
+  );
+  
+  const [isOnDemandModalOpen, setIsOnDemandModalOpen] = useState(false);
+  const [isSupplierDialogOpen, setIsSupplierDialogOpen] = React.useState(false);
 
   // Refs para os inputs para evitar formatação durante digitação
   const priceRef = React.useRef<HTMLInputElement>(null);
@@ -442,6 +447,16 @@ const DynamicProductForm: React.FC<{
                         ))}
                       </SelectContent>
                     </Select>
+                    {value.milesProgram && (
+                      <div className="text-sm text-muted-foreground mt-1">
+                        Saldo disponível: {availableMiles.toLocaleString()} milhas
+                        {value.qtdMilhas && value.qtdMilhas > availableMiles && (
+                          <span className="text-destructive ml-2">
+                            ⚠️ Saldo insuficiente!
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
                 

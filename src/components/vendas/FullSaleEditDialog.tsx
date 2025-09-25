@@ -71,7 +71,11 @@ export function FullSaleEditDialog({ sale, open, onOpenChange }: FullSaleEditDia
                 periodo: p.rental_period || '',
                 cobertura: p.coverage_type || '',
                 details: p.details || '',
-                fornecedor: p.fornecedor || ''
+                fornecedor: p.fornecedor || '',
+                // Map miles-related fields that were missing
+                useOwnMiles: p.miles && p.miles > 0,
+                milesSourceType: p.miles && p.miles > 0 ? "estoque" : undefined,
+                milesProgram: sale.supplier_id || '' // This will be populated from context
               };
             })
       : [EmptyProduct]
@@ -133,7 +137,11 @@ export function FullSaleEditDialog({ sale, open, onOpenChange }: FullSaleEditDia
                 periodo: p.rental_period || '',
                 cobertura: p.coverage_type || '',
                 details: p.details || '',
-                fornecedor: p.fornecedor || ''
+                fornecedor: p.fornecedor || '',
+                // Map miles-related fields that were missing
+                useOwnMiles: p.miles && p.miles > 0,
+                milesSourceType: p.miles && p.miles > 0 ? "estoque" : undefined,
+                milesProgram: sale.supplier_id || '' // This will be populated from context
               };
             })
           : [EmptyProduct]
