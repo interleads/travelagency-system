@@ -2,7 +2,7 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import { Trash2 } from "lucide-react";
 import { useCurrencyInput, useQuantityInput, parseCurrency, parseQuantity } from "@/lib/utils";
 
@@ -535,44 +535,20 @@ const DynamicProductForm: React.FC<{
       )}
       
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <div className="md:col-span-4">
+        <div>
           <Label>Tipo</Label>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 mt-1">
-            {typeOptions.map(option => {
-              // Static class mappings for Tailwind JIT
-              const productClassMap = {
-                'passagem': 'bg-product-passagem text-product-passagem-foreground border-0',
-                'hotel': 'bg-product-hotel text-product-hotel-foreground border-0',
-                'veiculo': 'bg-product-veiculo text-product-veiculo-foreground border-0',
-                'seguro': 'bg-product-seguro text-product-seguro-foreground border-0',
-                'transfer': 'bg-product-transfer text-product-transfer-foreground border-0',
-                'passeios': 'bg-product-passeios text-product-passeios-foreground border-0',
-                'outros': 'bg-product-outros text-product-outros-foreground border-0'
-              };
-
-              const isSelected = value.type === option.value;
-              const baseClasses = productClassMap[option.value] || productClassMap['outros'];
-              
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => {
-                    const newType = option.value as ProductType;
-                    onChange({ ...EmptyProduct, ...value, type: newType });
-                  }}
-                  className={`
-                    ${baseClasses}
-                    px-3 py-2 rounded-full text-xs font-semibold transition-all duration-200
-                    hover:scale-105 hover:shadow-md
-                    ${isSelected ? 'ring-2 ring-primary ring-offset-2 scale-105' : 'opacity-80 hover:opacity-100'}
-                  `}
-                >
-                  {option.label}
-                </button>
-              );
-            })}
-          </div>
+          <select
+            className="w-full mt-1 border border-input rounded-md h-10 px-3 bg-background"
+            value={value.type ?? ""}
+            onChange={e => {
+              const newType = e.target.value === "" ? undefined : (e.target.value as ProductType);
+              onChange({ ...EmptyProduct, ...value, type: newType });
+            }}
+            required
+          >
+            <option value="">Selecione</option>
+            {typeOptions.map(pt => <option key={pt.value} value={pt.value}>{pt.label}</option>)}
+          </select>
         </div>
         <div>
           <Label>Qtd</Label>

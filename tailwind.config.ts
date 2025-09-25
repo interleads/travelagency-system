@@ -65,10 +65,16 @@ export default {
 				product: {
 					passagem: 'hsl(var(--product-passagem))',
 					'passagem-foreground': 'hsl(var(--product-passagem-foreground))',
-					hospedagem: 'hsl(var(--product-hospedagem))',
-					'hospedagem-foreground': 'hsl(var(--product-hospedagem-foreground))',
+					hotel: 'hsl(var(--product-hotel))',
+					'hotel-foreground': 'hsl(var(--product-hotel-foreground))',
+					veiculo: 'hsl(var(--product-veiculo))',
+					'veiculo-foreground': 'hsl(var(--product-veiculo-foreground))',
 					seguro: 'hsl(var(--product-seguro))',
 					'seguro-foreground': 'hsl(var(--product-seguro-foreground))',
+					transfer: 'hsl(var(--product-transfer))',
+					'transfer-foreground': 'hsl(var(--product-transfer-foreground))',
+					passeios: 'hsl(var(--product-passeios))',
+					'passeios-foreground': 'hsl(var(--product-passeios-foreground))',
 					outros: 'hsl(var(--product-outros))',
 					'outros-foreground': 'hsl(var(--product-outros-foreground))'
 				},
