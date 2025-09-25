@@ -11,6 +11,8 @@ import { useCurrencyInput, useQuantityInput, parseCurrency, parseQuantity } from
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { useMilesPrograms } from "@/hooks/useMilesInventory";
 import { SupplierForm } from "@/components/finance/SupplierForm";
+import { OnDemandMilesPurchaseModal } from "./OnDemandMilesPurchaseModal";
+import { useOnDemandMilesPurchase } from "@/hooks/useOnDemandMilesPurchase";
 
 // Componente select reutilizável
 const airlines = [
@@ -39,6 +41,7 @@ export interface SaleProduct {
   // Campos só para passagem
   ticketType?: "milhas" | "tarifada";
   useOwnMiles?: boolean; // Toggle para usar milhas próprias
+  milesSourceType?: "estoque" | "compra_sob_demanda"; // Tipo de origem das milhas
   milesProgram?: string; // ID do programa de milhas
   airline?: string;
   adults?: number;
@@ -134,6 +137,8 @@ const DynamicProductForm: React.FC<{
   const { data: suppliers } = useSuppliers();
   const { data: milesPrograms } = useMilesPrograms();
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = React.useState(false);
+  const [isOnDemandModalOpen, setIsOnDemandModalOpen] = React.useState(false);
+  const onDemandMilesPurchase = useOnDemandMilesPurchase();
 
   // Refs para os inputs para evitar formatação durante digitação
   const priceRef = React.useRef<HTMLInputElement>(null);
@@ -216,6 +221,31 @@ const DynamicProductForm: React.FC<{
       onChange({ ...value, name: autoName });
     }
   }, [value.type, value.airline, value.origin, value.destination, value.categoria, value.cobertura, value.local, value.origem, value.destino, value.fornecedor]);
+
+  // Handle on-demand miles purchase
+  const handleOnDemandPurchase = async (purchase: any) => {
+    try {
+      const result = await onDemandMilesPurchase.mutateAsync(purchase);
+      
+      // Update the product with supplier info and cost
+      onChange({
+        ...value,
+        supplier_id: result.supplierId,
+        fornecedor: purchase.supplier.name,
+        custoMil: purchase.miles.cost_per_thousand,
+        cost: result.totalCost
+      });
+      
+      setIsOnDemandModalOpen(false);
+    } catch (error) {
+      console.error('Erro ao realizar compra sob demanda:', error);
+    }
+  };
+
+  // Calculate max cost per thousand based on sale price to ensure profitability
+  const maxCostPerThousand = value.price && value.qtdMilhas 
+    ? ((value.price * 0.8) / value.qtdMilhas) * 1000 // 80% of sale price as max cost
+    : 0;
 
   // Render extra fields REVISADO
   const renderExtraFields = () => {
@@ -348,6 +378,7 @@ const DynamicProductForm: React.FC<{
                   onChange({ 
                     ...value, 
                     useOwnMiles: checked,
+                    milesSourceType: checked ? "estoque" : undefined,
                     custoMil: checked ? 0 : value.custoMil 
                   });
                 }}
@@ -357,10 +388,43 @@ const DynamicProductForm: React.FC<{
               </Label>
             </div>
 
+            {/* Seleção do tipo de origem das milhas */}
+            {value.useOwnMiles && (
+              <div className="space-y-3 p-3 bg-accent/50 rounded-md">
+                <Label className="text-sm font-medium">Como obter as milhas?</Label>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant={value.milesSourceType === "estoque" ? "default" : "outline"}
+                    onClick={() => onChange({ ...value, milesSourceType: "estoque" })}
+                    className="flex-1"
+                    size="sm"
+                  >
+                    Estoque Atual
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={value.milesSourceType === "compra_sob_demanda" ? "default" : "outline"}
+                    onClick={() => onChange({ ...value, milesSourceType: "compra_sob_demanda" })}
+                    className="flex-1"
+                    size="sm"
+                  >
+                    Comprar Agora
+                  </Button>
+                </div>
+                
+                {value.milesSourceType === "compra_sob_demanda" && (
+                  <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
+                    💡 As milhas serão compradas no momento da venda e utilizadas imediatamente.
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Campos específicos por tipo */}
             {value.ticketType === "milhas" ? (
               <div className="space-y-3">
-                {value.useOwnMiles && (
+                {value.useOwnMiles && value.milesSourceType === "estoque" && (
                   <div>
                     <Label>Programa de Milhas</Label>
                     <Select
@@ -378,6 +442,40 @@ const DynamicProductForm: React.FC<{
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+                )}
+                
+                {value.useOwnMiles && value.milesSourceType === "compra_sob_demanda" && (
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <Label>Programa de Milhas</Label>
+                      <Select
+                        value={value.milesProgram || ""}
+                        onValueChange={(program_id) => onChange({ ...value, milesProgram: program_id })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o programa" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {milesPrograms?.map((program) => (
+                            <SelectItem key={program.id} value={program.id}>
+                              {program.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-end">
+                      <Button
+                        type="button"
+                        onClick={() => setIsOnDemandModalOpen(true)}
+                        disabled={!value.qtdMilhas || !value.price}
+                        variant="outline"
+                        className="h-10"
+                      >
+                        Configurar Compra
+                      </Button>
+                    </div>
                   </div>
                 )}
                 
@@ -900,7 +998,18 @@ const DynamicProductForm: React.FC<{
           />
         </div>
     </div>
+    
+    {/* On-Demand Miles Purchase Modal */}
+    <OnDemandMilesPurchaseModal
+      open={isOnDemandModalOpen}
+      onOpenChange={setIsOnDemandModalOpen}
+      onSubmit={handleOnDemandPurchase}
+      requiredMiles={value.qtdMilhas || 0}
+      maxCostPerThousand={maxCostPerThousand}
+      loading={onDemandMilesPurchase.isPending}
+    />
   );
+};
 };
 
 export default DynamicProductForm;
