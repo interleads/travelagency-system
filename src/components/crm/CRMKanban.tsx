@@ -119,6 +119,7 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
   const [targetColumnId, setTargetColumnId] = useState<string | null>(null);
   const [draggedColumnId, setDraggedColumnId] = useState<string | null>(null);
   const [availableHeight, setAvailableHeight] = useState<number>(0);
+  const [isAddClientDialogOpen, setIsAddClientDialogOpen] = useState(false);
   const boardRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   
@@ -233,6 +234,7 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
     });
     newCardPhoneInput.setDisplayValue('');
     setTargetColumnId(null);
+    setIsAddClientDialogOpen(false);
     
     toast({
       title: "Cliente adicionado",
@@ -386,7 +388,24 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
                   >
                     <div className="flex justify-between items-center">
                       <CardTitle className="text-sm font-medium">{column.title}</CardTitle>
-                      <Dialog>
+                      <Dialog 
+                        open={isAddClientDialogOpen} 
+                        onOpenChange={(open) => {
+                          setIsAddClientDialogOpen(open);
+                          if (!open) {
+                            // Clear form when modal closes
+                            setNewCard({
+                              title: '',
+                              description: '',
+                              client: '',
+                              email: '',
+                              phone: ''
+                            });
+                            newCardPhoneInput.setDisplayValue('');
+                            setTargetColumnId(null);
+                          }
+                        }}
+                      >
                         <DialogTrigger asChild>
                           <Button 
                             size="sm" 
