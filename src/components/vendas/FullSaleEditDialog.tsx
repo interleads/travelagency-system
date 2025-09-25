@@ -30,28 +30,50 @@ export function FullSaleEditDialog({ sale, open, onOpenChange }: FullSaleEditDia
   );
   const [products, setProducts] = useState<SaleProduct[]>(
     sale.sale_products && sale.sale_products.length > 0 
-          ? sale.sale_products.map(p => ({
-              name: p.name,
-              type: p.type as ProductType,
-              price: Number(p.price),
-              cost: Number(p.cost || 0),
-              quantity: p.quantity,
-              // Map database fields back to form fields
-              trecho1: p.departure_date || '',
-              trecho2: p.return_date || '',
-              adults: 0,
-              children: 0,
-              airline: p.airline || '',
-              qtdMilhas: p.miles || 0,
-              custoMil: Number(p.miles_cost || 0),
-              checkin: p.checkin_date || '',
-              checkout: p.checkout_date || '',
-              categoria: p.vehicle_category || '',
-              periodo: p.rental_period || '',
-              cobertura: p.coverage_type || '',
-              details: p.details || '',
-              fornecedor: p.fornecedor || '' // Incluir campo fornecedor
-            }))
+          ? sale.sale_products.map(p => {
+              // Parse passengers field to extract adults and children
+              const parsePassengers = (passengers: string | null) => {
+                if (!passengers) return { adults: 1, children: 0 };
+                const match = passengers.match(/(\d+)\s*adulto[s]?(?:,?\s*(\d+)\s*criança[s]?)?/i);
+                if (match) {
+                  return {
+                    adults: parseInt(match[1]) || 1,
+                    children: parseInt(match[2]) || 0
+                  };
+                }
+                return { adults: 1, children: 0 };
+              };
+              
+              const passengerData = parsePassengers(p.passengers);
+              const ticketType = (p.miles && p.miles > 0) ? "milhas" : "tarifada";
+              
+              return {
+                name: p.name,
+                type: p.type as ProductType,
+                price: Number(p.price),
+                cost: Number(p.cost || 0),
+                quantity: p.quantity,
+                // Map database fields back to form fields
+                origin: p.origin || '',
+                destination: p.destination || '',
+                locator: p.locator || '',
+                trecho1: p.departure_date || '',
+                trecho2: p.return_date || '',
+                adults: passengerData.adults,
+                children: passengerData.children,
+                ticketType: ticketType as "milhas" | "tarifada",
+                airline: p.airline || '',
+                qtdMilhas: p.miles || 0,
+                custoMil: Number(p.miles_cost || 0),
+                checkin: p.checkin_date || '',
+                checkout: p.checkout_date || '',
+                categoria: p.vehicle_category || '',
+                periodo: p.rental_period || '',
+                cobertura: p.coverage_type || '',
+                details: p.details || '',
+                fornecedor: p.fornecedor || ''
+              };
+            })
       : [EmptyProduct]
   );
   const [paymentMethod, setPaymentMethod] = useState(sale.payment_method);
@@ -70,28 +92,50 @@ export function FullSaleEditDialog({ sale, open, onOpenChange }: FullSaleEditDia
       );
       setProducts(
         sale.sale_products && sale.sale_products.length > 0 
-          ? sale.sale_products.map(p => ({
-              name: p.name,
-              type: p.type as ProductType,
-              price: Number(p.price),
-              cost: Number(p.cost || 0),
-              quantity: p.quantity,
-              // Map database fields back to form fields
-              trecho1: p.departure_date || '',
-              trecho2: p.return_date || '',
-              adults: 0,
-              children: 0,
-              airline: p.airline || '',
-              qtdMilhas: p.miles || 0,
-              custoMil: Number(p.miles_cost || 0),
-              checkin: p.checkin_date || '',
-              checkout: p.checkout_date || '',
-              categoria: p.vehicle_category || '',
-              periodo: p.rental_period || '',
-              cobertura: p.coverage_type || '',
-              details: p.details || '',
-              fornecedor: p.fornecedor || '' // Incluir campo fornecedor
-            }))
+          ? sale.sale_products.map(p => {
+              // Parse passengers field to extract adults and children
+              const parsePassengers = (passengers: string | null) => {
+                if (!passengers) return { adults: 1, children: 0 };
+                const match = passengers.match(/(\d+)\s*adulto[s]?(?:,?\s*(\d+)\s*criança[s]?)?/i);
+                if (match) {
+                  return {
+                    adults: parseInt(match[1]) || 1,
+                    children: parseInt(match[2]) || 0
+                  };
+                }
+                return { adults: 1, children: 0 };
+              };
+              
+              const passengerData = parsePassengers(p.passengers);
+              const ticketType = (p.miles && p.miles > 0) ? "milhas" : "tarifada";
+              
+              return {
+                name: p.name,
+                type: p.type as ProductType,
+                price: Number(p.price),
+                cost: Number(p.cost || 0),
+                quantity: p.quantity,
+                // Map database fields back to form fields
+                origin: p.origin || '',
+                destination: p.destination || '',
+                locator: p.locator || '',
+                trecho1: p.departure_date || '',
+                trecho2: p.return_date || '',
+                adults: passengerData.adults,
+                children: passengerData.children,
+                ticketType: ticketType as "milhas" | "tarifada",
+                airline: p.airline || '',
+                qtdMilhas: p.miles || 0,
+                custoMil: Number(p.miles_cost || 0),
+                checkin: p.checkin_date || '',
+                checkout: p.checkout_date || '',
+                categoria: p.vehicle_category || '',
+                periodo: p.rental_period || '',
+                cobertura: p.coverage_type || '',
+                details: p.details || '',
+                fornecedor: p.fornecedor || ''
+              };
+            })
           : [EmptyProduct]
       );
       setPaymentMethod(sale.payment_method);
