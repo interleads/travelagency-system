@@ -13,6 +13,8 @@ import Configuracoes from "./pages/Configuracoes";
 import NotFound from "./pages/NotFound";
 import Vendas from "./pages/Vendas";
 import MilesManagement from "./pages/MilesManagement";
+import Fornecedores from "./pages/Fornecedores";
+import DashboardLayout from "./components/layouts/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import React, { useEffect, useState } from "react";
 
@@ -54,20 +56,21 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Redireciona raiz e /login para o dashboard, sem AuthGuard */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/login" element={<Navigate to="/dashboard" replace />} />
-          {/* Rotas principais */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          {/* Atualizando de Operacional para Vendas */}
-          <Route path="/vendas" element={<Vendas />} />
-          <Route path="/milhas" element={<MilesManagement />} />
-          <Route path="/finance" element={<Finance />} />
-          {/* Redirects for moved pages */}
-          <Route path="/crm" element={<Navigate to="/vendas" replace />} />
-          <Route path="/fornecedores" element={<Navigate to="/milhas" replace />} />
-          <Route path="/packages" element={<Packages />} />
-          <Route path="/configuracoes" element={<Configuracoes />} />
+          <Route path="/login" element={<AuthPage />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/dashboard" element={<AuthGuard><DashboardLayout><Dashboard /></DashboardLayout></AuthGuard>} />
+          <Route path="/vendas" element={<AuthGuard><DashboardLayout><Vendas /></DashboardLayout></AuthGuard>} />
+          <Route path="/miles" element={<AuthGuard><DashboardLayout><MilesManagement /></DashboardLayout></AuthGuard>} />
+          <Route path="/finance" element={<AuthGuard><DashboardLayout><Finance /></DashboardLayout></AuthGuard>} />
+          <Route path="/suppliers" element={<AuthGuard><DashboardLayout><Fornecedores /></DashboardLayout></AuthGuard>} />
+          <Route path="/crm" element={<AuthGuard><DashboardLayout><CRM /></DashboardLayout></AuthGuard>} />
+          <Route path="/packages" element={<AuthGuard><DashboardLayout><Packages /></DashboardLayout></AuthGuard>} />
+          <Route path="/configuracoes" element={<AuthGuard><DashboardLayout><Configuracoes /></DashboardLayout></AuthGuard>} />
+          
+          {/* Redirect old routes */}
+          <Route path="/milhas" element={<Navigate to="/miles" replace />} />
+          <Route path="/fornecedores" element={<Navigate to="/suppliers" replace />} />
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
