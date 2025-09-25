@@ -474,7 +474,7 @@ const DynamicProductForm: React.FC<{
                       const selectedSupplier = suppliers?.find(s => s.id === supplier_id);
                       onChange({ 
                         ...value, 
-                        supplier_id: supplier_id || undefined,
+                        supplier_id: supplier_id === "other" ? undefined : supplier_id,
                         fornecedor: selectedSupplier?.name || ""
                       });
                     }}
@@ -483,7 +483,7 @@ const DynamicProductForm: React.FC<{
                       <SelectValue placeholder="Selecione um fornecedor" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Outro (texto livre)</SelectItem>
+                      <SelectItem value="other">Outro (texto livre)</SelectItem>
                       {suppliers?.map((supplier) => (
                         <SelectItem key={supplier.id} value={supplier.id}>
                           {supplier.name}
@@ -509,7 +509,7 @@ const DynamicProductForm: React.FC<{
                     </DialogContent>
                   </Dialog>
                 </div>
-                {!value.supplier_id && (
+                {(!value.supplier_id || value.supplier_id === "other") && (
                   <Input 
                     value={value.fornecedor || ""} 
                     onChange={e => onChange({ ...value, fornecedor: e.target.value })} 
@@ -533,7 +533,7 @@ const DynamicProductForm: React.FC<{
                     const selectedSupplier = suppliers?.find(s => s.id === supplier_id);
                     onChange({ 
                       ...value, 
-                      supplier_id: supplier_id || undefined,
+                      supplier_id: supplier_id === "other" ? undefined : supplier_id,
                       fornecedor: selectedSupplier?.name || ""
                     });
                   }}
@@ -542,7 +542,7 @@ const DynamicProductForm: React.FC<{
                     <SelectValue placeholder="Selecione um fornecedor" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Outro (texto livre)</SelectItem>
+                    <SelectItem value="other">Outro (texto livre)</SelectItem>
                     {suppliers?.map((supplier) => (
                       <SelectItem key={supplier.id} value={supplier.id}>
                         {supplier.name}
@@ -568,7 +568,7 @@ const DynamicProductForm: React.FC<{
                   </DialogContent>
                 </Dialog>
               </div>
-              {!value.supplier_id && (
+              {(!value.supplier_id || value.supplier_id === "other") && (
                 <Input 
                   value={value.fornecedor || ""} 
                   onChange={e => onChange({ ...value, fornecedor: e.target.value })} 
@@ -598,7 +598,7 @@ const DynamicProductForm: React.FC<{
                     const selectedSupplier = suppliers?.find(s => s.id === supplier_id);
                     onChange({ 
                       ...value, 
-                      supplier_id: supplier_id || undefined,
+                      supplier_id: supplier_id === "other" ? undefined : supplier_id,
                       fornecedor: selectedSupplier?.name || ""
                     });
                   }}
@@ -607,7 +607,7 @@ const DynamicProductForm: React.FC<{
                     <SelectValue placeholder="Selecione um fornecedor" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Outro (texto livre)</SelectItem>
+                    <SelectItem value="other">Outro (texto livre)</SelectItem>
                     {suppliers?.map((supplier) => (
                       <SelectItem key={supplier.id} value={supplier.id}>
                         {supplier.name}
@@ -633,7 +633,7 @@ const DynamicProductForm: React.FC<{
                   </DialogContent>
                 </Dialog>
               </div>
-              {!value.supplier_id && (
+              {(!value.supplier_id || value.supplier_id === "other") && (
                 <Input 
                   value={value.fornecedor || ""} 
                   onChange={e => onChange({ ...value, fornecedor: e.target.value })} 
@@ -663,7 +663,7 @@ const DynamicProductForm: React.FC<{
                     const selectedSupplier = suppliers?.find(s => s.id === supplier_id);
                     onChange({ 
                       ...value, 
-                      supplier_id: supplier_id || undefined,
+                      supplier_id: supplier_id === "other" ? undefined : supplier_id,
                       fornecedor: selectedSupplier?.name || ""
                     });
                   }}
@@ -672,7 +672,7 @@ const DynamicProductForm: React.FC<{
                     <SelectValue placeholder="Selecione um fornecedor" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Outro (texto livre)</SelectItem>
+                    <SelectItem value="other">Outro (texto livre)</SelectItem>
                     {suppliers?.map((supplier) => (
                       <SelectItem key={supplier.id} value={supplier.id}>
                         {supplier.name}
@@ -698,7 +698,7 @@ const DynamicProductForm: React.FC<{
                   </DialogContent>
                 </Dialog>
               </div>
-              {!value.supplier_id && (
+              {(!value.supplier_id || value.supplier_id === "other") && (
                 <Input 
                   value={value.fornecedor || ""} 
                   onChange={e => onChange({ ...value, fornecedor: e.target.value })} 
