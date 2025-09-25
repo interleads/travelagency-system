@@ -127,8 +127,9 @@ export function SaleDetailsExpanded({ sale }: SaleDetailsExpandedProps) {
             };
 
             return (
-              <Card key={product.id} className="p-4">
-                <div className="space-y-3">
+              <Card key={product.id} className="hover:shadow-md transition-all duration-200">
+                {/* HEADER - Tipo do produto + preço */}
+                <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <Badge 
                       variant="secondary"
@@ -137,87 +138,107 @@ export function SaleDetailsExpanded({ sale }: SaleDetailsExpandedProps) {
                       {getProductTypeLabel(product.type)}
                     </Badge>
                     <div className="text-right">
-                      <div className="font-bold text-lg">{formatCurrency(Number(product.price))}</div>
+                      <div className="text-xl font-bold">{formatCurrency(Number(product.price))}</div>
                       {product.quantity > 1 && (
                         <div className="text-sm text-muted-foreground">Qtd: {product.quantity}</div>
                       )}
                     </div>
                   </div>
+                </CardHeader>
 
-                  {/* Fornecedor - destacado quando disponível */}
+                {/* BODY - Informações essenciais */}
+                <CardContent className="space-y-3 pb-3">
+                  {/* Fornecedor */}
                   {product.fornecedor && (
-                    <div className="text-sm font-medium text-primary bg-primary/10 px-2 py-1 rounded">
-                      🏢 Fornecedor: {product.fornecedor}
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">🏢</span>
+                      <span className="font-medium">{product.fornecedor}</span>
                     </div>
                   )}
 
-                  {/* Anotações/Detalhes - destacado quando disponível */}
-                  {product.details && product.details.trim() && (
-                    <div className="text-sm text-muted-foreground bg-muted/50 px-2 py-1 rounded">
-                      💬 Anotações: {product.details}
-                    </div>
-                  )}
-
-
+                  {/* Rotas e informações específicas por tipo */}
                   {product.origin && product.destination && (
-                    <div className="text-sm font-medium">
-                      {product.origin} → {product.destination}
-                    </div>
-                  )}
-
-                  {/* Período/Datas quando disponível */}
-                  {product.departure_date && (
-                    <div className="text-sm text-muted-foreground">
-                      <div>Partida: {formatDate(product.departure_date)}</div>
-                      {product.return_date && (
-                        <div>Retorno: {formatDate(product.return_date)}</div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Datas específicas por tipo de produto */}
-                  {product.checkin_date && product.checkout_date && (
-                    <div className="text-sm text-muted-foreground">
-                      <div>📅 Check-in: {formatDate(product.checkin_date)}</div>
-                      <div>📅 Check-out: {formatDate(product.checkout_date)}</div>
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <span className="text-muted-foreground">📍</span>
+                      <span>{product.origin} → {product.destination}</span>
                     </div>
                   )}
 
                   {/* Informações específicas por tipo */}
                   {product.type === 'passagem' && product.airline && (
-                    <div className="text-sm text-muted-foreground">
-                      ✈️ {product.airline}
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>✈️</span>
+                      <span>{product.airline}</span>
                       {product.miles && product.miles > 0 && (
-                        <span className="ml-2">• {product.miles.toLocaleString('pt-BR')} milhas</span>
+                        <span className="ml-1">• {product.miles.toLocaleString('pt-BR')} milhas</span>
                       )}
                     </div>
                   )}
 
                   {product.type === 'veiculo' && product.vehicle_category && (
-                    <div className="text-sm text-muted-foreground">
-                      🚗 {product.vehicle_category}
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>🚗</span>
+                      <span>{product.vehicle_category}</span>
                     </div>
                   )}
 
                   {product.type === 'seguro' && product.coverage_type && (
-                    <div className="text-sm text-muted-foreground">
-                      🛡️ {product.coverage_type}
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>🛡️</span>
+                      <span>{product.coverage_type}</span>
                     </div>
                   )}
 
-                  {product.dataPasseio && (
-                    <div className="text-sm text-muted-foreground">
-                      <div>Data: {formatDate(product.dataPasseio)}</div>
-                      {product.duracao && <div>Duração: {product.duracao}</div>}
-                    </div>
-                  )}
+                  {/* Datas */}
+                  <div className="space-y-1">
+                    {product.departure_date && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>📅</span>
+                        <span>
+                          {formatDate(product.departure_date)}
+                          {product.return_date && ` - ${formatDate(product.return_date)}`}
+                        </span>
+                      </div>
+                    )}
 
-                  {product.periodo && (
-                    <div className="text-sm text-muted-foreground">
-                      Período: {product.periodo}
+                    {product.checkin_date && product.checkout_date && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>📅</span>
+                        <span>{formatDate(product.checkin_date)} - {formatDate(product.checkout_date)}</span>
+                      </div>
+                    )}
+
+                    {product.dataPasseio && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>📅</span>
+                        <span>
+                          {formatDate(product.dataPasseio)}
+                          {product.duracao && ` (${product.duracao})`}
+                        </span>
+                      </div>
+                    )}
+
+                    {product.periodo && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>📅</span>
+                        <span>{product.periodo}</span>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+
+                {/* FOOTER - Anotações movidas para o final */}
+                {product.details && product.details.trim() && (
+                  <div className="border-t bg-muted/20 p-4">
+                    <div className="flex items-start gap-2 text-sm">
+                      <span className="text-muted-foreground mt-0.5">💬</span>
+                      <div>
+                        <div className="font-medium text-xs text-muted-foreground mb-1">ANOTAÇÕES</div>
+                        <div className="text-muted-foreground leading-relaxed">{product.details}</div>
+                      </div>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </Card>
             );
           })}
