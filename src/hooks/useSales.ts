@@ -124,6 +124,69 @@ export const useCreateSale = () => {
 
       if (saleError) throw saleError;
 
+      // Process miles consumption for own miles products
+      for (const product of saleData.products) {
+        if (product.type === "passagem" && product.ticketType === "milhas" && product.useOwnMiles && product.qtdMilhas) {
+          // Find miles inventory using FIFO (first in, first out)
+          const { data: inventory, error: inventoryError } = await supabase
+            .from("miles_inventory")
+            .select("*, miles_programs(name)")
+            .eq("program_id", product.milesProgram || "")
+            .gt("remaining_quantity", 0)
+            .eq("status", "Ativo")
+            .order("purchase_date", { ascending: true });
+
+          if (inventoryError) throw inventoryError;
+
+          let remainingMiles = product.qtdMilhas;
+          let totalCost = 0;
+
+          for (const lot of inventory || []) {
+            if (remainingMiles <= 0) break;
+
+            const milesToConsume = Math.min(remainingMiles, lot.remaining_quantity);
+            const lotCostPerThousand = lot.cost_per_thousand;
+            const consumptionCost = (milesToConsume / 1000) * lotCostPerThousand;
+
+            // Update inventory
+            await supabase
+              .from("miles_inventory")
+              .update({ 
+                remaining_quantity: lot.remaining_quantity - milesToConsume,
+                updated_at: new Date().toISOString()
+              })
+              .eq("id", lot.id);
+
+            // Record miles transaction
+            await supabase
+              .from("miles_transactions")
+              .insert({
+                sale_id: sale.id,
+                miles_inventory_id: lot.id,
+                type: "sale",
+                quantity: milesToConsume,
+                cost_per_thousand: lotCostPerThousand,
+                total_value: consumptionCost,
+                description: `Venda ${saleData.client_name} - ${milesToConsume.toLocaleString()} milhas`
+              });
+
+            totalCost += consumptionCost;
+            remainingMiles -= milesToConsume;
+
+            // Update lot status if depleted
+            if (lot.remaining_quantity - milesToConsume <= 0) {
+              await supabase
+                .from("miles_inventory")
+                .update({ status: "Esgotado" })
+                .eq("id", lot.id);
+            }
+          }
+
+          // Update product cost with calculated FIFO cost
+          product.cost = totalCost;
+        }
+      }
+
       // Insert products - map the form fields to database fields
       const productsForDb = saleData.products.map(product => {
         // Garantir que sempre temos um nome válido
@@ -138,6 +201,7 @@ export const useCreateSale = () => {
           cost: product.cost || 0,
           details: product.details || '',
           fornecedor: product.fornecedor || '', // Campo fornecedor
+          supplier_id: product.supplier_id || null, // New supplier relationship
           // Map form fields to database fields
           airline: product.airline,
           passengers: product.adults && product.children ? `${product.adults} adultos, ${product.children} crianças` : '',
@@ -282,6 +346,7 @@ export const useUpdateSale = () => {
             cost: product.cost || 0,
             details: product.details || '',
             fornecedor: product.fornecedor || '', // Campo fornecedor
+            supplier_id: product.supplier_id || null, // New supplier relationship
             airline: product.airline,
             passengers: product.adults && product.children ? `${product.adults} adultos, ${product.children} crianças` : '',
             origin: product.origin,

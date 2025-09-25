@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useAddSupplier } from "@/hooks/useSuppliers";
 
 const formSchema = z.object({
   name: z.string().min(2, "Nome deve ter no mínimo 2 caracteres"),
@@ -41,6 +42,8 @@ const programs = [
 ];
 
 export function SupplierForm({ onSubmit }: SupplierFormProps) {
+  const addSupplier = useAddSupplier();
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,9 +54,25 @@ export function SupplierForm({ onSubmit }: SupplierFormProps) {
     },
   });
 
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      const supplierData = {
+        name: values.name,
+        contact: values.contact,
+        program: values.program,
+        notes: values.notes || undefined
+      };
+      await addSupplier.mutateAsync(supplierData);
+      onSubmit(values);
+      form.reset();
+    } catch (error) {
+      console.error("Error adding supplier:", error);
+    }
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}

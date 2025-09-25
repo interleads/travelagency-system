@@ -204,6 +204,7 @@ export type Database = {
           rental_period: string | null
           return_date: string | null
           sale_id: string
+          supplier_id: string | null
           type: string
           vehicle_category: string | null
         }
@@ -230,6 +231,7 @@ export type Database = {
           rental_period?: string | null
           return_date?: string | null
           sale_id: string
+          supplier_id?: string | null
           type: string
           vehicle_category?: string | null
         }
@@ -256,6 +258,7 @@ export type Database = {
           rental_period?: string | null
           return_date?: string | null
           sale_id?: string
+          supplier_id?: string | null
           type?: string
           vehicle_category?: string | null
         }
@@ -265,6 +268,13 @@ export type Database = {
             columns: ["sale_id"]
             isOneToOne: false
             referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_products_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
             referencedColumns: ["id"]
           },
         ]
