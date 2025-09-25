@@ -85,14 +85,6 @@ const AuthPage: React.FC = () => {
         <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-500 to-sky-500"></div>
         
         <CardHeader className="space-y-6 text-center pt-8">
-          <div className="mx-auto relative">
-            <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-xl scale-110"></div>
-            <img 
-              src="/assets/logo-connect-voos.png" 
-              alt="Connect Voos" 
-              className="h-20 w-auto mx-auto relative z-10 drop-shadow-lg"
-            />
-          </div>
           <div className="space-y-3">
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-sky-600 bg-clip-text text-transparent">
               Connect Voos
