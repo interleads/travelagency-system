@@ -15,15 +15,15 @@ export function SalesOverviewCards({ activeTab }: SalesOverviewCardsProps) {
   const totalSales = sales.length;
   const totalRevenue = sales.reduce((sum, sale) => sum + Number(sale.total_amount), 0);
   
-  // Calcular custo total e lucro bruto
+  // Calcular custo total e lucro bruto - corrigido
   const totalCost = sales.reduce((sum, sale) => {
     const saleCost = sale.sale_products?.reduce((productSum: number, product: SaleProductDb) => {
-      if (product.type === 'passagem') {
-        if (product.miles && product.miles_cost) {
-          return productSum + Number(product.miles_cost);
-        }
-        return productSum + (Number(product.cost) || 0);
+      if (product.type === 'passagem' && product.miles && product.miles_cost) {
+        // Para passagens com milhas: (qtdMilhas / 1000) * custoMil
+        const milhasCost = (Number(product.miles) / 1000) * Number(product.miles_cost);
+        return productSum + milhasCost;
       }
+      // Para outros produtos e passagens tarifadas, usar campo cost
       return productSum + (Number(product.cost) || 0);
     }, 0) || 0;
     return sum + saleCost;
