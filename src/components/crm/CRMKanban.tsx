@@ -17,33 +17,9 @@ import { CompactCard } from './CompactCard';
 import { CardDetailsModal } from './CardDetailsModal';
 import { ColumnHeader } from './ColumnHeader';
 import { CardQuickActions } from './CardQuickActions';
+import { useCRMPersistence, KanbanCard, KanbanColumn } from '@/hooks/useCRMPersistence';
 
-// Kanban Column interface
-interface KanbanColumn {
-  id: string;
-  title: string;
-  cards: KanbanCard[];
-}
-
-// Kanban Card interface
-interface KanbanCard {
-  id: string;
-  title: string;
-  description: string;
-  client: string;
-  email: string;
-  phone: string;
-  labels: LabelType[];
-  dueDate?: Date;
-  checklist: ChecklistItem[];
-  dealValue?: number;
-  leadSource?: LeadSource;
-  probability?: number;
-  priority: Priority;
-  assignedTo?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// Types are now imported from the hook
 
 // Available labels
 const availableLabels: LabelType[] = [
@@ -57,72 +33,22 @@ const availableLabels: LabelType[] = [
   { id: '8', name: 'Grupo', color: 'yellow' }
 ];
 
-// Initial columns with sample data
-const initialColumns: KanbanColumn[] = [
-  {
-    id: 'prospect',
-    title: 'Prospecção',
-    cards: [
-      {
-        id: '1',
-        title: 'Pacote Paris',
-        description: 'Cliente interessado em pacote para Paris em Julho/2025',
-        client: 'João Silva',
-        email: 'joao.silva@email.com',
-        phone: '(11) 98765-4321',
-        labels: [availableLabels[0], availableLabels[4]],
-        dueDate: new Date(2025, 0, 15),
-        checklist: [
-          { id: '1', text: 'Consultar disponibilidade de voos', completed: true, createdAt: new Date() },
-          { id: '2', text: 'Verificar documentação necessária', completed: true, createdAt: new Date() },
-          { id: '3', text: 'Preparar orçamento detalhado', completed: false, createdAt: new Date() }
-        ],
-        dealValue: 25000,
-        leadSource: 'referral' as LeadSource,
-        probability: 80,
-        priority: 'high' as Priority,
-        assignedTo: 'Ana Costa',
-        createdAt: new Date(2024, 11, 10),
-        updatedAt: new Date(2024, 11, 20)
-      }
-    ]
-  },
-  {
-    id: 'negotiation',
-    title: 'Negociação',
-    cards: [
-      {
-        id: '3',
-        title: 'Pacote Orlando',
-        description: 'Cliente negociando pacote para Orlando em Dezembro/2025',
-        client: 'Pedro Santos',
-        email: 'pedro.santos@email.com',
-        phone: '(11) 95678-1234',
-        labels: [availableLabels[2], availableLabels[4]],
-        dueDate: new Date(2025, 0, 10),
-        checklist: [
-          { id: '6', text: 'Confirmar datas com o cliente', completed: true, createdAt: new Date() },
-          { id: '7', text: 'Negociar desconto especial', completed: true, createdAt: new Date() },
-          { id: '8', text: 'Finalizar contrato', completed: false, createdAt: new Date() }
-        ],
-        dealValue: 45000,
-        leadSource: 'phone' as LeadSource,
-        probability: 90,
-        priority: 'urgent' as Priority,
-        assignedTo: 'Carlos Mendes',
-        createdAt: new Date(2024, 10, 25),
-        updatedAt: new Date(2024, 11, 22)
-      }
-    ]
-  }
-];
-
 interface CRMKanbanProps {
   registerAddColumn?: (fn: (title: string) => void) => void;
 }
 
 const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
-  const [columns, setColumns] = useState<KanbanColumn[]>(initialColumns);
+  // Use the persistence hook
+  const {
+    columns,
+    isLoaded,
+    addColumn,
+    addCard: addCardToPersistence,
+    updateCard: updateCardInPersistence,
+    deleteCard: deleteCardFromPersistence,
+    moveCard
+  } = useCRMPersistence();
+
   const [detailsCard, setDetailsCard] = useState<KanbanCard | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [newCard, setNewCard] = useState<Partial<KanbanCard>>({
@@ -140,39 +66,12 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
 
   // Register add column function with parent
   useEffect(() => {
-    if (registerAddColumn) {
+    if (registerAddColumn && isLoaded) {
       registerAddColumn((title: string) => {
-        console.log('Tentando adicionar coluna:', title);
-        
-        if (title.trim() === '') {
-          toast({
-            variant: "destructive",
-            title: "Erro",
-            description: "O título da coluna não pode estar vazio"
-          });
-          return;
-        }
-        
-        const newColumn: KanbanColumn = {
-          id: `column-${Date.now()}`,
-          title,
-          cards: []
-        };
-        
-        console.log('Nova coluna criada:', newColumn);
-        setColumns(prev => {
-          const updatedColumns = [...prev, newColumn];
-          console.log('Colunas atualizadas:', updatedColumns);
-          return updatedColumns;
-        });
-        
-        toast({
-          title: "Coluna adicionada",
-          description: `Nova coluna "${title}" foi adicionada`
-        });
+        addColumn(title);
       });
     }
-  }, [registerAddColumn, toast]);
+  }, [registerAddColumn, addColumn, isLoaded]);
 
   // Calculate available height
   useEffect(() => {
@@ -190,57 +89,17 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
 
   // Add new card
   const addCard = () => {
-    if (!targetColumnId || !newCard.title || !newCard.client) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Título e nome do cliente são obrigatórios"
-      });
-      return;
-    }
+    if (!targetColumnId) return;
     
-    const newCardComplete: KanbanCard = {
-      id: `card-${Date.now()}`,
-      title: newCard.title || '',
-      description: newCard.description || '',
-      client: newCard.client || '',
-      email: '',
-      phone: '',
-      labels: [],
-      checklist: [],
-      priority: 'medium',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    
-    setColumns(columns.map(col => 
-      col.id === targetColumnId
-        ? { ...col, cards: [...col.cards, newCardComplete] }
-        : col
-    ));
-    
+    addCardToPersistence(targetColumnId, newCard);
     setNewCard({ title: '', client: '', description: '' });
     setTargetColumnId(null);
     setIsAddClientDialogOpen(false);
-    
-    toast({
-      title: "Cliente adicionado",
-      description: `Cliente "${newCard.client}" foi adicionado`
-    });
   };
 
   // Delete card
   const deleteCard = (columnId: string, cardId: string) => {
-    setColumns(columns.map(col => 
-      col.id === columnId
-        ? { ...col, cards: col.cards.filter(card => card.id !== cardId) }
-        : col
-    ));
-    
-    toast({
-      title: "Cliente removido",
-      description: "O cliente foi removido com sucesso"
-    });
+    deleteCardFromPersistence(columnId, cardId);
   };
 
   // Drag handlers
@@ -259,25 +118,9 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
     const cardId = e.dataTransfer.getData('cardId');
     const sourceColumnId = e.dataTransfer.getData('sourceColumnId');
     
-    const sourceColumn = columns.find(col => col.id === sourceColumnId);
-    if (!sourceColumn) return;
-    
-    const card = sourceColumn.cards.find(c => c.id === cardId);
-    if (!card) return;
-    
-    const updatedColumns = columns.map(col => 
-      col.id === sourceColumnId
-        ? { ...col, cards: col.cards.filter(c => c.id !== cardId) }
-        : col
-    );
-    
-    const finalColumns = updatedColumns.map(col => 
-      col.id === targetColumnId
-        ? { ...col, cards: [...col.cards, card] }
-        : col
-    );
-    
-    setColumns(finalColumns);
+    if (sourceColumnId !== targetColumnId) {
+      moveCard(cardId, sourceColumnId, targetColumnId);
+    }
   };
 
   // Card interaction handlers
@@ -291,18 +134,20 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
   };
 
   const updateCard = (updatedCard: KanbanCard) => {
-    setColumns(columns.map(col => ({
-      ...col,
-      cards: col.cards.map(card => 
-        card.id === updatedCard.id ? updatedCard : card
-      )
-    })));
-    
-    toast({
-      title: "Cliente atualizado",
-      description: `As informações de "${updatedCard.client}" foram atualizadas`
-    });
+    updateCardInPersistence(updatedCard);
   };
+
+  // Show loading state if data is not loaded yet
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+          <p className="text-muted-foreground">Carregando dados do CRM...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
