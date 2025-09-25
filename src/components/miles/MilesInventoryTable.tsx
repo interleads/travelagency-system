@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useMilesInventory } from '@/hooks/useMilesInventory';
 import { useDateRangeFilter } from "@/components/shared/useDateRangeFilter";
+import { MilesInventoryActions } from './MilesInventoryActions';
 
 export const MilesInventoryTable = () => {
   const { dateRange } = useDateRangeFilter();
@@ -39,6 +40,7 @@ export const MilesInventoryTable = () => {
               <TableHead>Valor Investido</TableHead>
               <TableHead>Data Compra</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -59,6 +61,9 @@ export const MilesInventoryTable = () => {
                   <Badge variant={getStatusColor(item.status, item.remaining_quantity)}>
                     {getStatusText(item.status, item.remaining_quantity)}
                   </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <MilesInventoryActions item={item} />
                 </TableCell>
               </TableRow>
             ))}

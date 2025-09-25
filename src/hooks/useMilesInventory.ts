@@ -135,3 +135,35 @@ export const useAddMilesPurchase = () => {
     },
   });
 };
+
+export const useUpdateMilesInventory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...data }: Partial<MilesInventory> & { id: string }) => {
+      const { error } = await supabase
+        .from("miles_inventory")
+        .update(data)
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["miles_inventory"] });
+    },
+  });
+};
+
+export const useDeleteMilesInventory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("miles_inventory")
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["miles_inventory"] });
+    },
+  });
+};

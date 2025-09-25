@@ -7,15 +7,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
-import { Transaction } from '@/hooks/useTransactions';
-import { EditTransactionDialog } from './EditTransactionDialog';
-import { DeleteTransactionDialog } from './DeleteTransactionDialog';
+import { MilesInventory } from '@/hooks/useMilesInventory';
+import { EditMilesDialog } from './EditMilesDialog';
+import { DeleteMilesDialog } from './DeleteMilesDialog';
 
-interface TransactionActionsProps {
-  transaction: Transaction;
+interface MilesInventoryActionsProps {
+  item: MilesInventory;
 }
 
-export function TransactionActions({ transaction }: TransactionActionsProps) {
+export function MilesInventoryActions({ item }: MilesInventoryActionsProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -43,14 +43,14 @@ export function TransactionActions({ transaction }: TransactionActionsProps) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <EditTransactionDialog
-        transaction={transaction}
+      <EditMilesDialog
+        item={item}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
       />
 
-      <DeleteTransactionDialog
-        transaction={transaction}
+      <DeleteMilesDialog
+        item={item}
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
       />
