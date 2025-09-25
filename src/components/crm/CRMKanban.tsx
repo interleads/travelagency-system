@@ -113,6 +113,7 @@ const CRMKanban = () => {
     phone: ''
   });
   const [targetColumnId, setTargetColumnId] = useState<string | null>(null);
+  const [draggedColumnId, setDraggedColumnId] = useState<string | null>(null);
   const { toast } = useToast();
   
   // Phone input hooks
@@ -239,7 +240,7 @@ const CRMKanban = () => {
     e.preventDefault();
   };
 
-  // Handle drop
+  // Handle drop (cards)
   const handleDrop = (e: React.DragEvent, targetColumnId: string) => {
     e.preventDefault();
     
@@ -275,17 +276,48 @@ const CRMKanban = () => {
     });
   };
 
+  // Column drag handlers
+  const handleColumnDragStart = (e: React.DragEvent, columnId: string) => {
+    e.dataTransfer.setData('columnId', columnId);
+    setDraggedColumnId(columnId);
+  };
+
+  const handleColumnDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleColumnDrop = (e: React.DragEvent, targetColumnId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const sourceColumnId = e.dataTransfer.getData('columnId');
+    if (sourceColumnId === targetColumnId) return;
+    
+    const sourceIndex = columns.findIndex(col => col.id === sourceColumnId);
+    const targetIndex = columns.findIndex(col => col.id === targetColumnId);
+    
+    if (sourceIndex === -1 || targetIndex === -1) return;
+    
+    const newColumns = [...columns];
+    const [movedColumn] = newColumns.splice(sourceIndex, 1);
+    newColumns.splice(targetIndex, 0, movedColumn);
+    
+    setColumns(newColumns);
+    setDraggedColumnId(null);
+    
+    toast({
+      title: "Coluna reordenada",
+      description: `Coluna "${movedColumn.title}" foi reordenada`
+    });
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h3 className="text-2xl font-bold">CRM - Gerenciamento de Clientes</h3>
-          <p className="text-muted-foreground">Gerencie seus clientes e oportunidades de vendas</p>
-        </div>
-        
+    <div className="flex flex-col h-full">
+      {/* Compact toolbar */}
+      <div className="flex justify-end items-center py-2 px-1 border-b border-border/50">
         <Dialog>
           <DialogTrigger asChild>
-            <Button>
+            <Button size="sm" variant="outline">
               <Plus size={16} className="mr-2" />
               Nova Coluna
             </Button>
@@ -310,29 +342,41 @@ const CRMKanban = () => {
         </Dialog>
       </div>
       
-      <ScrollArea className="w-full">
-        <div className="flex space-x-4 pb-6 min-w-max">
-          {columns.map(column => (
-            <div 
-              key={column.id}
-              className="flex-shrink-0 w-80"
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, column.id)}
-            >
-              <Card className="h-[calc(100vh-200px)]">
-                <CardHeader className="bg-muted/50 flex-shrink-0">
-                  <div className="flex justify-between items-center">
-                    <CardTitle>{column.title}</CardTitle>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          onClick={() => setTargetColumnId(column.id)}
-                        >
-                          <UserPlus size={16} />
-                        </Button>
-                      </DialogTrigger>
+      {/* Kanban board with fixed headers */}
+      <div className="flex-1 overflow-hidden">
+        <ScrollArea className="h-full">
+          <div className="flex space-x-4 p-4 min-w-max">
+            {columns.map(column => (
+              <div 
+                key={column.id}
+                className={`flex-shrink-0 w-80 ${draggedColumnId === column.id ? 'opacity-50' : ''}`}
+                draggable
+                onDragStart={(e) => handleColumnDragStart(e, column.id)}
+                onDragOver={handleColumnDragOver}
+                onDrop={(e) => handleColumnDrop(e, column.id)}
+              >
+                <Card className="h-[calc(100vh-140px)] flex flex-col">
+                  {/* Fixed header */}
+                  <CardHeader 
+                    className="bg-muted/50 flex-shrink-0 cursor-move border-b"
+                    onDragOver={(e) => e.stopPropagation()}
+                    onDrop={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="text-sm font-medium">{column.title}</CardTitle>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setTargetColumnId(column.id);
+                            }}
+                          >
+                            <UserPlus size={14} />
+                          </Button>
+                        </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
                           <DialogTitle>Adicionar Cliente</DialogTitle>
@@ -391,20 +435,30 @@ const CRMKanban = () => {
                         </div>
                       </DialogContent>
                     </Dialog>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {column.cards.length} {column.cards.length === 1 ? 'cliente' : 'clientes'}
-                  </div>
-                </CardHeader>
-                <ScrollArea className="flex-1">
-                  <CardContent className="space-y-3 py-4">
-                    {column.cards.map(card => (
-                      <Card 
-                        key={card.id}
-                        className="bg-card shadow-sm cursor-move hover:shadow-md transition-shadow"
-                        draggable
-                        onDragStart={(e) => handleDragStart(e, card.id, column.id)}
-                      >
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {column.cards.length} {column.cards.length === 1 ? 'cliente' : 'clientes'}
+                    </div>
+                  </CardHeader>
+                  
+                  {/* Scrollable cards area */}
+                  <div 
+                    className="flex-1 overflow-hidden"
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, column.id)}
+                  >
+                    <ScrollArea className="h-full">
+                      <CardContent className="space-y-3 py-4">
+                        {column.cards.map(card => (
+                          <Card 
+                            key={card.id}
+                            className="bg-card shadow-sm cursor-move hover:shadow-md transition-shadow"
+                            draggable
+                            onDragStart={(e) => {
+                              e.stopPropagation();
+                              handleDragStart(e, card.id, column.id);
+                            }}
+                          >
                         <CardContent className="p-3">
                           <h4 className="font-medium">{card.title}</h4>
                           <p className="text-sm text-muted-foreground mt-1">{card.client}</p>
@@ -504,16 +558,18 @@ const CRMKanban = () => {
                             </DropdownMenu>
                           </div>
                         </CardContent>
-                      </Card>
-                    ))}
-                  </CardContent>
-                </ScrollArea>
-              </Card>
-            </div>
-          ))}
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+                          </Card>
+                        ))}
+                      </CardContent>
+                    </ScrollArea>
+                  </div>
+                </Card>
+              </div>
+            ))}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </div>
     </div>
   );
 };
