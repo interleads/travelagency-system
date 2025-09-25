@@ -9,6 +9,7 @@ import DynamicProductForm, { EmptyProduct, generateProductName } from "@/compone
 import SaleSummary from "@/components/sales/SaleSummary";
 import { PAYMENT_METHODS } from '@/data/products';
 import { useCreateSale, SaleProduct } from '@/hooks/useSales';
+import { usePhoneInput } from '@/lib/phoneMask';
 
 interface VendasFormProps {
   onSaleSuccess?: () => void;
@@ -16,7 +17,7 @@ interface VendasFormProps {
 
 const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
   const [client, setClient] = useState('');
-  const [phone, setPhone] = useState('');
+  const phoneInput = usePhoneInput('');
   const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0]);
   const [products, setProducts] = useState<SaleProduct[]>([EmptyProduct]);
   const [paymentMethod, setPaymentMethod] = useState('');
@@ -99,7 +100,7 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
       onSuccess: () => {
         toast({ title: "Venda registrada com sucesso!", description: `Total: R$ ${total.toFixed(2)}` });
         setClient('');
-        setPhone('');
+        phoneInput.setDisplayValue('');
         setSaleDate(new Date().toISOString().split('T')[0]);
         setProducts([EmptyProduct]);
         setPaymentMethod('');
@@ -137,10 +138,11 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
               <Input 
                 id="phone" 
                 type="tel"
-                value={phone} 
-                onChange={e => setPhone(e.target.value)} 
+                value={phoneInput.displayValue} 
+                onChange={phoneInput.handleChange} 
                 placeholder="(11) 99999-9999"
                 className="mt-1"
+                maxLength={15}
               />
             </div>
             <div>

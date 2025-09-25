@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from '@/components/ui/use-toast';
+import { usePhoneInput, unformatPhoneNumber } from '@/lib/phoneMask';
 
 // Kanban Column interface
 interface KanbanColumn {
@@ -112,6 +113,10 @@ const CRMKanban = () => {
   });
   const [targetColumnId, setTargetColumnId] = useState<string | null>(null);
   const { toast } = useToast();
+  
+  // Phone input hooks
+  const newCardPhoneInput = usePhoneInput('');
+  const editCardPhoneInput = usePhoneInput('');
 
   // Add new column
   const addColumn = () => {
@@ -158,7 +163,7 @@ const CRMKanban = () => {
       description: newCard.description || '',
       client: newCard.client || '',
       email: newCard.email || '',
-      phone: newCard.phone || ''
+      phone: newCardPhoneInput.rawValue
     };
     
     setColumns(columns.map(col => 
@@ -174,7 +179,7 @@ const CRMKanban = () => {
       email: '',
       phone: ''
     });
-    
+    newCardPhoneInput.setDisplayValue('');
     setTargetColumnId(null);
     
     toast({
@@ -187,14 +192,20 @@ const CRMKanban = () => {
   const updateCard = () => {
     if (!editingCard) return;
     
+    const updatedCard = {
+      ...editingCard,
+      phone: editCardPhoneInput.rawValue
+    };
+    
     setColumns(columns.map(col => ({
       ...col,
       cards: col.cards.map(card => 
-        card.id === editingCard.id ? editingCard : card
+        card.id === editingCard.id ? updatedCard : card
       )
     })));
     
     setEditingCard(null);
+    editCardPhoneInput.setDisplayValue('');
     
     toast({
       title: "Cliente atualizado",
@@ -353,15 +364,17 @@ const CRMKanban = () => {
                             placeholder="Ex: joao@email.com"
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="phone">Telefone</Label>
-                          <Input 
-                            id="phone"
-                            value={newCard.phone || ''}
-                            onChange={(e) => setNewCard({...newCard, phone: e.target.value})}
-                            placeholder="Ex: (11) 98765-4321"
-                          />
-                        </div>
+                         <div>
+                           <Label htmlFor="phone">Telefone</Label>
+                           <Input 
+                             id="phone"
+                             type="tel"
+                             value={newCardPhoneInput.displayValue}
+                             onChange={newCardPhoneInput.handleChange}
+                             placeholder="(11) 99999-9999"
+                             maxLength={15}
+                           />
+                         </div>
                         <div>
                           <Label htmlFor="description">Descrição</Label>
                           <Textarea 
@@ -412,6 +425,7 @@ const CRMKanban = () => {
                                   onSelect={(e) => {
                                     e.preventDefault();
                                     setEditingCard(card);
+                                    editCardPhoneInput.setDisplayValue(card.phone || '');
                                   }}
                                   className="cursor-pointer"
                                 >
@@ -450,14 +464,17 @@ const CRMKanban = () => {
                                         onChange={(e) => setEditingCard({...editingCard, email: e.target.value})}
                                       />
                                     </div>
-                                    <div>
-                                      <Label htmlFor="edit-phone">Telefone</Label>
-                                      <Input 
-                                        id="edit-phone"
-                                        value={editingCard.phone}
-                                        onChange={(e) => setEditingCard({...editingCard, phone: e.target.value})}
-                                      />
-                                    </div>
+                                     <div>
+                                       <Label htmlFor="edit-phone">Telefone</Label>
+                                       <Input 
+                                         id="edit-phone"
+                                         type="tel"
+                                         value={editCardPhoneInput.displayValue}
+                                         onChange={editCardPhoneInput.handleChange}
+                                         placeholder="(11) 99999-9999"
+                                         maxLength={15}
+                                       />
+                                     </div>
                                     <div>
                                       <Label htmlFor="edit-description">Descrição</Label>
                                       <Textarea 
