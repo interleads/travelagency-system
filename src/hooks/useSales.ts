@@ -219,9 +219,9 @@ export const useCreateSale = () => {
       return sale;
     },
     onSuccess: () => {
+      // More specific invalidation to reduce unnecessary re-fetches
       queryClient.invalidateQueries({ queryKey: ["sales"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["miles_inventory"] });
       queryClient.invalidateQueries({ queryKey: ["installments"] });
     },
   });

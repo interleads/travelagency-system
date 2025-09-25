@@ -30,11 +30,10 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
   const removeProduct = (idx: number) => setProducts(products.filter((_, i) => i !== idx));
   const updateProduct = (idx: number, product: SaleProduct) => setProducts(products.map((p, i) => i === idx ? product : p));
 
-  // Cálculo dos totais em tempo real com debugging
+  // Cálculo dos totais em tempo real otimizado
   const total = React.useMemo(() => {
     return products.reduce((sum, p) => {
       const productTotal = (p.price || 0) * (p.quantity || 1);
-      console.log('Cálculo total produto:', { name: p.name, price: p.price, quantity: p.quantity, total: productTotal });
       return sum + productTotal;
     }, 0);
   }, [products]);
@@ -46,17 +45,13 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
         const milhas = Number(p.qtdMilhas || 0);
         const custoMil = Number(p.custoMil || 0);
         const custoTotal = (milhas / 1000) * custoMil;
-        console.log('Cálculo custo milhas:', { name: p.name, milhas, custoMil, custoTotal });
         return sum + custoTotal;
       }
       // Para outros produtos e passagem tarifada, usar campo cost
       const custo = p.cost || 0;
-      console.log('Cálculo custo padrão:', { name: p.name, custo });
       return sum + custo;
     }, 0);
   }, [products]);
-
-  console.log('Totais calculados VendasForm:', { total, totalCost, profit: total - totalCost });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,18 +85,6 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
       return;
     }
 
-    console.log('Dados da venda sendo enviados:', {
-      client_name: client,
-      products: products.map(p => ({
-        type: p.type,
-        name: p.name || generateProductName(p),
-        price: p.price,
-        cost: p.cost,
-        qtdMilhas: p.qtdMilhas,
-        custoMil: p.custoMil
-      })),
-      total_amount: total
-    });
 
     createSale.mutate({
       client_name: client,
@@ -126,7 +109,6 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
         onSaleSuccess?.();
       },
       onError: (err: any) => {
-        console.error('Erro ao criar venda:', err);
         toast({ variant: "destructive", title: "Erro ao salvar", description: err.message });
       }
     });
