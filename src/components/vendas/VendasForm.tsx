@@ -9,15 +9,15 @@ import DynamicProductForm, { EmptyProduct, generateProductName } from "@/compone
 import SaleSummary from "@/components/sales/SaleSummary";
 import { PAYMENT_METHODS } from '@/data/products';
 import { useCreateSale, SaleProduct } from '@/hooks/useSales';
-import { usePhoneInput } from '@/lib/phoneMask';
+import ClientSelector from './ClientSelector';
+import { Client } from '@/hooks/useClients';
 
 interface VendasFormProps {
   onSaleSuccess?: () => void;
 }
 
 const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
-  const [client, setClient] = useState('');
-  const phoneInput = usePhoneInput('');
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0]);
   const [products, setProducts] = useState<SaleProduct[]>([EmptyProduct]);
   const [paymentMethod, setPaymentMethod] = useState('');
@@ -56,8 +56,8 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!client) {
-      toast({ variant: "destructive", title: "Erro", description: "Informe o nome do cliente" });
+    if (!selectedClient) {
+      toast({ variant: "destructive", title: "Erro", description: "Selecione um cliente" });
       return;
     }
     if (!paymentMethod) {
@@ -88,7 +88,8 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
 
 
     createSale.mutate({
-      client_name: client,
+      client_name: selectedClient.name,
+      client_id: selectedClient.id,
       sale_date: saleDate,
       products,
       payment_method: paymentMethod,
@@ -99,8 +100,7 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
     }, {
       onSuccess: () => {
         toast({ title: "Venda registrada com sucesso!", description: `Total: R$ ${total.toFixed(2)}` });
-        setClient('');
-        phoneInput.setDisplayValue('');
+        setSelectedClient(null);
         setSaleDate(new Date().toISOString().split('T')[0]);
         setProducts([EmptyProduct]);
         setPaymentMethod('');
@@ -122,27 +122,11 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
           <CardTitle className="text-lg text-primary">Dados do Cliente</CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="md:col-span-1">
-              <Label htmlFor="client">Nome do Cliente</Label>
-              <Input 
-                id="client" 
-                value={client} 
-                onChange={e => setClient(e.target.value)} 
-                placeholder="Digite o nome do cliente"
-                className="mt-1"
-              />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="phone">Telefone</Label>
-              <Input 
-                id="phone" 
-                type="tel"
-                value={phoneInput.displayValue} 
-                onChange={phoneInput.handleChange} 
-                placeholder="(11) 99999-9999"
-                className="mt-1"
-                maxLength={15}
+              <ClientSelector
+                selectedClient={selectedClient}
+                onClientSelect={setSelectedClient}
               />
             </div>
             <div>

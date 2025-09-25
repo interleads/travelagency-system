@@ -43,6 +43,7 @@ export interface SaleProductDb {
 export interface Sale {
   id: string;
   client_name: string;
+  client_id?: string;
   payment_method: string;
   installments: number;
   total_amount: number;
@@ -59,6 +60,7 @@ export interface Sale {
 
 export interface SaleInput {
   client_name: string;
+  client_id?: string;
   payment_method: string;
   installments: number;
   total_amount: number;
@@ -110,6 +112,7 @@ export const useCreateSale = () => {
         .from("sales")
         .insert([{
           client_name: saleData.client_name,
+          client_id: saleData.client_id,
           payment_method: saleData.payment_method,
           installments: saleData.installments,
           total_amount: saleData.total_amount,

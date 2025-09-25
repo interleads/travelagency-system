@@ -14,6 +14,146 @@ export type Database = {
   }
   public: {
     Tables: {
+      clients: {
+        Row: {
+          address: string | null
+          birth_date: string | null
+          city: string | null
+          cpf: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          state: string | null
+          updated_at: string
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          birth_date?: string | null
+          city?: string | null
+          cpf?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          state?: string | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          birth_date?: string | null
+          city?: string | null
+          cpf?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          state?: string | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
+      crm_cards: {
+        Row: {
+          assigned_to: string | null
+          checklist: Json | null
+          client: string
+          column_id: string
+          created_at: string
+          deal_value: number | null
+          description: string | null
+          due_date: string | null
+          email: string | null
+          id: string
+          labels: Json | null
+          lead_source: string | null
+          phone: string | null
+          priority: string
+          probability: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          checklist?: Json | null
+          client: string
+          column_id: string
+          created_at?: string
+          deal_value?: number | null
+          description?: string | null
+          due_date?: string | null
+          email?: string | null
+          id?: string
+          labels?: Json | null
+          lead_source?: string | null
+          phone?: string | null
+          priority?: string
+          probability?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          checklist?: Json | null
+          client?: string
+          column_id?: string
+          created_at?: string
+          deal_value?: number | null
+          description?: string | null
+          due_date?: string | null
+          email?: string | null
+          id?: string
+          labels?: Json | null
+          lead_source?: string | null
+          phone?: string | null
+          priority?: string
+          probability?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_cards_column_id_fkey"
+            columns: ["column_id"]
+            isOneToOne: false
+            referencedRelation: "crm_columns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_columns: {
+        Row: {
+          created_at: string
+          id: string
+          position: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          position?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          position?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       miles_inventory: {
         Row: {
           cost_per_thousand: number
@@ -288,6 +428,7 @@ export type Database = {
       sales: {
         Row: {
           anticipation_date: string | null
+          client_id: string | null
           client_name: string
           created_at: string
           gross_profit: number | null
@@ -305,6 +446,7 @@ export type Database = {
         }
         Insert: {
           anticipation_date?: string | null
+          client_id?: string | null
           client_name: string
           created_at?: string
           gross_profit?: number | null
@@ -322,6 +464,7 @@ export type Database = {
         }
         Update: {
           anticipation_date?: string | null
+          client_id?: string | null
           client_name?: string
           created_at?: string
           gross_profit?: number | null
@@ -338,6 +481,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "sales_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "sales_supplier_id_fkey"
             columns: ["supplier_id"]
