@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2, UserPlus, MoreVertical } from "lucide-react";
+import { Plus, Edit, Trash2, UserPlus, MoreVertical, CalendarIcon } from "lucide-react";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -13,8 +13,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from '@/components/ui/use-toast';
 import { usePhoneInput, unformatPhoneNumber } from '@/lib/phoneMask';
+import { LabelBadge, Label as LabelType } from './LabelBadge';
+import { LabelSelector } from './LabelSelector';
+import { DueDateBadge } from './DueDateBadge';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 // Kanban Column interface
 interface KanbanColumn {
@@ -31,7 +39,21 @@ interface KanbanCard {
   client: string;
   email: string;
   phone: string;
+  labels: LabelType[];
+  dueDate?: Date;
 }
+
+// Available labels
+const availableLabels: LabelType[] = [
+  { id: '1', name: 'Urgente', color: 'red' },
+  { id: '2', name: 'Alta Prioridade', color: 'orange' },
+  { id: '3', name: 'VIP', color: 'purple' },
+  { id: '4', name: 'Promoção', color: 'blue' },
+  { id: '5', name: 'Familia', color: 'green' },
+  { id: '6', name: 'Corporativo', color: 'teal' },
+  { id: '7', name: 'Lua de Mel', color: 'pink' },
+  { id: '8', name: 'Grupo', color: 'yellow' }
+];
 
 // Initial columns
 const initialColumns: KanbanColumn[] = [
@@ -45,7 +67,9 @@ const initialColumns: KanbanColumn[] = [
         description: 'Cliente interessado em pacote para Paris em Julho/2025',
         client: 'João Silva',
         email: 'joao.silva@email.com',
-        phone: '(11) 98765-4321'
+        phone: '(11) 98765-4321',
+        labels: [availableLabels[0], availableLabels[4]], // Urgente, Familia
+        dueDate: new Date(2025, 0, 15) // 15/01/2025
       },
       {
         id: '2',
@@ -53,7 +77,9 @@ const initialColumns: KanbanColumn[] = [
         description: 'Cliente interessado em pacote para Cancún em Maio/2025',
         client: 'Maria Oliveira',
         email: 'maria.oliveira@email.com',
-        phone: '(11) 91234-5678'
+        phone: '(11) 91234-5678',
+        labels: [availableLabels[3]], // Promoção
+        dueDate: new Date(2025, 0, 20) // 20/01/2025
       }
     ]
   },
@@ -67,7 +93,9 @@ const initialColumns: KanbanColumn[] = [
         description: 'Cliente negociando pacote para Orlando em Dezembro/2025',
         client: 'Pedro Santos',
         email: 'pedro.santos@email.com',
-        phone: '(11) 95678-1234'
+        phone: '(11) 95678-1234',
+        labels: [availableLabels[2], availableLabels[4]], // VIP, Familia
+        dueDate: new Date(2025, 0, 10) // 10/01/2025
       }
     ]
   },
@@ -81,7 +109,9 @@ const initialColumns: KanbanColumn[] = [
         description: 'Cliente fechou pacote para Buenos Aires em Setembro/2025',
         client: 'Ana Costa',
         email: 'ana.costa@email.com',
-        phone: '(11) 94321-8765'
+        phone: '(11) 94321-8765',
+        labels: [availableLabels[6]], // Lua de Mel
+        dueDate: new Date(2024, 11, 25) // 25/12/2024 (overdue)
       }
     ]
   },
@@ -95,7 +125,9 @@ const initialColumns: KanbanColumn[] = [
         description: 'Cliente retornou de viagem ao Rio de Janeiro',
         client: 'Carlos Mendes',
         email: 'carlos.mendes@email.com',
-        phone: '(11) 93456-7890'
+        phone: '(11) 93456-7890',
+        labels: [availableLabels[5]], // Corporativo
+        dueDate: new Date(2024, 11, 20) // 20/12/2024 (completed)
       }
     ]
   }
@@ -114,7 +146,9 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
     description: '',
     client: '',
     email: '',
-    phone: ''
+    phone: '',
+    labels: [],
+    dueDate: undefined
   });
   const [targetColumnId, setTargetColumnId] = useState<string | null>(null);
   const [draggedColumnId, setDraggedColumnId] = useState<string | null>(null);
@@ -216,7 +250,9 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
       description: newCard.description || '',
       client: newCard.client || '',
       email: newCard.email || '',
-      phone: newCardPhoneInput.rawValue
+      phone: newCardPhoneInput.rawValue,
+      labels: newCard.labels || [],
+      dueDate: newCard.dueDate
     };
     
     setColumns(columns.map(col => 
@@ -230,7 +266,9 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
       description: '',
       client: '',
       email: '',
-      phone: ''
+      phone: '',
+      labels: [],
+      dueDate: undefined
     });
     newCardPhoneInput.setDisplayValue('');
     setTargetColumnId(null);
@@ -399,7 +437,9 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
                               description: '',
                               client: '',
                               email: '',
-                              phone: ''
+                              phone: '',
+                              labels: [],
+                              dueDate: undefined
                             });
                             newCardPhoneInput.setDisplayValue('');
                             setTargetColumnId(null);
@@ -472,6 +512,39 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
                               rows={3}
                             />
                           </div>
+
+                          <LabelSelector 
+                            selectedLabels={newCard.labels || []}
+                            onLabelsChange={(labels) => setNewCard({...newCard, labels})}
+                            availableLabels={availableLabels}
+                          />
+
+                          <div>
+                            <Label>Data de Vencimento</Label>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !newCard.dueDate && "text-muted-foreground"
+                                  )}
+                                >
+                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  {newCard.dueDate ? format(newCard.dueDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar data"}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={newCard.dueDate}
+                                  onSelect={(date) => setNewCard({...newCard, dueDate: date})}
+                                  initialFocus
+                                  className="pointer-events-auto"
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </div>
                           <Button onClick={addCard} className="w-full">Adicionar Cliente</Button>
                         </div>
                       </DialogContent>
@@ -500,105 +573,176 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
                               handleDragStart(e, card.id, column.id);
                             }}
                           >
-                        <CardContent className="p-3">
-                          <h4 className="font-medium">{card.title}</h4>
-                          <p className="text-sm text-muted-foreground mt-1">{card.client}</p>
-                          <p className="text-xs text-muted-foreground mt-1">{card.description}</p>
-                          
-                          <div className="flex justify-end mt-2">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button 
-                                  size="sm" 
-                                  variant="ghost"
-                                  className="h-8 w-8 p-0"
-                                >
-                                  <MoreVertical size={14} />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-48">
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <DropdownMenuItem 
-                                      onSelect={(e) => {
-                                        e.preventDefault();
-                                        setEditingCard(card);
-                                        editCardPhoneInput.setDisplayValue(card.phone || '');
-                                      }}
-                                      className="cursor-pointer"
+                            <CardContent className="p-3 space-y-2">
+                              {/* Card Header with title and actions */}
+                              <div className="flex justify-between items-start">
+                                <h4 className="font-medium text-sm leading-tight">{card.title}</h4>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button 
+                                      size="sm" 
+                                      variant="ghost" 
+                                      className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                                      onClick={(e) => e.stopPropagation()}
                                     >
-                                      <Edit size={14} className="mr-2" />
-                                      Editar Cliente
+                                      <MoreVertical size={12} />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <Dialog>
+                                      <DialogTrigger asChild>
+                                        <DropdownMenuItem 
+                                          onSelect={(e) => {
+                                            e.preventDefault();
+                                            setEditingCard(card);
+                                            editCardPhoneInput.setDisplayValue(card.phone || '');
+                                          }}
+                                          className="cursor-pointer"
+                                        >
+                                          <Edit size={12} className="mr-2" />
+                                          Editar Cliente
+                                        </DropdownMenuItem>
+                                      </DialogTrigger>
+                                      <DialogContent>
+                                        <DialogHeader>
+                                          <DialogTitle>Editar Cliente</DialogTitle>
+                                        </DialogHeader>
+                                        {editingCard && (
+                                          <div className="space-y-4 pt-4">
+                                            <div>
+                                              <Label htmlFor="edit-title">Título</Label>
+                                              <Input 
+                                                id="edit-title"
+                                                value={editingCard.title}
+                                                onChange={(e) => setEditingCard({...editingCard, title: e.target.value})}
+                                              />
+                                            </div>
+                                            <div>
+                                              <Label htmlFor="edit-client">Nome do Cliente</Label>
+                                              <Input 
+                                                id="edit-client"
+                                                value={editingCard.client}
+                                                onChange={(e) => setEditingCard({...editingCard, client: e.target.value})}
+                                              />
+                                            </div>
+                                            <div>
+                                              <Label htmlFor="edit-email">Email</Label>
+                                              <Input 
+                                                id="edit-email"
+                                                type="email"
+                                                value={editingCard.email}
+                                                onChange={(e) => setEditingCard({...editingCard, email: e.target.value})}
+                                              />
+                                            </div>
+                                            <div>
+                                              <Label htmlFor="edit-phone">Telefone</Label>
+                                              <Input 
+                                                id="edit-phone"
+                                                type="tel"
+                                                value={editCardPhoneInput.displayValue}
+                                                onChange={editCardPhoneInput.handleChange}
+                                                placeholder="(11) 99999-9999"
+                                                maxLength={15}
+                                              />
+                                            </div>
+                                            <div>
+                                              <Label htmlFor="edit-description">Descrição</Label>
+                                              <Textarea 
+                                                id="edit-description"
+                                                value={editingCard.description}
+                                                onChange={(e) => setEditingCard({...editingCard, description: e.target.value})}
+                                                rows={3}
+                                              />
+                                            </div>
+
+                                            <LabelSelector 
+                                              selectedLabels={editingCard.labels || []}
+                                              onLabelsChange={(labels) => setEditingCard({...editingCard, labels})}
+                                              availableLabels={availableLabels}
+                                            />
+
+                                            <div>
+                                              <Label>Data de Vencimento</Label>
+                                              <Popover>
+                                                <PopoverTrigger asChild>
+                                                  <Button
+                                                    variant="outline"
+                                                    className={cn(
+                                                      "w-full justify-start text-left font-normal",
+                                                      !editingCard.dueDate && "text-muted-foreground"
+                                                    )}
+                                                  >
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {editingCard.dueDate ? format(editingCard.dueDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar data"}
+                                                  </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-auto p-0" align="start">
+                                                  <Calendar
+                                                    mode="single"
+                                                    selected={editingCard.dueDate}
+                                                    onSelect={(date) => setEditingCard({...editingCard, dueDate: date})}
+                                                    initialFocus
+                                                    className="pointer-events-auto"
+                                                  />
+                                                </PopoverContent>
+                                              </Popover>
+                                            </div>
+
+                                            <Button onClick={updateCard} className="w-full">Salvar Alterações</Button>
+                                          </div>
+                                        )}
+                                      </DialogContent>
+                                    </Dialog>
+                                    
+                                    <DropdownMenuItem 
+                                      onSelect={() => deleteCard(column.id, card.id)}
+                                      className="cursor-pointer text-destructive focus:text-destructive"
+                                    >
+                                      <Trash2 size={12} className="mr-2" />
+                                      Excluir Cliente
                                     </DropdownMenuItem>
-                                  </DialogTrigger>
-                                  <DialogContent>
-                                    <DialogHeader>
-                                      <DialogTitle>Editar Cliente</DialogTitle>
-                                    </DialogHeader>
-                                    {editingCard && (
-                                      <div className="space-y-4 pt-4">
-                                        <div>
-                                          <Label htmlFor="edit-title">Título</Label>
-                                          <Input 
-                                            id="edit-title"
-                                            value={editingCard.title}
-                                            onChange={(e) => setEditingCard({...editingCard, title: e.target.value})}
-                                          />
-                                        </div>
-                                        <div>
-                                          <Label htmlFor="edit-client">Nome do Cliente</Label>
-                                          <Input 
-                                            id="edit-client"
-                                            value={editingCard.client}
-                                            onChange={(e) => setEditingCard({...editingCard, client: e.target.value})}
-                                          />
-                                        </div>
-                                        <div>
-                                          <Label htmlFor="edit-email">Email</Label>
-                                          <Input 
-                                            id="edit-email"
-                                            type="email"
-                                            value={editingCard.email}
-                                            onChange={(e) => setEditingCard({...editingCard, email: e.target.value})}
-                                          />
-                                        </div>
-                                         <div>
-                                           <Label htmlFor="edit-phone">Telefone</Label>
-                                           <Input 
-                                             id="edit-phone"
-                                             type="tel"
-                                             value={editCardPhoneInput.displayValue}
-                                             onChange={editCardPhoneInput.handleChange}
-                                             placeholder="(11) 99999-9999"
-                                             maxLength={15}
-                                           />
-                                         </div>
-                                        <div>
-                                          <Label htmlFor="edit-description">Descrição</Label>
-                                          <Textarea 
-                                            id="edit-description"
-                                            value={editingCard.description}
-                                            onChange={(e) => setEditingCard({...editingCard, description: e.target.value})}
-                                            rows={3}
-                                          />
-                                        </div>
-                                        <Button onClick={updateCard} className="w-full">Salvar Alterações</Button>
-                                      </div>
-                                    )}
-                                  </DialogContent>
-                                </Dialog>
-                                
-                                <DropdownMenuItem 
-                                  onSelect={() => deleteCard(column.id, card.id)}
-                                  className="cursor-pointer text-destructive focus:text-destructive"
-                                >
-                                  <Trash2 size={14} className="mr-2" />
-                                  Excluir Cliente
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </CardContent>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+
+                              {/* Labels */}
+                              {card.labels && card.labels.length > 0 && (
+                                <div className="flex flex-wrap gap-1">
+                                  {card.labels.map(label => (
+                                    <LabelBadge key={label.id} label={label} />
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* Due date */}
+                              {card.dueDate && (
+                                <DueDateBadge dueDate={card.dueDate} />
+                              )}
+
+                              {/* Client info */}
+                              <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground">
+                                  <span className="font-medium">Cliente:</span> {card.client}
+                                </p>
+                                {card.email && (
+                                  <p className="text-xs text-muted-foreground">
+                                    <span className="font-medium">Email:</span> {card.email}
+                                  </p>
+                                )}
+                                {card.phone && (
+                                  <p className="text-xs text-muted-foreground">
+                                    <span className="font-medium">Telefone:</span> {card.phone}
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* Description */}
+                              {card.description && (
+                                <p className="text-xs text-muted-foreground mt-2">
+                                  {card.description}
+                                </p>
+                              )}
+                            </CardContent>
                           </Card>
                          ))}
                       </CardContent>
