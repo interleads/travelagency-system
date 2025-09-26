@@ -98,46 +98,8 @@ export function SuppliersTable() {
     );
   }
 
-  const activeSuppliers = suppliers.filter((s: any) => s.status === 'Ativo').length;
-  const totalSuppliers = suppliers.length;
-
   return (
     <div className="space-y-6">
-      {/* Resumo */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Fornecedores</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center space-x-2">
-              <User className="h-4 w-4 text-gray-500" />
-              <p className="text-2xl font-bold text-gray-600">{totalSuppliers}</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Fornecedores Ativos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-emerald-600">{activeSuppliers}</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Programas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-blue-600">
-              {[...new Set(suppliers.map((s: any) => s.program))].length}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Header com botão */}
       <div className="flex justify-between items-center">
         <h3 className="text-xl font-semibold">Fornecedores e Parceiros</h3>
