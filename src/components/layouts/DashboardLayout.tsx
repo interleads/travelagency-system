@@ -4,8 +4,9 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   Home, CreditCard, Briefcase, 
-  Menu, X, Settings, Plane, Package
+  Menu, X, Settings, Plane, Package, LogOut
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -19,6 +20,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/login');
+  };
 
   const isActiveRoute = (path: string) => location.pathname === path;
 
@@ -87,8 +93,20 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </div>
       </div>
       {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        <main className="p-6">{children}</main>
+      <div className="flex-1 overflow-auto flex flex-col">
+        {/* Header */}
+        <header className="bg-white border-b border-gray-200 px-6 py-4 flex justify-end">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleLogout}
+            className="flex items-center gap-2"
+          >
+            <LogOut size={16} />
+            Sair
+          </Button>
+        </header>
+        <main className="flex-1 p-6">{children}</main>
       </div>
     </div>
   );
