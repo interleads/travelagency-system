@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Settings, Users, Plus, Edit, Trash2, Save, AlertTriangle, RotateCcw, Pencil, UserCheck, UserX } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useUsers } from '@/hooks/useUsers';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/hooks/useAuth';
 import { ClearAllDataDialog } from '@/components/shared/ClearAllDataDialog';
 
 const Configuracoes = () => {

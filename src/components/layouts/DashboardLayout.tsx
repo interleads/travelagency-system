@@ -7,7 +7,7 @@ import {
   Home, CreditCard, Briefcase, 
   Menu, X, Settings, Plane, Package, LogOut, Users
 } from "lucide-react";
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useAuth } from "@/hooks/useAuth";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;

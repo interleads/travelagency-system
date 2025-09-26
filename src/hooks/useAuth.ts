@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -10,6 +10,28 @@ export interface UserProfile {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+}
+
+interface AuthContextType {
+  user: User | null;
+  session: Session | null;
+  profile: UserProfile | null;
+  loading: boolean;
+  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
+  signOut: () => Promise<void>;
+  hasRole: (role: 'administrador' | 'vendedor') => boolean;
+  isAdmin: boolean;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 }
 
 export function useAuthProvider() {
