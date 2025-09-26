@@ -32,8 +32,6 @@ import { SupplierDetailsExpanded } from './SupplierDetailsExpanded';
 import { useToast } from "@/hooks/use-toast";
 import { useSuppliers, useAddSupplier, type Supplier } from '@/hooks/useSuppliers';
 
-const RowGroup: React.FC<React.PropsWithChildren<any>> = ({ children }) => <>{children}</>;
-
 export function SuppliersTable() {
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -147,7 +145,7 @@ export function SuppliersTable() {
               </TableHeader>
               <TableBody>
                 {suppliers.map((supplier: any) => (
-                  <RowGroup key={supplier.id}>
+                  <React.Fragment key={supplier.id}>
                     <TableRow>
                       <TableCell>
                         <Button
@@ -220,7 +218,7 @@ export function SuppliersTable() {
                         </TableCell>
                       </TableRow>
                     )}
-                  </RowGroup>
+                  </React.Fragment>
                 ))}
               </TableBody>
             </Table>
