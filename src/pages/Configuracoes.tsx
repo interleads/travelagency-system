@@ -18,7 +18,6 @@ import {
   Settings, Users, 
   Plus, Edit, Trash2, Save, AlertTriangle, RotateCcw 
 } from "lucide-react";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { useToast } from "@/hooks/use-toast";
 import { ClearAllDataDialog } from "@/components/shared/ClearAllDataDialog";
 
@@ -34,7 +33,7 @@ const Configuracoes = () => {
   };
 
   return (
-    <DashboardLayout>
+    <>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold text-gray-800">Configurações do Sistema</h2>
       </div>
@@ -209,7 +208,7 @@ const Configuracoes = () => {
         open={clearDataDialogOpen}
         onOpenChange={setClearDataDialogOpen}
       />
-    </DashboardLayout>
+    </>
   );
 };
 

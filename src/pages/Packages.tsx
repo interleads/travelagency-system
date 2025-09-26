@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
 import TravelPackageForm from '@/components/TravelPackageForm';
 import PackageTemplateGallery from "@/components/PackageTemplateGallery";
 
@@ -10,7 +9,7 @@ const Packages = () => {
   const [templateData, setTemplateData] = useState<any | null>(null);
 
   return (
-    <DashboardLayout>
+    <>
       <h2 className="text-3xl font-bold mb-6 text-gray-800">Gerenciamento de Pacotes</h2>
       
       <Tabs defaultValue="create">
@@ -55,7 +54,7 @@ const Packages = () => {
           </Card>
         </TabsContent>
       </Tabs>
-    </DashboardLayout>
+    </>
   );
 };
 

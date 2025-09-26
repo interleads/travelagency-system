@@ -9,7 +9,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { MilesInventoryTable } from '@/components/miles/MilesInventoryTable';
 import { MilesPurchaseForm } from '@/components/miles/MilesPurchaseForm';
 import { SuppliersTable } from '@/components/finance/SuppliersTable';
@@ -34,47 +33,45 @@ const MilesManagement = () => {
 
   return (
     <DateRangeFilterProvider>
-      <DashboardLayout>
-        <div className="flex items-center justify-between mb-6">
-          <DateRangeFilter />
+      <div className="flex items-center justify-between mb-6">
+        <DateRangeFilter />
+      </div>
+    
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <div className="flex items-center justify-between">
+          <TabsList className="grid w-fit grid-cols-2">
+            <TabsTrigger value="inventory">Estoque</TabsTrigger>
+            <TabsTrigger value="suppliers">Fornecedores</TabsTrigger>
+          </TabsList>
+          
+          {activeTab === "inventory" && (
+            <Dialog open={isPurchaseDialogOpen} onOpenChange={setIsPurchaseDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Comprar Milhas
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Comprar Milhas</DialogTitle>
+                </DialogHeader>
+                <MilesPurchaseForm onSubmit={handlePurchaseSubmit} />
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
-      
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="flex items-center justify-between">
-            <TabsList className="grid w-fit grid-cols-2">
-              <TabsTrigger value="inventory">Estoque</TabsTrigger>
-              <TabsTrigger value="suppliers">Fornecedores</TabsTrigger>
-            </TabsList>
-            
-            {activeTab === "inventory" && (
-              <Dialog open={isPurchaseDialogOpen} onOpenChange={setIsPurchaseDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Comprar Milhas
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Comprar Milhas</DialogTitle>
-                  </DialogHeader>
-                  <MilesPurchaseForm onSubmit={handlePurchaseSubmit} />
-                </DialogContent>
-              </Dialog>
-            )}
-          </div>
 
-          <MilesOverviewCards activeTab={activeTab} />
-          
-          <TabsContent value="inventory" className="mt-0">
-            <MilesInventoryTable />
-          </TabsContent>
-          
-          <TabsContent value="suppliers" className="mt-0">
-            <SuppliersTable />
-          </TabsContent>
-        </Tabs>
-      </DashboardLayout>
+        <MilesOverviewCards activeTab={activeTab} />
+        
+        <TabsContent value="inventory" className="mt-0">
+          <MilesInventoryTable />
+        </TabsContent>
+        
+        <TabsContent value="suppliers" className="mt-0">
+          <SuppliersTable />
+        </TabsContent>
+      </Tabs>
     </DateRangeFilterProvider>
   );
 };
