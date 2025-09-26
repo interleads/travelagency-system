@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Index from "./pages/Index";
 import AuthPage from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Finance from "./pages/Finance";
@@ -14,95 +15,65 @@ import Vendas from "./pages/Vendas";
 import MilesManagement from "./pages/MilesManagement";
 import Fornecedores from "./pages/Fornecedores";
 import DashboardLayout from "./components/layouts/DashboardLayout";
-import { AuthProvider } from "./components/auth/AuthProvider";
-import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { supabase } from "@/integrations/supabase/client";
+import React, { useEffect, useState } from "react";
+
+// Auth guard for Supabase sessions
+const AuthGuard = ({ children }: { children: JSX.Element }) => {
+  const [loading, setLoading] = React.useState(true);
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      setIsAuthenticated(!!session);
+      setLoading(false);
+    });
+    // Listen for changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+  
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
+  }
+
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/" element={<Navigate to="/auth" replace />} />
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout><Dashboard /></DashboardLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/vendas" 
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout><Vendas /></DashboardLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/miles" 
-              element={
-                <ProtectedRoute adminOnly>
-                  <DashboardLayout><MilesManagement /></DashboardLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/finance" 
-              element={
-                <ProtectedRoute adminOnly>
-                  <DashboardLayout><Finance /></DashboardLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/suppliers" 
-              element={
-                <ProtectedRoute adminOnly>
-                  <DashboardLayout><Fornecedores /></DashboardLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/crm" 
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout><CRM /></DashboardLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/packages" 
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout><Packages /></DashboardLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/configuracoes" 
-              element={
-                <ProtectedRoute adminOnly>
-                  <DashboardLayout><Configuracoes /></DashboardLayout>
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Redirect old routes */}
-            <Route path="/milhas" element={<Navigate to="/miles" replace />} />
-            <Route path="/fornecedores" element={<Navigate to="/suppliers" replace />} />
-            <Route path="/login" element={<Navigate to="/auth" replace />} />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<AuthPage />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/dashboard" element={<AuthGuard><DashboardLayout><Dashboard /></DashboardLayout></AuthGuard>} />
+          <Route path="/vendas" element={<AuthGuard><DashboardLayout><Vendas /></DashboardLayout></AuthGuard>} />
+          <Route path="/miles" element={<AuthGuard><DashboardLayout><MilesManagement /></DashboardLayout></AuthGuard>} />
+          <Route path="/finance" element={<AuthGuard><DashboardLayout><Finance /></DashboardLayout></AuthGuard>} />
+          <Route path="/suppliers" element={<AuthGuard><DashboardLayout><Fornecedores /></DashboardLayout></AuthGuard>} />
+          <Route path="/crm" element={<AuthGuard><DashboardLayout><CRM /></DashboardLayout></AuthGuard>} />
+          <Route path="/packages" element={<AuthGuard><DashboardLayout><Packages /></DashboardLayout></AuthGuard>} />
+          <Route path="/configuracoes" element={<AuthGuard><DashboardLayout><Configuracoes /></DashboardLayout></AuthGuard>} />
+          
+          {/* Redirect old routes */}
+          <Route path="/milhas" element={<Navigate to="/miles" replace />} />
+          <Route path="/fornecedores" element={<Navigate to="/suppliers" replace />} />
+          
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );

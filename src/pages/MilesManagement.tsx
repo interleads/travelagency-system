@@ -12,7 +12,6 @@ import { Plus } from "lucide-react";
 import { MilesInventoryTable } from '@/components/miles/MilesInventoryTable';
 import { MilesPurchaseForm } from '@/components/miles/MilesPurchaseForm';
 import { SuppliersTable } from '@/components/finance/SuppliersTable';
-import { MilesOverviewCards } from '@/components/miles/MilesOverviewCards';
 import { useToast } from "@/hooks/use-toast";
 import { DateRangeFilter } from '@/components/shared/DateRangeFilter';
 import { DateRangeFilterProvider } from '@/components/shared/useDateRangeFilter';
@@ -62,8 +61,6 @@ const MilesManagement = () => {
           )}
         </div>
 
-        <MilesOverviewCards activeTab={activeTab} />
-        
         <TabsContent value="inventory" className="mt-0">
           <MilesInventoryTable />
         </TabsContent>

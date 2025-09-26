@@ -2,12 +2,11 @@
 import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { 
   Home, CreditCard, Briefcase, 
-  Menu, X, Settings, Plane, Package, LogOut, Users
+  Menu, X, Settings, Plane, Package, LogOut
 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -17,67 +16,25 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
-  const { profile, signOut, isAdmin } = useAuth();
+
+  
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   const handleLogout = async () => {
-    await signOut();
-    navigate('/auth');
+    await supabase.auth.signOut();
+    navigate('/login');
   };
 
   const isActiveRoute = (path: string) => location.pathname === path;
 
-  // Define navigation items based on user role
-  const allNavigationItems = [
-    { 
-      path: "/dashboard", 
-      icon: Home, 
-      label: "Dashboard", 
-      roles: ['administrador', 'vendedor'] 
-    },
-    { 
-      path: "/vendas", 
-      icon: Plane, 
-      label: "Vendas", 
-      roles: ['administrador', 'vendedor'] 
-    },
-    { 
-      path: "/crm", 
-      icon: Users, 
-      label: "CRM", 
-      roles: ['administrador', 'vendedor'] 
-    },
-    { 
-      path: "/packages", 
-      icon: Briefcase, 
-      label: "Pacotes", 
-      roles: ['administrador', 'vendedor'] 
-    },
-    { 
-      path: "/miles", 
-      icon: Package, 
-      label: "Gestão de Milhas", 
-      roles: ['administrador'] 
-    },
-    { 
-      path: "/finance", 
-      icon: CreditCard, 
-      label: "Financeiro", 
-      roles: ['administrador'] 
-    },
-    { 
-      path: "/suppliers", 
-      icon: Briefcase, 
-      label: "Fornecedores", 
-      roles: ['administrador'] 
-    },
+  const navigationItems = [
+    { path: "/dashboard", icon: Home, label: "Dashboard" },
+    { path: "/vendas", icon: Plane, label: "Vendas" },
+    { path: "/milhas", icon: Package, label: "Gestão de Milhas" },
+    { path: "/finance", icon: CreditCard, label: "Financeiro" },
+    { path: "/packages", icon: Briefcase, label: "Pacotes" },
   ];
-
-  // Filter navigation items based on user role
-  const navigationItems = allNavigationItems.filter(item => 
-    profile && item.roles.includes(profile.role)
-  );
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -85,20 +42,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       <div 
         className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-sky-900 text-white transition-all duration-300 ease-in-out flex flex-col`}
       >
-        <div className="p-4 flex justify-between items-center border-b border-sky-800">
-          {isSidebarOpen && (
-            <div>
-              <h1 className="text-xl font-bold">Connect Voos</h1>
-              {profile && (
-                <div className="mt-2">
-                  <p className="text-sm text-sky-200">{profile.full_name}</p>
-                  <Badge variant="secondary" className="text-xs">
-                    {profile.role === 'administrador' ? 'Administrador' : 'Vendedor'}
-                  </Badge>
-                </div>
-              )}
-            </div>
-          )}
+        <div className="p-4 flex justify-between items-center">
+          {isSidebarOpen && <h1 className="text-xl font-bold">Agência Viagens</h1>}
           <Button 
             variant="ghost" 
             size="icon" 
@@ -132,22 +77,20 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             })}
           </ul>
         </nav>
-        {/* Configurações (apenas para administradores) */}
-        {isAdmin && (
-          <div className="p-4 mt-auto border-t border-sky-800">
-            <Link
-              to="/configuracoes"
-              className={`flex items-center p-3 rounded-lg transition-colors ${
-                isActiveRoute("/configuracoes")
-                  ? "bg-sky-700 text-white"
-                  : "text-white hover:bg-sky-800"
-              }`}
-            >
-              <Settings size={20} />
-              {isSidebarOpen && <span className="ml-3">Configurações</span>}
-            </Link>
-          </div>
-        )}
+        {/* Configurações Fixa no Rodapé */}
+        <div className="p-4 mt-auto border-t border-sky-800">
+          <Link
+            to="/configuracoes"
+            className={`flex items-center p-3 rounded-lg transition-colors ${
+              isActiveRoute("/configuracoes")
+                ? "bg-sky-700 text-white"
+                : "text-white hover:bg-sky-800"
+            }`}
+          >
+            <Settings size={20} />
+            {isSidebarOpen && <span className="ml-3">Configurações</span>}
+          </Link>
+        </div>
       </div>
       {/* Main Content */}
       <div className="flex-1 overflow-auto flex flex-col">

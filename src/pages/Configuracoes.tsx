@@ -1,54 +1,29 @@
 import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Settings, Users, Plus, Edit, Trash2, Save, AlertTriangle, RotateCcw, Pencil, UserCheck, UserX } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { useUsers } from '@/hooks/useUsers';
-import { useAuth } from '@/hooks/useAuth';
-import { ClearAllDataDialog } from '@/components/shared/ClearAllDataDialog';
+import { 
+  Card, CardContent, CardHeader, CardTitle 
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import { 
+  Settings, Users, 
+  Plus, Edit, Trash2, Save, AlertTriangle, RotateCcw 
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { ClearAllDataDialog } from "@/components/shared/ClearAllDataDialog";
 
 const Configuracoes = () => {
-  const [clearDataDialogOpen, setClearDataDialogOpen] = useState(false);
-  const [editUserDialogOpen, setEditUserDialogOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [editForm, setEditForm] = useState({ full_name: '', phone: '' });
-  
   const { toast } = useToast();
-  const { users, loading, updateUserRole, updateUserStatus, updateUserProfile } = useUsers();
-  const { profile: currentUserProfile } = useAuth();
-
-  const handleEditUser = (user: any) => {
-    setSelectedUser(user);
-    setEditForm({
-      full_name: user.full_name,
-      phone: user.phone || '',
-    });
-    setEditUserDialogOpen(true);
-  };
-
-  const handleSaveUserProfile = async () => {
-    if (!selectedUser) return;
-    
-    await updateUserProfile(selectedUser.id, editForm);
-    setEditUserDialogOpen(false);
-    setSelectedUser(null);
-  };
-
-  const handleRoleChange = async (userId: string, newRole: 'administrador' | 'vendedor') => {
-    await updateUserRole(userId, newRole);
-  };
-
-  const handleStatusToggle = async (userId: string, currentStatus: boolean) => {
-    await updateUserStatus(userId, !currentStatus);
-  };
+  const [clearDataDialogOpen, setClearDataDialogOpen] = useState(false);
 
   const handleSaveSettings = () => {
     toast({
@@ -72,143 +47,68 @@ const Configuracoes = () => {
         
         <TabsContent value="usuarios">
           <Card>
-            <CardHeader>
-              <CardTitle>Gerenciamento de Usuários</CardTitle>
-              <CardDescription>
-                Gerencie usuários do sistema e suas permissões
-              </CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Gestão de Usuários
+              </CardTitle>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Novo Usuário
+              </Button>
             </CardHeader>
             <CardContent>
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <h3 className="text-lg font-medium">Usuários cadastrados</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {users.length} usuários encontrados
-                  </p>
-                </div>
-                <Button disabled>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Novos usuários se cadastram na tela de login
-                </Button>
-              </div>
-              
-              {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Telefone</TableHead>
-                      <TableHead>Função</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Criado em</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.full_name}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>{user.phone || '-'}</TableCell>
-                        <TableCell>
-                          <Select
-                            value={user.role}
-                            onValueChange={(value: 'administrador' | 'vendedor') => 
-                              handleRoleChange(user.id, value)
-                            }
-                            disabled={user.id === currentUserProfile?.id}
-                          >
-                            <SelectTrigger className="w-[140px]">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="administrador">Administrador</SelectItem>
-                              <SelectItem value="vendedor">Vendedor</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Badge variant={user.is_active ? 'default' : 'secondary'}>
-                              {user.is_active ? 'Ativo' : 'Inativo'}
-                            </Badge>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleStatusToggle(user.id, user.is_active)}
-                              disabled={user.id === currentUserProfile?.id}
-                            >
-                              {user.is_active ? 
-                                <UserX className="h-4 w-4 text-red-500" /> : 
-                                <UserCheck className="h-4 w-4 text-green-500" />
-                              }
-                            </Button>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {new Date(user.created_at).toLocaleDateString('pt-BR')}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleEditUser(user)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Função</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>João Silva</TableCell>
+                    <TableCell>joao@agencia.com</TableCell>
+                    <TableCell>Administrador</TableCell>
+                    <TableCell>
+                      <span className="px-2 py-1 rounded-full text-xs bg-emerald-100 text-emerald-800">
+                        Ativo
+                      </span>
+                    </TableCell>
+                    <TableCell className="space-x-2">
+                      <Button variant="outline" size="sm">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Maria Santos</TableCell>
+                    <TableCell>maria@agencia.com</TableCell>
+                    <TableCell>Vendedor</TableCell>
+                    <TableCell>
+                      <span className="px-2 py-1 rounded-full text-xs bg-emerald-100 text-emerald-800">
+                        Ativo
+                      </span>
+                    </TableCell>
+                    <TableCell className="space-x-2">
+                      <Button variant="outline" size="sm">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
-          
-          <Dialog open={editUserDialogOpen} onOpenChange={setEditUserDialogOpen}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Editar Usuário</DialogTitle>
-                <DialogDescription>
-                  Altere os dados do usuário {selectedUser?.full_name}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Nome Completo</Label>
-                  <Input
-                    id="fullName"
-                    value={editForm.full_name}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, full_name: e.target.value }))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Telefone</Label>
-                  <Input
-                    id="phone"
-                    value={editForm.phone}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
-                    placeholder="(11) 99999-9999"
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setEditUserDialogOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button onClick={handleSaveUserProfile}>
-                  Salvar Alterações
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
         </TabsContent>
         
         <TabsContent value="sistema">

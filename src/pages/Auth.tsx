@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { Plane, Mail, Lock, Loader2 } from "lucide-react";
 
 type Mode = "login" | "signup";
@@ -17,7 +17,6 @@ const AuthPage: React.FC = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const navigate = useNavigate();
@@ -56,20 +55,11 @@ const AuthPage: React.FC = () => {
         toast({ title: "Login realizado", description: "Bem-vindo de volta!" });
       } else {
         // SIGNUP
-        if (!fullName.trim()) {
-          throw new Error('Nome completo é obrigatório');
-        }
-        
         const redirectUrl = `${window.location.origin}/`;
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { 
-            emailRedirectTo: redirectUrl,
-            data: {
-              full_name: fullName,
-            },
-          }
+          options: { emailRedirectTo: redirectUrl }
         });
         if (error) throw error;
         toast({ title: "Cadastro realizado", description: "Verifique seu email para confirmar o cadastro." });
@@ -108,22 +98,6 @@ const AuthPage: React.FC = () => {
         </CardHeader>
         <CardContent className="px-8 pb-6">
           <form onSubmit={handleAuth} className="space-y-6">
-            {mode === "signup" && (
-              <div className="space-y-3">
-                <Label htmlFor="fullName" className="flex items-center gap-2 text-gray-700 font-medium">
-                  Nome Completo
-                </Label>
-                <Input 
-                  id="fullName" 
-                  type="text" 
-                  placeholder="Seu nome completo" 
-                  value={fullName} 
-                  onChange={(e) => setFullName(e.target.value)} 
-                  required={mode === "signup"}
-                  className="h-12 border-gray-200 focus:border-blue-400 focus:ring-blue-400/20 transition-all duration-200"
-                />
-              </div>
-            )}
             <div className="space-y-3">
               <Label htmlFor="email" className="flex items-center gap-2 text-gray-700 font-medium">
                 <Mail className="h-4 w-4 text-blue-500" />
