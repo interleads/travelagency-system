@@ -26,19 +26,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Create normal client for user validation (uses anon key)
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: {
-            Authorization: req.headers.get('Authorization') ?? '',
-          },
-        },
-      }
-    )
-
     // Create admin client with service role for admin operations
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -51,35 +38,56 @@ Deno.serve(async (req) => {
       }
     )
 
-    // Get the authorization header for logging
+    // Extract and decode JWT token from Authorization header
     const authHeader = req.headers.get('Authorization')
     console.log('Authorization header present:', !!authHeader)
     
-    // Verify the user making the request using normal client
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-    if (userError || !user) {
-      console.error('Authentication error:', userError)
-      console.error('Auth header:', authHeader ? 'Present' : 'Missing')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.error('Missing or invalid Authorization header')
       return new Response(JSON.stringify({ 
         error: 'Unauthorized', 
-        details: userError?.message || 'No user found' 
+        details: 'Authorization header missing or invalid' 
       }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
 
-    console.log('User authenticated:', user.id, user.email)
+    // Extract JWT token and decode payload
+    const token = authHeader.replace('Bearer ', '')
+    let callerUserId: string
+    
+    try {
+      // Decode JWT payload (Supabase already verified the JWT signature due to verify_jwt = true)
+      const payloadBase64 = token.split('.')[1]
+      const payload = JSON.parse(atob(payloadBase64))
+      callerUserId = payload.sub
+      
+      if (!callerUserId) {
+        throw new Error('User ID not found in token')
+      }
+      
+      console.log('Caller authenticated:', callerUserId)
+    } catch (decodeError) {
+      console.error('JWT decode error:', decodeError)
+      return new Response(JSON.stringify({ 
+        error: 'Unauthorized', 
+        details: 'Invalid token format' 
+      }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
 
-    // Check if user is admin
-    const { data: profile } = await supabaseAdmin
+    // Check if caller is admin
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('role')
-      .eq('id', user.id)
+      .eq('id', callerUserId)
       .single()
 
-    if (!profile || profile.role !== 'administrador') {
-      console.error('User is not admin:', user.id)
+    if (profileError || !profile || profile.role !== 'administrador') {
+      console.error('User is not admin:', callerUserId, profileError)
       return new Response(JSON.stringify({ error: 'Forbidden - Admin access required' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
