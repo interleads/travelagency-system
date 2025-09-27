@@ -77,34 +77,37 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             })}
           </ul>
         </nav>
-        {/* Configurações Fixa no Rodapé */}
+        {/* Configurações e Sair no Rodapé */}
         <div className="p-4 mt-auto border-t border-sky-800">
-          <Link
-            to="/configuracoes"
-            className={`flex items-center p-3 rounded-lg transition-colors ${
-              isActiveRoute("/configuracoes")
-                ? "bg-sky-700 text-white"
-                : "text-white hover:bg-sky-800"
-            }`}
-          >
-            <Settings size={20} />
-            {isSidebarOpen && <span className="ml-3">Configurações</span>}
-          </Link>
+          <div className={`flex ${isSidebarOpen ? 'gap-2' : 'flex-col gap-2'}`}>
+            <Link
+              to="/configuracoes"
+              className={`flex items-center ${isSidebarOpen ? 'flex-1' : ''} p-3 rounded-lg transition-colors ${
+                isActiveRoute("/configuracoes")
+                  ? "bg-sky-700 text-white"
+                  : "text-white hover:bg-sky-800"
+              }`}
+            >
+              <Settings size={20} />
+              {isSidebarOpen && <span className="ml-3">Configurações</span>}
+            </Link>
+            <Button 
+              variant="ghost" 
+              size={isSidebarOpen ? "default" : "icon"}
+              onClick={handleLogout}
+              className={`${isSidebarOpen ? 'flex-1' : ''} text-white hover:bg-sky-800 rounded-lg transition-colors`}
+            >
+              <LogOut size={20} />
+              {isSidebarOpen && <span className="ml-3">Sair</span>}
+            </Button>
+          </div>
         </div>
       </div>
       {/* Main Content */}
       <div className="flex-1 overflow-auto flex flex-col">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex justify-end">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleLogout}
-            className="flex items-center gap-2"
-          >
-            <LogOut size={16} />
-            Sair
-          </Button>
+        <header className="bg-white border-b border-gray-200 px-6 py-2">
+          {/* Header vazio - botões movidos para sidebar */}
         </header>
         <main className="flex-1 p-6">{children}</main>
       </div>
