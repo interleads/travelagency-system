@@ -42,10 +42,11 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
   const totalCost = React.useMemo(() => {
     return products.reduce((sum, p) => {
       if (p.type === "passagem" && p.ticketType === "milhas") {
-        // Para passagem com milhas, usar qtdMilhas * custoMil / 1000
+        // Para passagem com milhas, usar qtdMilhas * custoMil / 1000 + taxas
         const milhas = Number(p.qtdMilhas || 0);
         const custoMil = Number(p.custoMil || 0);
-        const custoTotal = (milhas / 1000) * custoMil;
+        const taxas = Number(p.taxValue || 0);
+        const custoTotal = (milhas / 1000) * custoMil + taxas;
         return sum + custoTotal;
       }
       // Para outros produtos e passagem tarifada, usar campo cost
