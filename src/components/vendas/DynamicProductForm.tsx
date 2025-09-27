@@ -223,15 +223,16 @@ const DynamicProductForm: React.FC<{
     if (value.type === "passagem" && value.ticketType === "milhas") {
       const milhas = value.qtdMilhas || 0;
       const custoMil = value.custoMil || 0;
-      if (!milhas || !custoMil) return venda || 0;
-      const custoTotal = (milhas / 1000) * custoMil;
+      const taxas = value.taxValue || 0;
+      if (!milhas || !custoMil) return venda - taxas || 0;
+      const custoTotal = (milhas / 1000) * custoMil + taxas;
       return venda - custoTotal;
     }
     
     // Para passagem tarifada e outros produtos
     const custo = value.cost || 0;
     return venda - custo;
-  }, [value.price, value.quantity, value.qtdMilhas, value.custoMil, value.cost, value.type, value.ticketType]);
+  }, [value.price, value.quantity, value.qtdMilhas, value.custoMil, value.cost, value.type, value.ticketType, value.taxValue]);
 
   // Atualizar profit no estado quando computedProfit mudar
   React.useEffect(() => {
