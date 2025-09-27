@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { CreateUserData, EditUserData, Profile } from '@/hooks/useProfiles';
 
 const userSchema = z.object({
@@ -62,7 +62,6 @@ interface UserFormProps {
 
 export function UserForm({ open, onOpenChange, onSubmit, editingUser, isLoading }: UserFormProps) {
   const isEditing = !!editingUser;
-  const [showPassword, setShowPassword] = useState(false);
   
   const form = useForm<UserFormData | EditUserFormData>({
     resolver: zodResolver(isEditing ? editUserSchema : userSchema),
@@ -76,7 +75,6 @@ export function UserForm({ open, onOpenChange, onSubmit, editingUser, isLoading 
 
   // Reset form when editingUser changes
   useEffect(() => {
-    setShowPassword(false); // Reset password visibility when form changes
     if (isEditing && editingUser) {
       form.reset({
         email: editingUser.email || '',
@@ -152,33 +150,11 @@ export function UserForm({ open, onOpenChange, onSubmit, editingUser, isLoading 
                     {isEditing && <span className="text-sm font-normal text-muted-foreground ml-1">(deixe vazio para não alterar)</span>}
                   </FormLabel>
                   <FormControl>
-                    <div className="relative">
-                      <Input 
-                        type={showPassword ? "text" : "password"}
-                        placeholder={isEditing ? 
-                          (field.value ? "••••••••" : "Digite nova senha ou deixe vazio") : 
-                          "Mínimo 8 caracteres"
-                        }
-                        {...field} 
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowPassword(!showPassword)}
-                        disabled={isLoading}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-muted-foreground" />
-                        )}
-                        <span className="sr-only">
-                          {showPassword ? "Ocultar senha" : "Mostrar senha"}
-                        </span>
-                      </Button>
-                    </div>
+                    <Input 
+                      type="text"
+                      placeholder={isEditing ? "Digite nova senha ou deixe vazio" : "Mínimo 8 caracteres"}
+                      {...field} 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
