@@ -113,11 +113,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         
         {/* Configurações e Sair no Rodapé */}
         <div className="p-4 mt-auto border-t border-sky-800">
-          <div className={`flex ${isSidebarOpen ? 'gap-2' : 'flex-col gap-2'}`}>
+          <div className="flex flex-col gap-2">
             <Link
               to="/configuracoes"
               onClick={handleNavClick}
-              className={`flex items-center ${isSidebarOpen ? 'flex-1' : ''} p-3 rounded-lg transition-colors ${
+              className={`flex items-center p-3 rounded-lg transition-colors ${
                 isActiveRoute("/configuracoes")
                   ? "bg-sky-700 text-white"
                   : "text-white hover:bg-sky-800"
@@ -130,7 +130,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               variant="ghost" 
               size={isSidebarOpen ? "default" : "icon"}
               onClick={handleLogout}
-              className={`${isSidebarOpen ? 'flex-1' : ''} text-white hover:bg-sky-800 rounded-lg transition-colors`}
+              className="text-white hover:bg-sky-800 rounded-lg transition-colors justify-start"
             >
               <LogOut size={20} />
               {isSidebarOpen && <span className="ml-3">Sair</span>}
