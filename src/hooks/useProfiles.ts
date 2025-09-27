@@ -59,22 +59,20 @@ export function useProfiles() {
       const { data, error } = await supabase.functions.invoke('manage-user', {
         body: {
           action: 'create',
-          userData: userData
+          data: userData
         }
       });
 
       if (error) throw error;
-      if (!data.success) throw new Error(data.error || 'Erro ao criar usuário');
 
-      // Update local state - the profile will be created by the trigger
-      await loadProfiles();
+      setProfiles(prev => [...prev, data]);
       
       toast({
         title: "Usuário criado com sucesso!",
         description: `${userData.full_name} foi adicionado ao sistema.`
       });
 
-      return data.user;
+      return data;
     } catch (error: any) {
       console.error('Error creating user:', error);
       toast({
@@ -84,7 +82,7 @@ export function useProfiles() {
       });
       throw error;
     }
-  }, [toast, loadProfiles]);
+  }, [toast]);
 
   const updateProfile = useCallback(async (id: string, updates: EditUserData) => {
     try {
@@ -92,23 +90,22 @@ export function useProfiles() {
         body: {
           action: 'update',
           userId: id,
-          userData: updates
+          data: updates
         }
       });
 
       if (error) throw error;
-      if (!data.success) throw new Error(data.error || 'Erro ao atualizar usuário');
 
       // Update local state
       setProfiles(prev => prev.map(profile => 
-        profile.id === id ? { ...profile, ...data.data } : profile
+        profile.id === id ? { ...profile, ...data } : profile
       ));
 
       toast({
         title: "Usuário atualizado com sucesso!"
       });
 
-      return data.data;
+      return data;
     } catch (error: any) {
       console.error('Error updating profile:', error);
       toast({
@@ -122,12 +119,13 @@ export function useProfiles() {
 
   const toggleUserStatus = useCallback(async (id: string, isActive: boolean) => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .update({ is_active: isActive })
-        .eq('id', id)
-        .select()
-        .single();
+      const { data, error } = await supabase.functions.invoke('manage-user', {
+        body: {
+          action: 'toggle-status',
+          userId: id,
+          data: { isActive }
+        }
+      });
 
       if (error) throw error;
 
@@ -153,7 +151,7 @@ export function useProfiles() {
 
   const deleteUser = useCallback(async (id: string) => {
     try {
-      const { data, error } = await supabase.functions.invoke('manage-user', {
+      const { error } = await supabase.functions.invoke('manage-user', {
         body: {
           action: 'delete',
           userId: id
@@ -161,7 +159,6 @@ export function useProfiles() {
       });
 
       if (error) throw error;
-      if (!data.success) throw new Error(data.error || 'Erro ao remover usuário');
 
       setProfiles(prev => prev.filter(profile => profile.id !== id));
       
