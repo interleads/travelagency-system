@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
-import { CreateUserData, Profile } from '@/hooks/useProfiles';
+import { CreateUserData, EditUserData, Profile } from '@/hooks/useProfiles';
 
 const userSchema = z.object({
   email: z.string().email('Email inválido').min(1, 'Email é obrigatório'),
@@ -38,7 +38,18 @@ const userSchema = z.object({
   })
 });
 
-const editUserSchema = userSchema.omit({ email: true, password: true });
+const editUserSchema = z.object({
+  email: z.string().email('Email inválido').min(1, 'Email é obrigatório'),
+  password: z.string().optional().refine(
+    (val) => !val || val.length >= 8,
+    { message: 'Senha deve ter pelo menos 8 caracteres' }
+  ),
+  full_name: z.string().min(1, 'Nome é obrigatório').max(100, 'Nome deve ter no máximo 100 caracteres'),
+  phone: z.string().optional(),
+  role: z.enum(['administrador', 'vendedor'], {
+    required_error: 'Função é obrigatória'
+  })
+});
 
 type UserFormData = z.infer<typeof userSchema>;
 type EditUserFormData = z.infer<typeof editUserSchema>;
@@ -46,7 +57,7 @@ type EditUserFormData = z.infer<typeof editUserSchema>;
 interface UserFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: CreateUserData | Partial<Profile>) => Promise<void>;
+  onSubmit: (data: CreateUserData | EditUserData) => Promise<void>;
   editingUser?: Profile | null;
   isLoading: boolean;
 }
@@ -57,6 +68,8 @@ export function UserForm({ open, onOpenChange, onSubmit, editingUser, isLoading 
   const form = useForm<UserFormData | EditUserFormData>({
     resolver: zodResolver(isEditing ? editUserSchema : userSchema),
     defaultValues: isEditing ? {
+      email: editingUser?.email || '',
+      password: '',
       full_name: editingUser?.full_name || '',
       phone: editingUser?.phone || '',
       role: editingUser?.role || 'vendedor'
@@ -72,7 +85,12 @@ export function UserForm({ open, onOpenChange, onSubmit, editingUser, isLoading 
   const handleSubmit = async (data: UserFormData | EditUserFormData) => {
     try {
       if (isEditing) {
-        await onSubmit(data);
+        // Filter out empty password for edit mode
+        const editData = { ...data };
+        if (!editData.password) {
+          delete editData.password;
+        }
+        await onSubmit(editData as EditUserData);
       } else {
         await onSubmit(data as CreateUserData);
       }
@@ -94,45 +112,44 @@ export function UserForm({ open, onOpenChange, onSubmit, editingUser, isLoading 
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            {!isEditing && (
-              <>
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="email" 
-                          placeholder="usuario@email.com" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Senha</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="password" 
-                          placeholder="Mínimo 8 caracteres" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </>
-            )}
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="email" 
+                      placeholder="usuario@email.com" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Senha
+                    {isEditing && <span className="text-sm font-normal text-muted-foreground ml-1">(deixe vazio para não alterar)</span>}
+                  </FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="password" 
+                      placeholder={isEditing ? "Digite nova senha ou deixe vazio" : "Mínimo 8 caracteres"}
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             
             <FormField
               control={form.control}

@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 export interface Profile {
   id: string;
   full_name: string;
+  email: string;
   phone?: string;
   role: 'administrador' | 'vendedor';
   is_active: boolean;
@@ -15,6 +16,14 @@ export interface Profile {
 export interface CreateUserData {
   email: string;
   password: string;
+  full_name: string;
+  phone?: string;
+  role: 'administrador' | 'vendedor';
+}
+
+export interface EditUserData {
+  email: string;
+  password?: string;
   full_name: string;
   phone?: string;
   role: 'administrador' | 'vendedor';
@@ -34,7 +43,17 @@ export function useProfiles() {
         .order('full_name');
 
       if (error) throw error;
-      setProfiles(data || []);
+      
+      // Get emails for each profile separately
+      const profilesWithEmail = await Promise.all((data || []).map(async (profile) => {
+        const { data: userData, error: userError } = await supabase.auth.admin.getUserById(profile.id);
+        return {
+          ...profile,
+          email: userData.user?.email || ''
+        };
+      }));
+      
+      setProfiles(profilesWithEmail);
     } catch (error: any) {
       console.error('Error loading profiles:', error);
       toast({
@@ -80,7 +99,7 @@ export function useProfiles() {
 
       if (profileError) throw profileError;
 
-      setProfiles(prev => [...prev, profileData]);
+      setProfiles(prev => [...prev, { ...profileData, email: userData.email }]);
       
       toast({
         title: "Usuário criado com sucesso!",
@@ -99,19 +118,34 @@ export function useProfiles() {
     }
   }, [toast]);
 
-  const updateProfile = useCallback(async (id: string, updates: Partial<Profile>) => {
+  const updateProfile = useCallback(async (id: string, updates: EditUserData) => {
     try {
+      // Separate profile updates from auth updates
+      const { email, password, ...profileUpdates } = updates;
+      
+      // Update profile in profiles table
       const { data, error } = await supabase
         .from('profiles')
-        .update(updates)
+        .update(profileUpdates)
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
 
+      // Update email and/or password if provided
+      if (email || password) {
+        const authUpdates: any = {};
+        if (email) authUpdates.email = email;
+        if (password) authUpdates.password = password;
+        
+        const { error: authError } = await supabase.auth.admin.updateUserById(id, authUpdates);
+        if (authError) throw authError;
+      }
+
+      // Update local state
       setProfiles(prev => prev.map(profile => 
-        profile.id === id ? { ...profile, ...data } : profile
+        profile.id === id ? { ...profile, ...data, email: email || profile.email } : profile
       ));
 
       toast({
@@ -131,8 +165,35 @@ export function useProfiles() {
   }, [toast]);
 
   const toggleUserStatus = useCallback(async (id: string, isActive: boolean) => {
-    return updateProfile(id, { is_active: isActive });
-  }, [updateProfile]);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ is_active: isActive })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setProfiles(prev => prev.map(profile => 
+        profile.id === id ? { ...profile, is_active: isActive } : profile
+      ));
+
+      toast({
+        title: `Usuário ${isActive ? 'ativado' : 'desativado'} com sucesso!`
+      });
+
+      return data;
+    } catch (error: any) {
+      console.error('Error toggling user status:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao alterar status do usuário",
+        description: error.message
+      });
+      throw error;
+    }
+  }, [toast]);
 
   const deleteUser = useCallback(async (id: string) => {
     try {
