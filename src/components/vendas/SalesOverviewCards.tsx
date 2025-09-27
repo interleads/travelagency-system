@@ -166,15 +166,15 @@ export function SalesOverviewCards({ activeTab }: SalesOverviewCardsProps) {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
         {[1, 2, 3].map(i => (
-          <Card key={i}>
-            <CardHeader>
-              <div className="h-6 bg-gray-200 rounded animate-pulse" />
+          <Card key={i} className="animate-pulse">
+            <CardHeader className="pb-3">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
             </CardHeader>
             <CardContent>
-              <div className="h-8 bg-gray-200 rounded animate-pulse mb-2" />
-              <div className="h-4 bg-gray-200 rounded animate-pulse w-32" />
+              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded mb-3" />
+              <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
             </CardContent>
           </Card>
         ))}
@@ -183,7 +183,7 @@ export function SalesOverviewCards({ activeTab }: SalesOverviewCardsProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
       {renderCards()}
     </div>
   );

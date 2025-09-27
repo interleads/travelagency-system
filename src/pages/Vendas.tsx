@@ -13,12 +13,13 @@ import VendasForm from "@/components/vendas/VendasForm";
 import { SalesOverviewCards } from "@/components/vendas/SalesOverviewCards";
 import { SalesHistoryTable } from "@/components/vendas/SalesHistoryTable";
 import CRMKanban from "@/components/crm/CRMKanban";
-import { DateRangeFilter } from '@/components/shared/DateRangeFilter';
-import { DateRangeFilterProvider } from '@/components/shared/useDateRangeFilter';
+import { DateRangeFilterProvider } from "@/components/shared/useDateRangeFilter";
+import { DateRangeFilter } from "@/components/shared/DateRangeFilter";
+import { FloatingActionButton } from "@/components/ui/floating-action-button";
+import { useIsMobile } from "@/hooks/use-mobile";
 const Vendas = () => {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [isSaleDialogOpen, setIsSaleDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     // Se vier da rota CRM, ativar a aba CRM automaticamente
@@ -67,40 +68,47 @@ const Vendas = () => {
         {activeTab === "historico" && <div className="flex flex-col lg:flex-row gap-4 my-6">
             <div className="flex flex-col sm:flex-row gap-3 flex-1">
               {/* Busca por cliente */}
-              <div className="relative w-full md:max-w-[380px]">
+              <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input placeholder="Buscar por cliente, local ou grupo..." value={searchFilter} onChange={e => setSearchFilter(e.target.value)} className="pl-10" />
+                <Input 
+                  placeholder={isMobile ? "Buscar..." : "Buscar por cliente, local ou grupo..."} 
+                  value={searchFilter} 
+                  onChange={e => setSearchFilter(e.target.value)} 
+                  className="pl-10" 
+                />
               </div>
             </div>
             
-            {/* Botão Registrar Nova Venda */}
-            <div className="flex gap-2">
-              <Dialog open={isSaleDialogOpen} onOpenChange={setIsSaleDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button size="lg" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
-                    <Plus className="h-4 w-4" />
-                    Registrar Nova Venda
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto p-0">
-                  <DialogHeader className="bg-gradient-to-r from-primary to-primary/90 text-primary-foreground p-6 rounded-t-lg shadow-lg">
-                    <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-                      <Plus className="h-6 w-6" />
+            {/* Botão Registrar Nova Venda - apenas desktop */}
+            {!isMobile && (
+              <div className="flex gap-2">
+                <Dialog open={isSaleDialogOpen} onOpenChange={setIsSaleDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="lg" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
+                      <Plus className="h-4 w-4" />
                       Registrar Nova Venda
-                    </DialogTitle>
-                  </DialogHeader>
-                  <div className="p-4">
-                    <VendasForm onSaleSuccess={() => setIsSaleDialogOpen(false)} />
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto p-0">
+                    <DialogHeader className="bg-gradient-to-r from-primary to-primary/90 text-primary-foreground p-6 rounded-t-lg shadow-lg">
+                      <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                        <Plus className="h-6 w-6" />
+                        Registrar Nova Venda
+                      </DialogTitle>
+                    </DialogHeader>
+                    <div className="p-4">
+                      <VendasForm onSaleSuccess={() => setIsSaleDialogOpen(false)} />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            )}
           </div>}
 
         {activeTab === "crm" && <div className="flex flex-col lg:flex-row gap-4 my-6">
             <div className="flex flex-col sm:flex-row gap-3 flex-1">
               {/* Busca por cliente no CRM */}
-              <div className="relative w-full md:max-w-[380px]">
+              <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input placeholder="Buscar clientes..." className="pl-10" />
               </div>
@@ -109,7 +117,7 @@ const Vendas = () => {
               <div className="flex gap-2 items-center">
                 <Dialog open={isColumnDialogOpen} onOpenChange={setIsColumnDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button size="sm" variant="outline">
+                    <Button size={isMobile ? "default" : "sm"} variant="outline" className="shrink-0">
                       <Plus size={16} className="mr-2" />
                       Nova Coluna
                     </Button>
@@ -156,6 +164,29 @@ const Vendas = () => {
         </Card>
       </TabsContent>
     </Tabs>
+    
+    {/* Floating Action Button - apenas mobile */}
+    <Dialog open={isSaleDialogOpen} onOpenChange={setIsSaleDialogOpen}>
+      <DialogTrigger asChild>
+        <FloatingActionButton 
+          icon={Plus} 
+          label="Nova Venda"
+          onClick={() => setIsSaleDialogOpen(true)}
+        />
+      </DialogTrigger>
+      <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto p-0">
+        <DialogHeader className="bg-gradient-to-r from-primary to-primary/90 text-primary-foreground p-6 rounded-t-lg shadow-lg">
+          <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+            <Plus className="h-6 w-6" />
+            Registrar Nova Venda
+          </DialogTitle>
+        </DialogHeader>
+        <div className="p-4">
+          <VendasForm onSaleSuccess={() => setIsSaleDialogOpen(false)} />
+        </div>
+      </DialogContent>
+    </Dialog>
+    
     </DateRangeFilterProvider>;
 };
 export default Vendas;

@@ -29,6 +29,8 @@ import { useInstallments, useCreateInstallments } from "@/hooks/useInstallments"
 import { SaleDetailsExpanded } from "./SaleDetailsExpanded";
 import { FullSaleEditDialog } from "./FullSaleEditDialog";
 import { DeleteSaleDialog } from "./DeleteSaleDialog";
+import { MobileSalesCard } from "./MobileSalesCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 
 // Component for individual sale row
@@ -152,6 +154,7 @@ export function SalesHistoryTable({
 }: SalesHistoryTableProps = {}) {
   const { dateRange } = useDateRangeFilter();
   const { data: allSales = [], isLoading } = useSales(dateRange);
+  const isMobile = useIsMobile();
   
   // Aplicar filtros
   const filteredSales = React.useMemo(() => {
@@ -339,55 +342,83 @@ export function SalesHistoryTable({
 
   return (
     <>
-      <Card>
-        <CardContent>
-          <div className="space-y-0 overflow-hidden rounded-lg border">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead className="w-12"></TableHead>
-                  <TableHead className="text-center">Data</TableHead>
-                  <TableHead className="text-center">Cliente</TableHead>
-                  <TableHead className="text-center">Produtos</TableHead>
-                  <TableHead className="text-center">Pagamento</TableHead>
-                  <TableHead className="text-center">Status</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
-                  <TableHead className="w-12"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sales.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                      Nenhuma venda registrada ainda
-                    </TableCell>
+      {/* Mobile Layout */}
+      {isMobile ? (
+        <div className="space-y-4">
+          {sales.length === 0 ? (
+            <Card>
+              <CardContent className="py-8 text-center">
+                <p className="text-muted-foreground">Nenhuma venda registrada ainda</p>
+              </CardContent>
+            </Card>
+          ) : (
+            sales.map((sale) => (
+              <MobileSalesCard
+                key={sale.id}
+                sale={{
+                  ...sale,
+                  destination: sale.sale_products?.[0]?.destination || 'N/A',
+                  travel_date: sale.sale_products?.[0]?.departure_date || sale.sale_date || sale.created_at,
+                }}
+                onEdit={() => setEditingSale(sale)}
+                onDelete={() => setDeletingSale(sale)}
+                onView={() => toggleExpanded(sale.id)}
+              />
+            ))
+          )}
+        </div>
+      ) : (
+        /* Desktop Layout */
+        <Card>
+          <CardContent>
+            <div className="space-y-0 overflow-hidden rounded-lg border">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="w-12"></TableHead>
+                    <TableHead className="text-center">Data</TableHead>
+                    <TableHead className="text-center">Cliente</TableHead>
+                    <TableHead className="text-center">Produtos</TableHead>
+                    <TableHead className="text-center">Pagamento</TableHead>
+                    <TableHead className="text-center">Status</TableHead>
+                    <TableHead className="text-right">Total</TableHead>
+                    <TableHead className="w-12"></TableHead>
                   </TableRow>
-                ) : (
-                  sales.map((sale) => {
-                    const isExpanded = expandedSales.has(sale.id);
-                    
-                    return (
-                      <SaleRow
-                        key={sale.id}
-                        sale={sale}
-                        isExpanded={isExpanded}
-                        onToggleExpanded={() => toggleExpanded(sale.id)}
-                        onEdit={() => setEditingSale(sale)}
-                        onDelete={() => setDeletingSale(sale)}
-                        formatCurrency={formatCurrency}
-                        formatDate={formatDate}
-                        getProductTypesSummary={getProductTypesSummary}
-                        getSalePaymentStatus={getSalePaymentStatus}
-                        getStatusLabel={getStatusLabel}
-                      />
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {sales.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                        Nenhuma venda registrada ainda
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    sales.map((sale) => {
+                      const isExpanded = expandedSales.has(sale.id);
+                      
+                      return (
+                        <SaleRow
+                          key={sale.id}
+                          sale={sale}
+                          isExpanded={isExpanded}
+                          onToggleExpanded={() => toggleExpanded(sale.id)}
+                          onEdit={() => setEditingSale(sale)}
+                          onDelete={() => setDeletingSale(sale)}
+                          formatCurrency={formatCurrency}
+                          formatDate={formatDate}
+                          getProductTypesSummary={getProductTypesSummary}
+                          getSalePaymentStatus={getSalePaymentStatus}
+                          getStatusLabel={getStatusLabel}
+                        />
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {editingSale && (
         <FullSaleEditDialog
