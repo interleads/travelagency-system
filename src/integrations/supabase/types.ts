@@ -279,6 +279,7 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          email: string | null
           full_name: string
           id: string
           is_active: boolean
@@ -288,6 +289,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          email?: string | null
           full_name: string
           id: string
           is_active?: boolean
@@ -297,6 +299,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          email?: string | null
           full_name?: string
           id?: string
           is_active?: boolean
@@ -613,6 +616,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      sync_profile_emails: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {

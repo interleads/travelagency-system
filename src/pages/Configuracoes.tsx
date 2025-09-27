@@ -121,7 +121,6 @@ const Configuracoes = () => {
                   <TableRow>
                     <TableHead>Nome</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Telefone</TableHead>
                     <TableHead>Função</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Ações</TableHead>
@@ -130,13 +129,13 @@ const Configuracoes = () => {
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8">
+                      <TableCell colSpan={5} className="text-center py-8">
                         Carregando usuários...
                       </TableCell>
                     </TableRow>
                   ) : profiles.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8">
+                      <TableCell colSpan={5} className="text-center py-8">
                         Nenhum usuário encontrado
                       </TableCell>
                     </TableRow>
@@ -145,7 +144,6 @@ const Configuracoes = () => {
                       <TableRow key={profile.id}>
                         <TableCell className="font-medium">{profile.full_name}</TableCell>
                         <TableCell>{profile.email}</TableCell>
-                        <TableCell>{profile.phone || '-'}</TableCell>
                         <TableCell className="capitalize">{profile.role}</TableCell>
                         <TableCell>
                           <Badge variant={profile.is_active ? "default" : "secondary"}>

@@ -6,7 +6,6 @@ export interface Profile {
   id: string;
   full_name: string;
   email: string;
-  phone?: string;
   role: 'administrador' | 'vendedor';
   is_active: boolean;
   created_at: string;
@@ -17,7 +16,6 @@ export interface CreateUserData {
   email: string;
   password: string;
   full_name: string;
-  phone?: string;
   role: 'administrador' | 'vendedor';
 }
 
@@ -25,7 +23,6 @@ export interface EditUserData {
   email: string;
   password?: string;
   full_name: string;
-  phone?: string;
   role: 'administrador' | 'vendedor';
 }
 
@@ -44,16 +41,7 @@ export function useProfiles() {
 
       if (error) throw error;
       
-      // Get emails for each profile separately
-      const profilesWithEmail = await Promise.all((data || []).map(async (profile) => {
-        const { data: userData, error: userError } = await supabase.auth.admin.getUserById(profile.id);
-        return {
-          ...profile,
-          email: userData.user?.email || ''
-        };
-      }));
-      
-      setProfiles(profilesWithEmail);
+      setProfiles(data || []);
     } catch (error: any) {
       console.error('Error loading profiles:', error);
       toast({
@@ -90,7 +78,7 @@ export function useProfiles() {
         .insert([{
           id: authData.user.id,
           full_name: userData.full_name,
-          phone: userData.phone,
+          email: userData.email,
           role: userData.role,
           is_active: true
         }])
@@ -99,7 +87,7 @@ export function useProfiles() {
 
       if (profileError) throw profileError;
 
-      setProfiles(prev => [...prev, { ...profileData, email: userData.email }]);
+      setProfiles(prev => [...prev, profileData]);
       
       toast({
         title: "Usuário criado com sucesso!",
@@ -121,9 +109,9 @@ export function useProfiles() {
   const updateProfile = useCallback(async (id: string, updates: EditUserData) => {
     try {
       // Separate profile updates from auth updates
-      const { email, password, ...profileUpdates } = updates;
+      const { password, ...profileUpdates } = updates;
       
-      // Update profile in profiles table
+      // Update profile in profiles table (including email)
       const { data, error } = await supabase
         .from('profiles')
         .update(profileUpdates)
@@ -133,19 +121,25 @@ export function useProfiles() {
 
       if (error) throw error;
 
-      // Update email and/or password if provided
-      if (email || password) {
-        const authUpdates: any = {};
-        if (email) authUpdates.email = email;
-        if (password) authUpdates.password = password;
-        
-        const { error: authError } = await supabase.auth.admin.updateUserById(id, authUpdates);
+      // Update password in auth if provided
+      if (password) {
+        const { error: authError } = await supabase.auth.admin.updateUserById(id, {
+          password: password
+        });
+        if (authError) throw authError;
+      }
+
+      // Update email in auth if it changed
+      if (updates.email) {
+        const { error: authError } = await supabase.auth.admin.updateUserById(id, {
+          email: updates.email
+        });
         if (authError) throw authError;
       }
 
       // Update local state
       setProfiles(prev => prev.map(profile => 
-        profile.id === id ? { ...profile, ...data, email: email || profile.email } : profile
+        profile.id === id ? { ...profile, ...data } : profile
       ));
 
       toast({

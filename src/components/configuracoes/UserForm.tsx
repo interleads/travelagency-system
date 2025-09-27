@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -32,7 +32,6 @@ const userSchema = z.object({
   email: z.string().email('Email inválido').min(1, 'Email é obrigatório'),
   password: z.string().min(8, 'Senha deve ter pelo menos 8 caracteres'),
   full_name: z.string().min(1, 'Nome é obrigatório').max(100, 'Nome deve ter no máximo 100 caracteres'),
-  phone: z.string().optional(),
   role: z.enum(['administrador', 'vendedor'], {
     required_error: 'Função é obrigatória'
   })
@@ -45,7 +44,6 @@ const editUserSchema = z.object({
     { message: 'Senha deve ter pelo menos 8 caracteres' }
   ),
   full_name: z.string().min(1, 'Nome é obrigatório').max(100, 'Nome deve ter no máximo 100 caracteres'),
-  phone: z.string().optional(),
   role: z.enum(['administrador', 'vendedor'], {
     required_error: 'Função é obrigatória'
   })
@@ -67,20 +65,32 @@ export function UserForm({ open, onOpenChange, onSubmit, editingUser, isLoading 
   
   const form = useForm<UserFormData | EditUserFormData>({
     resolver: zodResolver(isEditing ? editUserSchema : userSchema),
-    defaultValues: isEditing ? {
-      email: editingUser?.email || '',
-      password: '',
-      full_name: editingUser?.full_name || '',
-      phone: editingUser?.phone || '',
-      role: editingUser?.role || 'vendedor'
-    } : {
+    defaultValues: {
       email: '',
       password: '',
       full_name: '',
-      phone: '',
       role: 'vendedor'
     }
   });
+
+  // Reset form when editingUser changes
+  useEffect(() => {
+    if (isEditing && editingUser) {
+      form.reset({
+        email: editingUser.email || '',
+        password: '',
+        full_name: editingUser.full_name || '',
+        role: editingUser.role || 'vendedor'
+      });
+    } else if (!isEditing) {
+      form.reset({
+        email: '',
+        password: '',
+        full_name: '',
+        role: 'vendedor'
+      });
+    }
+  }, [editingUser, isEditing, form]);
 
   const handleSubmit = async (data: UserFormData | EditUserFormData) => {
     try {
@@ -167,25 +177,11 @@ export function UserForm({ open, onOpenChange, onSubmit, editingUser, isLoading 
             
             <FormField
               control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Telefone (opcional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="(11) 99999-9999" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
               name="role"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Função</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione a função" />
