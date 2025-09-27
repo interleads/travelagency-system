@@ -13,12 +13,15 @@ import { MilesInventoryTable } from '@/components/miles/MilesInventoryTable';
 import { MilesPurchaseForm } from '@/components/miles/MilesPurchaseForm';
 import { SuppliersTable } from '@/components/finance/SuppliersTable';
 import { MilesOverviewCards } from '@/components/miles/MilesOverviewCards';
+import { FloatingActionButton } from '@/components/ui/floating-action-button';
 import { useToast } from "@/hooks/use-toast";
 import { DateRangeFilter } from '@/components/shared/DateRangeFilter';
 import { DateRangeFilterProvider } from '@/components/shared/useDateRangeFilter';
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const MilesManagement = () => {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("inventory");
 
@@ -33,45 +36,68 @@ const MilesManagement = () => {
 
   return (
     <DateRangeFilterProvider>
-      <div className="flex items-center justify-between mb-6">
-        <DateRangeFilter />
-      </div>
-    
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <div className="flex items-center justify-between">
-          <TabsList className="grid w-fit grid-cols-2">
-            <TabsTrigger value="inventory">Estoque</TabsTrigger>
-            <TabsTrigger value="suppliers">Fornecedores</TabsTrigger>
-          </TabsList>
-          
-          {activeTab === "inventory" && (
-            <Dialog open={isPurchaseDialogOpen} onOpenChange={setIsPurchaseDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Comprar Milhas
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Comprar Milhas</DialogTitle>
-                </DialogHeader>
-                <MilesPurchaseForm onSubmit={handlePurchaseSubmit} />
-              </DialogContent>
-            </Dialog>
-          )}
+      <div className="space-y-4 md:space-y-6 p-4 md:p-0">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <DateRangeFilter />
         </div>
+      
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 md:space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <TabsList className="grid w-full md:w-fit grid-cols-2 h-12 md:h-10">
+              <TabsTrigger value="inventory" className="text-sm md:text-base">Estoque</TabsTrigger>
+              <TabsTrigger value="suppliers" className="text-sm md:text-base">Fornecedores</TabsTrigger>
+            </TabsList>
+            
+            {activeTab === "inventory" && !isMobile && (
+              <Dialog open={isPurchaseDialogOpen} onOpenChange={setIsPurchaseDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="h-12 md:h-10">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Comprar Milhas
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Comprar Milhas</DialogTitle>
+                  </DialogHeader>
+                  <MilesPurchaseForm onSubmit={handlePurchaseSubmit} />
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
 
-        <MilesOverviewCards activeTab={activeTab} />
-        
-        <TabsContent value="inventory" className="mt-0">
-          <MilesInventoryTable />
-        </TabsContent>
-        
-        <TabsContent value="suppliers" className="mt-0">
-          <SuppliersTable />
-        </TabsContent>
-      </Tabs>
+          <MilesOverviewCards activeTab={activeTab} />
+          
+          <TabsContent value="inventory" className="mt-0">
+            <MilesInventoryTable />
+          </TabsContent>
+          
+          <TabsContent value="suppliers" className="mt-0">
+            <SuppliersTable />
+          </TabsContent>
+        </Tabs>
+
+        {/* Floating Action Button for mobile */}
+        {activeTab === "inventory" && (
+          <FloatingActionButton
+            icon={Plus}
+            label="Comprar Milhas"
+            onClick={() => setIsPurchaseDialogOpen(true)}
+          />
+        )}
+
+        {/* Mobile Purchase Dialog */}
+        {isMobile && (
+          <Dialog open={isPurchaseDialogOpen} onOpenChange={setIsPurchaseDialogOpen}>
+            <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Comprar Milhas</DialogTitle>
+              </DialogHeader>
+              <MilesPurchaseForm onSubmit={handlePurchaseSubmit} />
+            </DialogContent>
+          </Dialog>
+        )}
+      </div>
     </DateRangeFilterProvider>
   );
 };

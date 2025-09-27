@@ -160,7 +160,7 @@ export function MilesPurchaseForm({ onSubmit }: MilesPurchaseFormProps) {
           </div>
         )}
 
-        <Button type="submit" className="w-full" disabled={addPurchase.isPending}>
+        <Button type="submit" className="w-full h-12 md:h-10 text-base md:text-sm" disabled={addPurchase.isPending}>
           {addPurchase.isPending ? "Salvando..." : "Registrar Compra"}
         </Button>
       </form>

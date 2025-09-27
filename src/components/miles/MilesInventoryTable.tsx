@@ -5,10 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { useMilesInventory } from '@/hooks/useMilesInventory';
 import { useDateRangeFilter } from "@/components/shared/useDateRangeFilter";
 import { MilesInventoryActions } from './MilesInventoryActions';
+import { MobileMilesInventoryCard } from './MobileMilesInventoryCard';
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const MilesInventoryTable = () => {
   const { dateRange } = useDateRangeFilter();
   const { data: inventory = [], isLoading } = useMilesInventory(dateRange);
+  const isMobile = useIsMobile();
 
   const getStatusColor = (status: string, remainingQuantity: number) => {
     if (status === 'Esgotado' || remainingQuantity === 0) return "destructive";
@@ -23,9 +26,31 @@ export const MilesInventoryTable = () => {
   };
 
   if (isLoading) {
-    return <div>Carregando estoque...</div>;
+    return <div className="text-center py-8">Carregando estoque...</div>;
   }
 
+  // Mobile view
+  if (isMobile) {
+    return (
+      <div className="space-y-4">
+        {inventory.length === 0 ? (
+          <Card>
+            <CardContent className="py-8">
+              <div className="text-center text-muted-foreground">
+                Nenhum estoque de milhas encontrado
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          inventory.map((item) => (
+            <MobileMilesInventoryCard key={item.id} item={item} />
+          ))
+        )}
+      </div>
+    );
+  }
+
+  // Desktop view
   return (
     <Card>
       <CardContent className="p-0">

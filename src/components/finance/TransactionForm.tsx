@@ -99,15 +99,15 @@ export function TransactionForm({ onSubmit, defaultValues }: TransactionFormProp
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 md:space-y-6 p-1">
         <FormField
           control={form.control}
           name="date"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Data</FormLabel>
+              <FormLabel className="text-sm md:text-base">Data</FormLabel>
               <FormControl>
-                <Input type="date" {...field} />
+                <Input type="date" {...field} className="h-12 md:h-10" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -119,9 +119,9 @@ export function TransactionForm({ onSubmit, defaultValues }: TransactionFormProp
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Descrição</FormLabel>
+              <FormLabel className="text-sm md:text-base">Descrição</FormLabel>
               <FormControl>
-                <Textarea {...field} />
+                <Textarea {...field} className="min-h-[80px] md:min-h-[60px]" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -133,10 +133,10 @@ export function TransactionForm({ onSubmit, defaultValues }: TransactionFormProp
           name="type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tipo</FormLabel>
+              <FormLabel className="text-sm md:text-base">Tipo</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12 md:h-10">
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
                 </FormControl>
@@ -155,10 +155,10 @@ export function TransactionForm({ onSubmit, defaultValues }: TransactionFormProp
           name="category"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Categoria</FormLabel>
+              <FormLabel className="text-sm md:text-base">Categoria</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12 md:h-10">
                     <SelectValue placeholder="Selecione a categoria" />
                   </SelectTrigger>
                 </FormControl>
@@ -181,10 +181,10 @@ export function TransactionForm({ onSubmit, defaultValues }: TransactionFormProp
             name="subcategory"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Subcategoria</FormLabel>
+                <FormLabel className="text-sm md:text-base">Subcategoria</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12 md:h-10">
                       <SelectValue placeholder="Selecione a subcategoria" />
                     </SelectTrigger>
                   </FormControl>
@@ -207,7 +207,7 @@ export function TransactionForm({ onSubmit, defaultValues }: TransactionFormProp
           name="value"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Valor (R$)</FormLabel>
+              <FormLabel className="text-sm md:text-base">Valor (R$)</FormLabel>
               <FormControl>
                 <Input 
                   type="text" 
@@ -217,6 +217,7 @@ export function TransactionForm({ onSubmit, defaultValues }: TransactionFormProp
                     field.onChange(valueInput.numericValue.toString());
                   }}
                   placeholder="R$ 0,00"
+                  className="h-12 md:h-10 text-base md:text-sm"
                 />
               </FormControl>
               <FormMessage />
@@ -224,7 +225,7 @@ export function TransactionForm({ onSubmit, defaultValues }: TransactionFormProp
           )}
         />
 
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full h-12 md:h-10 text-base md:text-sm">
           Salvar
         </Button>
       </form>

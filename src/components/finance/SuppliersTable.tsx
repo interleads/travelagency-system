@@ -29,11 +29,14 @@ import { SupplierForm } from './SupplierForm';
 import { EditSupplierDialog } from './EditSupplierDialog';
 import { DeleteSupplierDialog } from './DeleteSupplierDialog';
 import { SupplierDetailsExpanded } from './SupplierDetailsExpanded';
+import { MobileSuppliersCard } from './MobileSuppliersCard';
 import { useToast } from "@/hooks/use-toast";
 import { useSuppliers, useAddSupplier, type Supplier } from '@/hooks/useSuppliers';
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function SuppliersTable() {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [expandedSuppliers, setExpandedSuppliers] = useState<Set<string>>(new Set());
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
@@ -98,6 +101,71 @@ export function SuppliersTable() {
     );
   }
 
+  // Mobile view
+  if (isMobile) {
+    return (
+      <div className="space-y-4">
+        {/* Header com botão */}
+        <div className="flex flex-col gap-4">
+          <h3 className="text-xl font-semibold">Fornecedores e Parceiros</h3>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="w-full h-12">
+                <Plus className="mr-2 h-4 w-4" />
+                Novo Fornecedor
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Novo Fornecedor</DialogTitle>
+              </DialogHeader>
+              <SupplierForm onSubmit={handleSupplierSubmit} />
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {suppliers.length === 0 ? (
+          <Card>
+            <CardContent className="p-8 text-center text-gray-500">
+              <User className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <p className="text-lg font-medium">Nenhum fornecedor cadastrado</p>
+              <p className="text-sm">Clique no botão "Novo Fornecedor" para começar</p>
+            </CardContent>
+          </Card>
+        ) : (
+          suppliers.map((supplier: any) => (
+            <MobileSuppliersCard
+              key={supplier.id}
+              supplier={supplier}
+              onEdit={setEditingSupplier}
+              onDelete={setDeletingSupplier}
+              onViewHistory={toggleSupplierExpansion}
+            />
+          ))
+        )}
+
+        {/* Edit Supplier Dialog */}
+        {editingSupplier && (
+          <EditSupplierDialog
+            supplier={editingSupplier}
+            open={!!editingSupplier}
+            onOpenChange={(open) => !open && setEditingSupplier(null)}
+          />
+        )}
+
+        {/* Delete Supplier Dialog */}
+        {deletingSupplier && (
+          <DeleteSupplierDialog
+            supplier={deletingSupplier}
+            open={!!deletingSupplier}
+            onOpenChange={(open) => !open && setDeletingSupplier(null)}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Desktop view
   return (
     <div className="space-y-6">
       {/* Header com botão */}
