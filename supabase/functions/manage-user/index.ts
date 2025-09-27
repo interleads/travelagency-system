@@ -59,8 +59,10 @@ Deno.serve(async (req) => {
     
     try {
       // Decode JWT payload (Supabase already verified the JWT signature due to verify_jwt = true)
-      const payloadBase64 = token.split('.')[1]
-      const payload = JSON.parse(atob(payloadBase64))
+      const payloadBase64Url = token.split('.')[1]
+      const base64 = payloadBase64Url.replace(/-/g, '+').replace(/_/g, '/')
+      const padded = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=')
+      const payload = JSON.parse(atob(padded))
       callerUserId = payload.sub
       
       if (!callerUserId) {
@@ -112,29 +114,39 @@ Deno.serve(async (req) => {
         })
 
         if (authError) {
+          const message = authError.message || 'Erro ao criar usuário'
           console.error('Auth creation error:', authError)
+          // Email already exists -> return 409 instead of 500
+          if (message.toLowerCase().includes('already been registered') || message.toLowerCase().includes('already exists')) {
+            return new Response(JSON.stringify({ error: 'Email já cadastrado' }), {
+              status: 409,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            })
+          }
           throw authError
         }
 
-        if (!authData.user) {
+        if (!authData?.user) {
           throw new Error('Usuário não foi criado')
         }
 
-        // Create profile
+        // Ensure profile exists and is updated (handle potential DB trigger duplication via upsert)
+        const profilePayload = {
+          id: authData.user.id,
+          full_name: userData.full_name,
+          email: userData.email,
+          role: userData.role,
+          is_active: true
+        }
+
         const { data: profileData, error: profileError } = await supabaseAdmin
           .from('profiles')
-          .insert([{
-            id: authData.user.id,
-            full_name: userData.full_name,
-            email: userData.email,
-            role: userData.role,
-            is_active: true
-          }])
+          .upsert(profilePayload, { onConflict: 'id' })
           .select()
           .single()
 
         if (profileError) {
-          console.error('Profile creation error:', profileError)
+          console.error('Profile upsert error:', profileError)
           throw profileError
         }
 
