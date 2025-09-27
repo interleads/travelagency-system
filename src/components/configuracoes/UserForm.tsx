@@ -76,6 +76,7 @@ export function UserForm({ open, onOpenChange, onSubmit, editingUser, isLoading 
 
   // Reset form when editingUser changes
   useEffect(() => {
+    setShowPassword(false); // Reset password visibility when form changes
     if (isEditing && editingUser) {
       form.reset({
         email: editingUser.email || '',
@@ -154,7 +155,10 @@ export function UserForm({ open, onOpenChange, onSubmit, editingUser, isLoading 
                     <div className="relative">
                       <Input 
                         type={showPassword ? "text" : "password"}
-                        placeholder={isEditing ? "Digite nova senha ou deixe vazio" : "Mínimo 8 caracteres"}
+                        placeholder={isEditing ? 
+                          (field.value ? "••••••••" : "Digite nova senha ou deixe vazio") : 
+                          "Mínimo 8 caracteres"
+                        }
                         {...field} 
                       />
                       <Button
