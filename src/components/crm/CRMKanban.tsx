@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from '@/components/ui/use-toast';
 import { usePhoneInput } from '@/lib/phoneMask';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Label as LabelType } from './LabelBadge';
 import { ChecklistItem } from './ChecklistComponent';
 import { Priority } from './PriorityBadge';
@@ -61,6 +62,7 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
   const [availableHeight, setAvailableHeight] = useState<number>(0);
   const boardRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   const newCardPhoneInput = usePhoneInput('');
 
@@ -156,11 +158,11 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
         className="h-full overflow-x-auto overflow-y-hidden"
         style={{ height: availableHeight > 0 ? `${availableHeight}px` : '100%' }}
       >
-        <div className="flex space-x-4 p-4 min-w-max h-full">
+        <div className={`flex ${isMobile ? 'space-x-3 p-3' : 'space-x-4 p-4'} min-w-max h-full`}>
           {columns.map(column => (
             <div 
               key={column.id}
-              className="flex-shrink-0 w-80"
+              className={`flex-shrink-0 ${isMobile ? 'w-72' : 'w-80'}`}
             >
               <div className="h-full flex flex-col" style={{ height: availableHeight > 0 ? `${availableHeight - 32}px` : '100%' }}>
                 
@@ -190,7 +192,7 @@ const CRMKanban = ({ registerAddColumn }: CRMKanbanProps) => {
                         Adicionar Cliente
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-md">
+                    <DialogContent className={`${isMobile ? 'max-w-[95vw] mx-2' : 'max-w-md'}`}>
                       <DialogHeader>
                         <DialogTitle>Adicionar Cliente</DialogTitle>
                         <DialogDescription>
