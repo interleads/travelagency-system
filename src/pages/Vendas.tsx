@@ -29,7 +29,6 @@ import { SalesHistoryTable } from "@/components/vendas/SalesHistoryTable";
 import CRMKanban from "@/components/crm/CRMKanban";
 import { DateRangeFilter } from '@/components/shared/DateRangeFilter';
 import { DateRangeFilterProvider } from '@/components/shared/useDateRangeFilter';
-import { ImportCSV } from '@/components/vendas/ImportCSV';
 
 const Vendas = () => {
   const { toast } = useToast();
@@ -79,7 +78,6 @@ const Vendas = () => {
           
           {activeTab === "historico" && (
             <div className="flex gap-2">
-              <ImportCSV />
               <Dialog open={isSaleDialogOpen} onOpenChange={setIsSaleDialogOpen}>
                 <DialogTrigger asChild>
                   <Button size="lg" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg">
