@@ -31,15 +31,15 @@ export const MilesOverviewCards = ({ activeTab }: MilesOverviewCardsProps) => {
 
   if (inventoryLoading || programsLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
         {[1, 2, 3, 4].map((i) => (
           <Card key={i} className="animate-pulse">
-            <CardHeader className="space-y-0 pb-2">
-              <div className="h-4 bg-muted rounded w-3/4"></div>
+            <CardHeader className="space-y-0 pb-1 md:pb-2">
+              <div className="h-3 md:h-4 bg-muted rounded w-3/4"></div>
             </CardHeader>
-            <CardContent>
-              <div className="h-8 bg-muted rounded w-1/2 mb-2"></div>
-              <div className="h-3 bg-muted rounded w-full"></div>
+            <CardContent className="pb-2 md:pb-6">
+              <div className="h-6 md:h-8 bg-muted rounded w-1/2 mb-1 md:mb-2"></div>
+              <div className="h-2 md:h-3 bg-muted rounded w-full"></div>
             </CardContent>
           </Card>
         ))}
@@ -66,34 +66,34 @@ export const MilesOverviewCards = ({ activeTab }: MilesOverviewCardsProps) => {
     });
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
         {programData.map((program) => {
           const theme = airlineThemes[program.name] || { border: 'border-l-primary', icon: 'bg-primary/10', text: 'text-primary' };
           const logoSrc = airlineLogos[program.name];
           
           return (
             <Card key={program.id} className={`relative overflow-hidden bg-gradient-to-br from-card to-card/50 border-l-4 ${theme.border} hover:shadow-lg transition-all duration-300`}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">{program.name}</CardTitle>
-                <div className={`p-3 ${theme.icon} rounded-full flex items-center justify-center`}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2">
+                <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">{program.name}</CardTitle>
+                <div className={`p-2 md:p-3 ${theme.icon} rounded-full flex items-center justify-center`}>
                   {logoSrc ? (
                     <img 
                       src={logoSrc} 
                       alt={`${program.name} logo`}
-                      className="h-8 w-8 object-contain"
+                      className="h-6 w-6 md:h-8 md:w-8 object-contain"
                     />
                   ) : (
-                    <Package className={`h-6 w-6 ${theme.text}`} />
+                    <Package className={`h-5 w-5 md:h-6 md:w-6 ${theme.text}`} />
                   )}
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className={`text-2xl font-bold ${theme.text}`}>{program.totalMiles.toLocaleString()}</div>
+              <CardContent className="pb-2 md:pb-6">
+                <div className={`text-lg md:text-2xl font-bold ${theme.text}`}>{program.totalMiles.toLocaleString()}</div>
                 <p className="text-xs text-muted-foreground">
                   R$ {program.totalInvestment.toFixed(2)} investido
                 </p>
                 {program.isLowStock && program.totalMiles > 0 && (
-                  <div className="flex items-center text-xs mt-2">
+                  <div className="flex items-center text-xs mt-1 md:mt-2">
                     <span className="px-2 py-1 bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 rounded-full text-xs flex items-center">
                       <AlertTriangle className="h-3 w-3 mr-1" />
                       Estoque baixo
@@ -117,16 +117,16 @@ export const MilesOverviewCards = ({ activeTab }: MilesOverviewCardsProps) => {
     const activePrograms = new Set(inventory.filter(item => item.status === 'Ativo').map(item => item.program_id)).size;
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
         <Card className="relative overflow-hidden bg-gradient-to-br from-card to-card/50 border-l-4 border-l-blue-500 hover:shadow-lg transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Fornecedores</CardTitle>
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
-              <TrendingUp className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2">
+            <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">Total Fornecedores</CardTitle>
+            <div className="p-1 md:p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+              <TrendingUp className="h-3 w-3 md:h-4 md:w-4 text-blue-600 dark:text-blue-400" />
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{totalSuppliers}</div>
+          <CardContent className="pb-2 md:pb-6">
+            <div className="text-lg md:text-2xl font-bold text-blue-600 dark:text-blue-400">{totalSuppliers}</div>
             <p className="text-xs text-muted-foreground">
               Fornecedores ativos
             </p>
@@ -134,14 +134,14 @@ export const MilesOverviewCards = ({ activeTab }: MilesOverviewCardsProps) => {
         </Card>
 
         <Card className="relative overflow-hidden bg-gradient-to-br from-card to-card/50 border-l-4 border-l-green-500 hover:shadow-lg transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Capital Imobilizado</CardTitle>
-            <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full">
-              <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2">
+            <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">Capital Imobilizado</CardTitle>
+            <div className="p-1 md:p-2 bg-green-100 dark:bg-green-900/30 rounded-full">
+              <DollarSign className="h-3 w-3 md:h-4 md:w-4 text-green-600 dark:text-green-400" />
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400">R$ {totalInvestment.toFixed(2)}</div>
+          <CardContent className="pb-2 md:pb-6">
+            <div className="text-lg md:text-2xl font-bold text-green-600 dark:text-green-400">R$ {totalInvestment.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">
               Total investido
             </p>
@@ -149,14 +149,14 @@ export const MilesOverviewCards = ({ activeTab }: MilesOverviewCardsProps) => {
         </Card>
 
         <Card className="relative overflow-hidden bg-gradient-to-br from-card to-card/50 border-l-4 border-l-purple-500 hover:shadow-lg transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Custo Médio</CardTitle>
-            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-full">
-              <Package className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2">
+            <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">Custo Médio</CardTitle>
+            <div className="p-1 md:p-2 bg-purple-100 dark:bg-purple-900/30 rounded-full">
+              <Package className="h-3 w-3 md:h-4 md:w-4 text-purple-600 dark:text-purple-400" />
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">R$ {avgCost.toFixed(2)}</div>
+          <CardContent className="pb-2 md:pb-6">
+            <div className="text-lg md:text-2xl font-bold text-purple-600 dark:text-purple-400">R$ {avgCost.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">
               Por mil milhas
             </p>
@@ -164,14 +164,14 @@ export const MilesOverviewCards = ({ activeTab }: MilesOverviewCardsProps) => {
         </Card>
 
         <Card className="relative overflow-hidden bg-gradient-to-br from-card to-card/50 border-l-4 border-l-orange-500 hover:shadow-lg transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Programas Ativos</CardTitle>
-            <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-full">
-              <AlertTriangle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2">
+            <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">Programas Ativos</CardTitle>
+            <div className="p-1 md:p-2 bg-orange-100 dark:bg-orange-900/30 rounded-full">
+              <AlertTriangle className="h-3 w-3 md:h-4 md:w-4 text-orange-600 dark:text-orange-400" />
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">{activePrograms}</div>
+          <CardContent className="pb-2 md:pb-6">
+            <div className="text-lg md:text-2xl font-bold text-orange-600 dark:text-orange-400">{activePrograms}</div>
             <p className="text-xs text-muted-foreground">
               Com estoque ativo
             </p>

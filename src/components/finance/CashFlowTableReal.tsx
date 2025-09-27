@@ -57,44 +57,44 @@ export function CashFlowTableReal() {
       {/* Resumo */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-1 md:pb-2">
             <CardTitle className="text-xs md:text-sm">Saldo Atual</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-lg md:text-2xl font-bold text-sky-600">
+          <CardContent className="pb-2 md:pb-6">
+            <p className="text-base md:text-2xl font-bold text-sky-600">
               R$ {currentBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </p>
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-1 md:pb-2">
             <CardTitle className="text-xs md:text-sm">Total Entradas</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-lg md:text-2xl font-bold text-emerald-600">
+          <CardContent className="pb-2 md:pb-6">
+            <p className="text-base md:text-2xl font-bold text-emerald-600">
               R$ {totalEntradas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </p>
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-1 md:pb-2">
             <CardTitle className="text-xs md:text-sm">Total Saídas</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-lg md:text-2xl font-bold text-red-600">
+          <CardContent className="pb-2 md:pb-6">
+            <p className="text-base md:text-2xl font-bold text-red-600">
               R$ {totalSaidas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </p>
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-1 md:pb-2">
             <CardTitle className="text-xs md:text-sm">Resultado</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-lg md:text-2xl font-bold text-blue-600">
+          <CardContent className="pb-2 md:pb-6">
+            <p className="text-base md:text-2xl font-bold text-blue-600">
               R$ {(totalEntradas - totalSaidas).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </p>
           </CardContent>

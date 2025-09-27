@@ -105,12 +105,12 @@ export default function DashboardKPICards() {
     return (
       <div className="grid gap-6 mb-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <Card key={i} className="h-32">
-            <CardContent className="p-6">
+          <Card key={i} className="h-20 md:h-32">
+            <CardContent className="p-3 md:p-6">
               <div className="animate-pulse">
-                <div className="h-4 bg-gray-200 rounded mb-2" />
-                <div className="h-8 bg-gray-200 rounded mb-2" />
-                <div className="h-3 bg-gray-200 rounded w-24" />
+                <div className="h-3 md:h-4 bg-gray-200 rounded mb-1 md:mb-2" />
+                <div className="h-5 md:h-8 bg-gray-200 rounded mb-1 md:mb-2" />
+                <div className="h-2 md:h-3 bg-gray-200 rounded w-24" />
               </div>
             </CardContent>
           </Card>
@@ -124,17 +124,17 @@ export default function DashboardKPICards() {
       {metrics.map((m, i) => (
         <Card
           key={i}
-          className="bg-gradient-to-br shadow-lg border-0 text-white relative overflow-hidden min-h-[120px] sm:min-h-[140px]"
+          className="bg-gradient-to-br shadow-lg border-0 text-white relative overflow-hidden min-h-[80px] sm:min-h-[140px]"
           style={{ backgroundImage: `linear-gradient(135deg,var(--tw-gradient-stops))` }}
         >
           <div className={`absolute inset-0 bg-gradient-to-br ${m.bg} opacity-90`} />
-          <CardContent className="relative flex flex-col gap-1 z-10 p-4 sm:p-6">
-            <div className="flex items-center justify-between mt-2 sm:mt-6">
-              <span className="text-sm sm:text-lg font-medium">{m.label}</span>
-              <m.icon className="w-6 h-6 sm:w-8 sm:h-8 opacity-75" />
+          <CardContent className="relative flex flex-col gap-1 z-10 p-3 sm:p-6">
+            <div className="flex items-center justify-between mt-1 sm:mt-6">
+              <span className="text-xs sm:text-lg font-medium">{m.label}</span>
+              <m.icon className="w-4 h-4 sm:w-8 sm:h-8 opacity-75" />
             </div>
-            <div className="text-2xl sm:text-3xl font-bold my-1 sm:my-2 break-all">{m.value}</div>
-            <span className="text-white/80 text-xs leading-tight">{m.description}</span>
+            <div className="text-lg sm:text-3xl font-bold my-0 sm:my-2 break-all">{m.value}</div>
+            <span className="text-white/80 text-[10px] sm:text-xs leading-tight">{m.description}</span>
           </CardContent>
         </Card>
       ))}
