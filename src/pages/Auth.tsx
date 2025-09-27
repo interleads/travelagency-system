@@ -9,10 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Plane, Mail, Lock, Loader2 } from "lucide-react";
 
-type Mode = "login" | "signup";
-
 const AuthPage: React.FC = () => {
-  const [mode, setMode] = useState<Mode>("login");
   const [loading, setLoading] = useState(false);
 
   const [email, setEmail] = useState("");
@@ -49,22 +46,9 @@ const AuthPage: React.FC = () => {
     setErrorMsg(null);
 
     try {
-      if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        toast({ title: "Login realizado", description: "Bem-vindo de volta!" });
-      } else {
-        // SIGNUP
-        const redirectUrl = `${window.location.origin}/`;
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: redirectUrl }
-        });
-        if (error) throw error;
-        toast({ title: "Cadastro realizado", description: "Verifique seu email para confirmar o cadastro." });
-        setMode("login");
-      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      toast({ title: "Login realizado", description: "Bem-vindo de volta!" });
     } catch (error: any) {
       setErrorMsg(error.message || "Erro inesperado");
       toast({ variant: "destructive", title: "Erro", description: error.message });
@@ -90,9 +74,7 @@ const AuthPage: React.FC = () => {
               Connect Voos
             </CardTitle>
             <CardDescription className="text-gray-600 text-lg">
-              {mode === "login"
-                ? "Acesse seu sistema de gestão"
-                : "Crie sua conta no sistema"}
+              Acesse seu sistema de gestão
             </CardDescription>
           </div>
         </CardHeader>
@@ -141,32 +123,17 @@ const AuthPage: React.FC = () => {
               {loading ? (
                 <div className="flex items-center gap-2">
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  {mode === "login" ? "Autenticando..." : "Criando conta..."}
+                  Autenticando...
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
                   <Plane className="h-5 w-5" />
-                  {mode === "login" ? "Entrar" : "Criar conta"}
+                  Entrar
                 </div>
               )}
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-2 pb-8">
-          <Button
-            type="button"
-            variant="ghost"
-            className="text-sm h-auto font-normal text-gray-600 hover:text-blue-600 transition-colors"
-            onClick={() => {
-              setMode(mode === "login" ? "signup" : "login");
-              setErrorMsg(null);
-            }}
-          >
-            {mode === "login"
-              ? "Não tem uma conta? Cadastre-se"
-              : "Já possui conta? Entrar"}
-          </Button>
-        </CardFooter>
       </Card>
     </div>
   );

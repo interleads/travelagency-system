@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableHeader,
@@ -14,16 +15,73 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { 
   Settings, Users, 
-  Plus, Edit, Trash2, Save, AlertTriangle, RotateCcw 
+  Plus, MoreHorizontal, Edit, UserX, UserCheck, Trash2, Save, AlertTriangle, RotateCcw 
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ClearAllDataDialog } from "@/components/shared/ClearAllDataDialog";
+import { useProfiles, Profile } from "@/hooks/useProfiles";
+import { UserForm } from "@/components/configuracoes/UserForm";
 
 const Configuracoes = () => {
   const { toast } = useToast();
   const [clearDataDialogOpen, setClearDataDialogOpen] = useState(false);
+  const [userFormOpen, setUserFormOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<Profile | null>(null);
+  const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+  const [formLoading, setFormLoading] = useState(false);
+
+  const { profiles, isLoading, createUser, updateProfile, toggleUserStatus, deleteUser } = useProfiles();
+
+  const handleCreateUser = async (userData: any) => {
+    setFormLoading(true);
+    try {
+      await createUser(userData);
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleEditUser = async (userData: any) => {
+    if (!editingUser) return;
+    
+    setFormLoading(true);
+    try {
+      await updateProfile(editingUser.id, userData);
+      setEditingUser(null);
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleToggleStatus = async (userId: string, currentStatus: boolean) => {
+    await toggleUserStatus(userId, !currentStatus);
+  };
+
+  const handleDeleteUser = async () => {
+    if (!deleteUserId) return;
+    
+    await deleteUser(deleteUserId);
+    setDeleteUserId(null);
+  };
 
   const handleSaveSettings = () => {
     toast({
@@ -52,7 +110,7 @@ const Configuracoes = () => {
                 <Users className="h-5 w-5" />
                 Gestão de Usuários
               </CardTitle>
-              <Button>
+              <Button onClick={() => setUserFormOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Novo Usuário
               </Button>
@@ -62,49 +120,82 @@ const Configuracoes = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Nome</TableHead>
-                    <TableHead>Email</TableHead>
+                    <TableHead>Telefone</TableHead>
                     <TableHead>Função</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow>
-                    <TableCell>João Silva</TableCell>
-                    <TableCell>joao@agencia.com</TableCell>
-                    <TableCell>Administrador</TableCell>
-                    <TableCell>
-                      <span className="px-2 py-1 rounded-full text-xs bg-emerald-100 text-emerald-800">
-                        Ativo
-                      </span>
-                    </TableCell>
-                    <TableCell className="space-x-2">
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Maria Santos</TableCell>
-                    <TableCell>maria@agencia.com</TableCell>
-                    <TableCell>Vendedor</TableCell>
-                    <TableCell>
-                      <span className="px-2 py-1 rounded-full text-xs bg-emerald-100 text-emerald-800">
-                        Ativo
-                      </span>
-                    </TableCell>
-                    <TableCell className="space-x-2">
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8">
+                        Carregando usuários...
+                      </TableCell>
+                    </TableRow>
+                  ) : profiles.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8">
+                        Nenhum usuário encontrado
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    profiles.map((profile) => (
+                      <TableRow key={profile.id}>
+                        <TableCell className="font-medium">{profile.full_name}</TableCell>
+                        <TableCell>{profile.phone || '-'}</TableCell>
+                        <TableCell className="capitalize">{profile.role}</TableCell>
+                        <TableCell>
+                          <Badge variant={profile.is_active ? "default" : "secondary"}>
+                            {profile.is_active ? "Ativo" : "Inativo"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem 
+                                onClick={() => {
+                                  setEditingUser(profile);
+                                  setUserFormOpen(true);
+                                }}
+                              >
+                                <Edit className="mr-2 h-4 w-4" />
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => handleToggleStatus(profile.id, profile.is_active)}
+                              >
+                                {profile.is_active ? (
+                                  <>
+                                    <UserX className="mr-2 h-4 w-4" />
+                                    Desativar
+                                  </>
+                                ) : (
+                                  <>
+                                    <UserCheck className="mr-2 h-4 w-4" />
+                                    Ativar
+                                  </>
+                                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                onClick={() => setDeleteUserId(profile.id)}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Excluir
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -204,6 +295,34 @@ const Configuracoes = () => {
         </TabsContent>
       </Tabs>
       
+      <UserForm
+        open={userFormOpen}
+        onOpenChange={(open) => {
+          setUserFormOpen(open);
+          if (!open) setEditingUser(null);
+        }}
+        onSubmit={editingUser ? handleEditUser : handleCreateUser}
+        editingUser={editingUser}
+        isLoading={formLoading}
+      />
+
+      <AlertDialog open={!!deleteUserId} onOpenChange={() => setDeleteUserId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteUser} className="bg-destructive hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <ClearAllDataDialog 
         open={clearDataDialogOpen}
         onOpenChange={setClearDataDialogOpen}
