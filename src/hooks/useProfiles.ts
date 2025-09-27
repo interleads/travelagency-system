@@ -56,45 +56,25 @@ export function useProfiles() {
 
   const createUser = useCallback(async (userData: CreateUserData) => {
     try {
-      // Create user in Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: userData.email,
-        password: userData.password,
-        email_confirm: true,
-        user_metadata: {
-          full_name: userData.full_name
+      const { data, error } = await supabase.functions.invoke('manage-user', {
+        body: {
+          action: 'create',
+          userData: userData
         }
       });
 
-      if (authError) throw authError;
+      if (error) throw error;
+      if (!data.success) throw new Error(data.error || 'Erro ao criar usuário');
 
-      if (!authData.user) {
-        throw new Error('Usuário não foi criado');
-      }
-
-      // Create profile
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .insert([{
-          id: authData.user.id,
-          full_name: userData.full_name,
-          email: userData.email,
-          role: userData.role,
-          is_active: true
-        }])
-        .select()
-        .single();
-
-      if (profileError) throw profileError;
-
-      setProfiles(prev => [...prev, profileData]);
+      // Update local state - the profile will be created by the trigger
+      await loadProfiles();
       
       toast({
         title: "Usuário criado com sucesso!",
         description: `${userData.full_name} foi adicionado ao sistema.`
       });
 
-      return profileData;
+      return data.user;
     } catch (error: any) {
       console.error('Error creating user:', error);
       toast({
@@ -104,49 +84,31 @@ export function useProfiles() {
       });
       throw error;
     }
-  }, [toast]);
+  }, [toast, loadProfiles]);
 
   const updateProfile = useCallback(async (id: string, updates: EditUserData) => {
     try {
-      // Separate profile updates from auth updates
-      const { password, ...profileUpdates } = updates;
-      
-      // Update profile in profiles table (including email)
-      const { data, error } = await supabase
-        .from('profiles')
-        .update(profileUpdates)
-        .eq('id', id)
-        .select()
-        .single();
+      const { data, error } = await supabase.functions.invoke('manage-user', {
+        body: {
+          action: 'update',
+          userId: id,
+          userData: updates
+        }
+      });
 
       if (error) throw error;
-
-      // Update password in auth if provided
-      if (password) {
-        const { error: authError } = await supabase.auth.admin.updateUserById(id, {
-          password: password
-        });
-        if (authError) throw authError;
-      }
-
-      // Update email in auth if it changed
-      if (updates.email) {
-        const { error: authError } = await supabase.auth.admin.updateUserById(id, {
-          email: updates.email
-        });
-        if (authError) throw authError;
-      }
+      if (!data.success) throw new Error(data.error || 'Erro ao atualizar usuário');
 
       // Update local state
       setProfiles(prev => prev.map(profile => 
-        profile.id === id ? { ...profile, ...data } : profile
+        profile.id === id ? { ...profile, ...data.data } : profile
       ));
 
       toast({
         title: "Usuário atualizado com sucesso!"
       });
 
-      return data;
+      return data.data;
     } catch (error: any) {
       console.error('Error updating profile:', error);
       toast({
@@ -191,9 +153,15 @@ export function useProfiles() {
 
   const deleteUser = useCallback(async (id: string) => {
     try {
-      // Delete from auth (this will cascade to profiles via RLS)
-      const { error: authError } = await supabase.auth.admin.deleteUser(id);
-      if (authError) throw authError;
+      const { data, error } = await supabase.functions.invoke('manage-user', {
+        body: {
+          action: 'delete',
+          userId: id
+        }
+      });
+
+      if (error) throw error;
+      if (!data.success) throw new Error(data.error || 'Erro ao remover usuário');
 
       setProfiles(prev => prev.filter(profile => profile.id !== id));
       
