@@ -69,7 +69,7 @@ export function MobileSaleDetailsModal({ sale, open, onOpenChange }: MobileSaleD
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <User size={20} />
@@ -115,7 +115,7 @@ export function MobileSaleDetailsModal({ sale, open, onOpenChange }: MobileSaleD
                       <Badge variant="outline" className="text-xs mb-1 capitalize">
                         {product.type}
                       </Badge>
-                      <p className="text-sm font-medium text-foreground">
+                      <p className="text-sm font-medium text-foreground break-words">
                         {product.origin && product.destination ? 
                           `${product.origin} → ${product.destination}` : 
                           product.details || 'Produto'
@@ -124,7 +124,7 @@ export function MobileSaleDetailsModal({ sale, open, onOpenChange }: MobileSaleD
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 text-xs">
                     {product.departure_date && (
                       <div>
                         <span className="text-muted-foreground">Partida:</span>
