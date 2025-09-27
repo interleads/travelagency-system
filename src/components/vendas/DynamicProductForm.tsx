@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 import { Trash2, Plus } from "lucide-react";
@@ -41,7 +40,6 @@ export interface SaleProduct {
   supplier_id?: string; // Novo relacionamento com fornecedores
   // Campos só para passagem
   ticketType?: "milhas" | "tarifada";
-  useOwnMiles?: boolean; // Toggle para usar milhas próprias
   milesSourceType?: "estoque" | "compra_sob_demanda"; // Tipo de origem das milhas
   milesProgram?: string; // ID do programa de milhas
   airline?: string;
@@ -103,7 +101,7 @@ export const EmptyProduct: SaleProduct = {
   fornecedor: "", // Campo fornecedor inicializado vazio
   supplier_id: undefined,
   ticketType: "milhas",
-  useOwnMiles: false,
+  milesSourceType: "estoque", // Padrão para estoque
   milesProgram: undefined,
   airline: "",
   adults: 1,
@@ -139,7 +137,7 @@ const DynamicProductForm: React.FC<{
   const { data: milesPrograms = [] } = useMilesPrograms();
   const onDemandMilesPurchase = useOnDemandMilesPurchase();
   const { data: availableMiles = 0 } = useAvailableMilesForProgram(
-    value.useOwnMiles && value.milesSourceType === "estoque" ? value.milesProgram : null
+    value.milesSourceType === "estoque" ? value.milesProgram : null
   );
   
   const [isOnDemandModalOpen, setIsOnDemandModalOpen] = useState(false);
@@ -374,62 +372,41 @@ const DynamicProductForm: React.FC<{
               </div>
             </div>
 
-            {/* Toggle Milhas Próprias */}
-            <div className="flex items-center space-x-2 p-3 bg-muted/30 rounded-md">
-              <Switch
-                id="use-own-miles"
-                checked={value.useOwnMiles || false}
-                onCheckedChange={(checked) => {
-                  onChange({ 
-                    ...value, 
-                    useOwnMiles: checked,
-                    milesSourceType: checked ? "estoque" : undefined,
-                    custoMil: checked ? 0 : value.custoMil 
-                  });
-                }}
-              />
-              <Label htmlFor="use-own-miles" className="font-medium">
-                Usar milhas próprias do estoque
-              </Label>
-            </div>
-
             {/* Seleção do tipo de origem das milhas */}
-            {value.useOwnMiles && (
-              <div className="space-y-3 p-3 bg-accent/50 rounded-md">
-                <Label className="text-sm font-medium">Como obter as milhas?</Label>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant={value.milesSourceType === "estoque" ? "default" : "outline"}
-                    onClick={() => onChange({ ...value, milesSourceType: "estoque" })}
-                    className="flex-1"
-                    size="sm"
-                  >
-                    Estoque Atual
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={value.milesSourceType === "compra_sob_demanda" ? "default" : "outline"}
-                    onClick={() => onChange({ ...value, milesSourceType: "compra_sob_demanda" })}
-                    className="flex-1"
-                    size="sm"
-                  >
-                    Comprar Agora
-                  </Button>
-                </div>
-                
-                {value.milesSourceType === "compra_sob_demanda" && (
-                  <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
-                    💡 As milhas serão compradas no momento da venda e utilizadas imediatamente.
-                  </div>
-                )}
+            <div className="space-y-3 p-3 bg-accent/50 rounded-md">
+              <Label className="text-sm font-medium">Como obter as milhas?</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={value.milesSourceType === "estoque" ? "default" : "outline"}
+                  onClick={() => onChange({ ...value, milesSourceType: "estoque" })}
+                  className="flex-1"
+                  size="sm"
+                >
+                  Estoque Atual
+                </Button>
+                <Button
+                  type="button"
+                  variant={value.milesSourceType === "compra_sob_demanda" ? "default" : "outline"}
+                  onClick={() => onChange({ ...value, milesSourceType: "compra_sob_demanda" })}
+                  className="flex-1"
+                  size="sm"
+                >
+                  Comprar Agora
+                </Button>
               </div>
-            )}
+              
+              {value.milesSourceType === "compra_sob_demanda" && (
+                <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
+                  💡 As milhas serão compradas no momento da venda e utilizadas imediatamente.
+                </div>
+              )}
+            </div>
 
             {/* Campos específicos por tipo */}
             {value.ticketType === "milhas" ? (
               <div className="space-y-3">
-                {value.useOwnMiles && value.milesSourceType === "estoque" && (
+                {value.milesSourceType === "estoque" && (
                   <div>
                     <Label>Programa de Milhas</Label>
                     <Select
@@ -460,7 +437,7 @@ const DynamicProductForm: React.FC<{
                   </div>
                 )}
                 
-                {value.useOwnMiles && value.milesSourceType === "compra_sob_demanda" && (
+                {value.milesSourceType === "compra_sob_demanda" && (
                   <div className="flex gap-2">
                     <div className="flex-1">
                       <Label>Programa de Milhas</Label>
@@ -485,7 +462,7 @@ const DynamicProductForm: React.FC<{
                         type="button"
                         onClick={() => setIsOnDemandModalOpen(true)}
                         disabled={!value.qtdMilhas || !value.price}
-                        variant="outline"
+                        variant="default"
                         className="h-10"
                       >
                         Configurar Compra
@@ -515,9 +492,9 @@ const DynamicProductForm: React.FC<{
                     <Input
                       ref={custoMilRef}
                       type="text"
-                      value={value.useOwnMiles ? "Calculado automaticamente" : custoMilInput.displayValue}
+                      value={value.milesSourceType === "estoque" ? "Calculado automaticamente" : custoMilInput.displayValue}
                       onChange={(e) => {
-                        if (!value.useOwnMiles) {
+                        if (value.milesSourceType !== "estoque") {
                           custoMilInput.handleChange(e);
                           const parsed = parseCurrency(e.target.value);
                           onChange({ ...value, custoMil: parsed });
@@ -525,10 +502,10 @@ const DynamicProductForm: React.FC<{
                       }}
                       onBlur={custoMilInput.handleBlur}
                       placeholder="R$ 0,00"
-                      disabled={value.useOwnMiles}
-                      className={value.useOwnMiles ? "bg-muted text-muted-foreground" : ""}
+                      disabled={value.milesSourceType === "estoque"}
+                      className={value.milesSourceType === "estoque" ? "bg-muted text-muted-foreground" : ""}
                     />
-                    {(value.custoMil || 0) > 0 && !value.useOwnMiles && (
+                    {(value.custoMil || 0) > 0 && value.milesSourceType !== "estoque" && (
                       <div className="text-xs text-muted-foreground mt-1">
                         Valor interpretado: R$ {(value.custoMil || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 5 })}
                       </div>
@@ -576,8 +553,8 @@ const DynamicProductForm: React.FC<{
               </div>
             )}
 
-            {/* Campo Fornecedor para passagens */}
-            {!value.useOwnMiles && (
+            {/* Campo Fornecedor para passagens - só para compra sob demanda ou tarifada */}
+            {(value.milesSourceType === "compra_sob_demanda" || value.ticketType === "tarifada") && (
               <div className="space-y-2">
                 <Label>Fornecedor</Label>
                 <div className="flex gap-2">

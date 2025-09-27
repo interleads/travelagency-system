@@ -158,7 +158,7 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
                   onRemove={products.length > 1 ? () => removeProduct(idx) : undefined}
                 />
               ))}
-              <Button type="button" variant="outline" onClick={addProduct} className="w-full">
+              <Button type="button" variant="default" onClick={addProduct} className="w-full">
                 Adicionar Produto
               </Button>
             </div>
