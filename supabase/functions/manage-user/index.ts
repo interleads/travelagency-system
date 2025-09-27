@@ -26,7 +26,20 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Create admin client with service role
+    // Create normal client for user validation (uses anon key)
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: {
+            Authorization: req.headers.get('Authorization') ?? '',
+          },
+        },
+      }
+    )
+
+    // Create admin client with service role for admin operations
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -38,18 +51,25 @@ Deno.serve(async (req) => {
       }
     )
 
-    // Get the authorization header from the request
-    const authHeader = req.headers.get('Authorization')?.replace('Bearer ', '')
+    // Get the authorization header for logging
+    const authHeader = req.headers.get('Authorization')
+    console.log('Authorization header present:', !!authHeader)
     
-    // Verify the user making the request
-    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(authHeader)
+    // Verify the user making the request using normal client
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
     if (userError || !user) {
       console.error('Authentication error:', userError)
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      console.error('Auth header:', authHeader ? 'Present' : 'Missing')
+      return new Response(JSON.stringify({ 
+        error: 'Unauthorized', 
+        details: userError?.message || 'No user found' 
+      }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
+
+    console.log('User authenticated:', user.id, user.email)
 
     // Check if user is admin
     const { data: profile } = await supabaseAdmin
