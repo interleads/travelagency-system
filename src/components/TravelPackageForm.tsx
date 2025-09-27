@@ -122,141 +122,187 @@ const TravelPackageForm = ({ templateData }: { templateData?: any }) => {
 
   return (
     <div className="container mx-auto p-4 max-w-6xl">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="space-y-6">
-          <h2 className="text-2xl font-bold mb-6">Dados do Pacote</h2>
-          <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+        <div className="space-y-4 lg:space-y-6">
+          <h2 className="text-xl sm:text-2xl font-bold mb-4 lg:mb-6">Dados do Pacote</h2>
+          <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-6">
             <Card className="p-4 space-y-4">
-              <div>
-                <label className="block mb-2">Título do Pacote</label>
+              <div className="space-y-2">
+                <label className="block mb-2 text-sm font-medium">Título do Pacote</label>
                 <Input
                   value={packageData.title}
                   onChange={(e) => setPackageData({...packageData, title: e.target.value})}
                   placeholder="Ex: PACOTE DE VIAGEM - RECIFE + MARAGOGI"
+                  className="h-11 sm:h-10"
                 />
               </div>
-              <div>
-                <label className="block mb-2">Agência</label>
+              <div className="space-y-2">
+                <label className="block mb-2 text-sm font-medium">Agência</label>
                 <Input
                   value={packageData.agency}
                   onChange={(e) => setPackageData({...packageData, agency: e.target.value})}
                   placeholder="Nome da sua agência"
+                  className="h-11 sm:h-10"
                 />
               </div>
             </Card>
 
             <Card className="p-4 space-y-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
+              <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
                 <Plane className="w-5 h-5 text-sky-600" />
                 Voos
               </h3>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <Input
-                    placeholder="Origem"
-                    value={packageData.flights.departure}
-                    onChange={(e) => setPackageData({
-                      ...packageData,
-                      flights: {...packageData.flights, departure: e.target.value}
-                    })}
-                  />
-                  <Input
-                    placeholder="Destino"
-                    value={packageData.flights.arrival}
-                    onChange={(e) => setPackageData({
-                      ...packageData,
-                      flights: {...packageData.flights, arrival: e.target.value}
-                    })}
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Origem</label>
+                    <Input
+                      placeholder="Origem"
+                      value={packageData.flights.departure}
+                      onChange={(e) => setPackageData({
+                        ...packageData,
+                        flights: {...packageData.flights, departure: e.target.value}
+                      })}
+                      className="h-11 sm:h-10"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Destino</label>
+                    <Input
+                      placeholder="Destino"
+                      value={packageData.flights.arrival}
+                      onChange={(e) => setPackageData({
+                        ...packageData,
+                        flights: {...packageData.flights, arrival: e.target.value}
+                      })}
+                      className="h-11 sm:h-10"
+                    />
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <Input
-                    placeholder="Horário Ida"
-                    value={packageData.flights.departureTime}
-                    onChange={(e) => setPackageData({
-                      ...packageData,
-                      flights: {...packageData.flights, departureTime: e.target.value}
-                    })}
-                  />
-                  <Input
-                    placeholder="Horário Volta"
-                    value={packageData.flights.arrivalTime}
-                    onChange={(e) => setPackageData({
-                      ...packageData,
-                      flights: {...packageData.flights, arrivalTime: e.target.value}
-                    })}
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Horário Ida</label>
+                    <Input
+                      placeholder="Horário Ida"
+                      value={packageData.flights.departureTime}
+                      onChange={(e) => setPackageData({
+                        ...packageData,
+                        flights: {...packageData.flights, departureTime: e.target.value}
+                      })}
+                      className="h-11 sm:h-10"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Horário Volta</label>
+                    <Input
+                      placeholder="Horário Volta"
+                      value={packageData.flights.arrivalTime}
+                      onChange={(e) => setPackageData({
+                        ...packageData,
+                        flights: {...packageData.flights, arrivalTime: e.target.value}
+                      })}
+                      className="h-11 sm:h-10"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Input
-                    placeholder="Companhia Aérea"
-                    value={packageData.flights.airline}
-                    onChange={(e) => setPackageData({
-                      ...packageData,
-                      flights: {...packageData.flights, airline: e.target.value}
-                    })}
-                  />
-                  <Input
-                    placeholder="URL do ícone da companhia aérea"
-                    value={packageData.flights.airlineIcon}
-                    onChange={(e) => setPackageData({
-                      ...packageData,
-                      flights: {...packageData.flights, airlineIcon: e.target.value}
-                    })}
-                  />
-                  <Textarea
-                    placeholder="Detalhes do voo (classe, bagagem, etc)"
-                    value={packageData.flights.flightDetails}
-                    onChange={(e) => setPackageData({
-                      ...packageData,
-                      flights: {...packageData.flights, flightDetails: e.target.value}
-                    })}
-                  />
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Companhia Aérea</label>
+                    <Input
+                      placeholder="Companhia Aérea"
+                      value={packageData.flights.airline}
+                      onChange={(e) => setPackageData({
+                        ...packageData,
+                        flights: {...packageData.flights, airline: e.target.value}
+                      })}
+                      className="h-11 sm:h-10"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">URL do ícone da companhia aérea</label>
+                    <Input
+                      placeholder="URL do ícone da companhia aérea"
+                      value={packageData.flights.airlineIcon}
+                      onChange={(e) => setPackageData({
+                        ...packageData,
+                        flights: {...packageData.flights, airlineIcon: e.target.value}
+                      })}
+                      className="h-11 sm:h-10"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Detalhes do voo</label>
+                    <Textarea
+                      placeholder="Detalhes do voo (classe, bagagem, etc)"
+                      value={packageData.flights.flightDetails}
+                      onChange={(e) => setPackageData({
+                        ...packageData,
+                        flights: {...packageData.flights, flightDetails: e.target.value}
+                      })}
+                      className="min-h-[80px]"
+                    />
+                  </div>
                 </div>
               </div>
             </Card>
 
             <Card className="p-4 space-y-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
+              <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
                 <Hotel className="w-5 h-5 text-sky-600" />
                 Hotel
               </h3>
               <div className="space-y-4">
-                <Input
-                  placeholder="Nome do Hotel"
-                  value={packageData.hotel.name}
-                  onChange={(e) => setPackageData({
-                    ...packageData,
-                    hotel: {...packageData.hotel, name: e.target.value}
-                  })}
-                />
-                <Input
-                  placeholder="Localização"
-                  value={packageData.hotel.location}
-                  onChange={(e) => setPackageData({
-                    ...packageData,
-                    hotel: {...packageData.hotel, location: e.target.value}
-                  })}
-                />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Nome do Hotel</label>
                   <Input
-                    placeholder="Check-in"
-                    type="date"
-                    value={packageData.hotel.checkin}
+                    placeholder="Nome do Hotel"
+                    value={packageData.hotel.name}
                     onChange={(e) => setPackageData({
                       ...packageData,
-                      hotel: {...packageData.hotel, checkin: e.target.value}
+                      hotel: {...packageData.hotel, name: e.target.value}
                     })}
+                    className="h-11 sm:h-10"
                   />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Localização</label>
                   <Input
-                    placeholder="Check-out"
-                    type="date"
-                    value={packageData.hotel.checkout}
+                    placeholder="Localização"
+                    value={packageData.hotel.location}
                     onChange={(e) => setPackageData({
                       ...packageData,
-                      hotel: {...packageData.hotel, checkout: e.target.value}
+                      hotel: {...packageData.hotel, location: e.target.value}
                     })}
+                    className="h-11 sm:h-10"
                   />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Check-in</label>
+                    <Input
+                      placeholder="Check-in"
+                      type="date"
+                      value={packageData.hotel.checkin}
+                      onChange={(e) => setPackageData({
+                        ...packageData,
+                        hotel: {...packageData.hotel, checkin: e.target.value}
+                      })}
+                      className="h-11 sm:h-10"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Check-out</label>
+                    <Input
+                      placeholder="Check-out"
+                      type="date"
+                      value={packageData.hotel.checkout}
+                      onChange={(e) => setPackageData({
+                        ...packageData,
+                        hotel: {...packageData.hotel, checkout: e.target.value}
+                      })}
+                      className="h-11 sm:h-10"
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Fotos do Hotel</label>
@@ -367,7 +413,7 @@ const TravelPackageForm = ({ templateData }: { templateData?: any }) => {
               </div>
             </Card>
 
-            <Button type="submit" className="w-full">Gerar PDF</Button>
+            <Button type="submit" className="w-full h-12 sm:h-10 text-base sm:text-sm">Gerar PDF</Button>
           </form>
         </div>
 

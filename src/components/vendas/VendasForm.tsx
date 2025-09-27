@@ -117,27 +117,27 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
   };
 
   return (
-    <div className="space-y-3 max-w-4xl mx-auto">
+    <div className="space-y-4 sm:space-y-6 max-w-4xl mx-auto p-4 sm:p-0">
       <Card className="border-primary/20">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg text-primary">Dados do Cliente</CardTitle>
+        <CardHeader className="pb-3 sm:pb-4">
+          <CardTitle className="text-lg sm:text-xl text-primary">Dados do Cliente</CardTitle>
         </CardHeader>
-        <CardContent className="pt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+        <CardContent className="pt-0 space-y-4">
+          <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
+            <div className="space-y-2">
               <ClientSelector
                 selectedClient={selectedClient}
                 onClientSelect={setSelectedClient}
               />
             </div>
-            <div>
-              <Label htmlFor="saleDate">Data da Venda</Label>
+            <div className="space-y-2">
+              <Label htmlFor="saleDate" className="text-sm font-medium">Data da Venda</Label>
               <Input 
                 id="saleDate" 
                 type="date"
                 value={saleDate} 
                 onChange={e => setSaleDate(e.target.value)}
-                className="mt-1"
+                className="h-11 sm:h-10"
               />
             </div>
           </div>
@@ -145,12 +145,12 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
       </Card>
 
       <Card className="border-primary/20">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg text-primary">Produtos / Serviços</CardTitle>
+        <CardHeader className="pb-3 sm:pb-4">
+          <CardTitle className="text-lg sm:text-xl text-primary">Produtos / Serviços</CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div className="space-y-2">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-4">
               {products.map((product, idx) => (
                 <DynamicProductForm
                   key={idx}
@@ -159,7 +159,12 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
                   onRemove={products.length > 1 ? () => removeProduct(idx) : undefined}
                 />
               ))}
-              <Button type="button" variant="default" onClick={addProduct} className="w-full">
+              <Button 
+                type="button" 
+                variant="default" 
+                onClick={addProduct} 
+                className="w-full h-11 sm:h-10 text-base sm:text-sm"
+              >
                 Adicionar Produto
               </Button>
             </div>
@@ -168,15 +173,15 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
       </Card>
 
       <Card className="border-primary/20">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg text-primary">Pagamento</CardTitle>
+        <CardHeader className="pb-3 sm:pb-4">
+          <CardTitle className="text-lg sm:text-xl text-primary">Pagamento</CardTitle>
         </CardHeader>
-        <CardContent className="pt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <Label htmlFor="payment">Método de Pagamento</Label>
+        <CardContent className="pt-0 space-y-4">
+          <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="payment" className="text-sm font-medium">Método de Pagamento</Label>
               <select
-                className="w-full mt-1 border border-input rounded-md h-10 px-3 bg-background"
+                className="w-full border border-input rounded-md h-11 sm:h-10 px-3 bg-background text-base sm:text-sm"
                 id="payment"
                 value={paymentMethod}
                 onChange={e => setPaymentMethod(e.target.value)}
@@ -189,8 +194,8 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
               </select>
             </div>
             {(paymentMethod === "Cartão de Crédito" || paymentMethod === "Boleto Bancário") && (
-              <div>
-                <Label htmlFor="inst">Parcelas</Label>
+              <div className="space-y-2">
+                <Label htmlFor="inst" className="text-sm font-medium">Parcelas</Label>
                 <Input 
                   id="inst" 
                   type="number" 
@@ -198,35 +203,35 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
                   max={12} 
                   value={installments} 
                   onChange={e => setInstallments(Number(e.target.value))}
-                  className="mt-1"
+                  className="h-11 sm:h-10"
                 />
               </div>
             )}
           </div>
           
           {paymentMethod === "Cartão de Crédito" && (
-            <div className="mt-4 p-4 border border-primary/20 rounded-lg bg-primary/5">
-              <div className="flex items-center space-x-2 mb-3">
+            <div className="mt-4 p-4 border border-primary/20 rounded-lg bg-primary/5 space-y-4">
+              <div className="flex items-center space-x-3">
                 <input
                   type="checkbox"
                   id="anticipation"
                   checked={hasAnticipation}
                   onChange={e => setHasAnticipation(e.target.checked)}
-                  className="rounded"
+                  className="rounded w-4 h-4 sm:w-3 sm:h-3"
                 />
-                <Label htmlFor="anticipation" className="text-sm">
+                <Label htmlFor="anticipation" className="text-sm font-medium">
                   Antecipação (receber valor total em 1x)
                 </Label>
               </div>
               {hasAnticipation && (
-                <div>
-                  <Label htmlFor="anticipationDate">Data da Antecipação</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="anticipationDate" className="text-sm font-medium">Data da Antecipação</Label>
                   <Input
                     id="anticipationDate"
                     type="date"
                     value={anticipationDate}
                     onChange={e => setAnticipationDate(e.target.value)}
-                    className="mt-1"
+                    className="h-11 sm:h-10"
                     max={new Date().toISOString().split('T')[0]}
                   />
                 </div>
@@ -241,7 +246,7 @@ const VendasForm = ({ onSaleSuccess }: VendasFormProps = {}) => {
       <Button
         type="submit"
         onClick={handleSubmit}
-        className="w-full bg-primary hover:bg-primary/90"
+        className="w-full h-12 sm:h-10 text-base sm:text-sm bg-primary hover:bg-primary/90"
         disabled={createSale.isPending}
       >
         {createSale.isPending ? "Salvando..." : "Registrar Venda"}

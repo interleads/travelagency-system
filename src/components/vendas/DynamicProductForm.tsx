@@ -278,25 +278,34 @@ const DynamicProductForm: React.FC<{
   const renderExtraFields = () => {
     switch (value.type) {
       case "passagem":
-        return <div className="space-y-3">
+        return <div className="space-y-4">
             {/* Tipo da Passagem */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Tipo da Passagem</Label>
-                <select className="w-full mt-1 border border-input rounded-md h-10 px-3 bg-background" value={value.ticketType || "milhas"} onChange={e => onChange({
-                ...value,
-                ticketType: e.target.value as "milhas" | "tarifada"
-              })}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Tipo da Passagem</Label>
+                <select 
+                  className="w-full border border-input rounded-md h-11 sm:h-10 px-3 bg-background text-base sm:text-sm" 
+                  value={value.ticketType || "milhas"} 
+                  onChange={e => onChange({
+                    ...value,
+                    ticketType: e.target.value as "milhas" | "tarifada"
+                  })}
+                >
                   <option value="milhas">Com Milhas</option>
                   <option value="tarifada">Tarifada</option>
                 </select>
               </div>
-              <div>
-                <Label>Companhia Aérea</Label>
-                <select className="w-full mt-1 border border-input rounded-md h-10 px-3 bg-background" value={value.airline ?? ""} onChange={e => onChange({
-                ...value,
-                airline: e.target.value
-              })} required>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Companhia Aérea</Label>
+                <select 
+                  className="w-full border border-input rounded-md h-11 sm:h-10 px-3 bg-background text-base sm:text-sm" 
+                  value={value.airline ?? ""} 
+                  onChange={e => onChange({
+                    ...value,
+                    airline: e.target.value
+                  })} 
+                  required
+                >
                   <option value="">Selecione</option>
                   {airlines.map(airline => <option key={airline} value={airline}>{airline}</option>)}
                 </select>
@@ -304,114 +313,149 @@ const DynamicProductForm: React.FC<{
             </div>
 
             {/* Informações Básicas */}
-            <div className="grid grid-cols-4 gap-3">
-              <div>
-                <Label>Adultos</Label>
-                <Input ref={adultsRef} type="text" value={adultsInput.displayValue} onChange={e => {
-                adultsInput.handleChange(e);
-                const parsed = parseQuantity(e.target.value);
-                onChange({
-                  ...value,
-                  adults: parsed
-                });
-              }} onBlur={adultsInput.handleBlur} placeholder="1" required />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Adultos</Label>
+                <Input 
+                  ref={adultsRef} 
+                  type="text" 
+                  value={adultsInput.displayValue} 
+                  onChange={e => {
+                    adultsInput.handleChange(e);
+                    const parsed = parseQuantity(e.target.value);
+                    onChange({ ...value, adults: parsed });
+                  }} 
+                  onBlur={adultsInput.handleBlur} 
+                  placeholder="1" 
+                  className="h-11 sm:h-10"
+                  required 
+                />
               </div>
-              <div>
-                <Label>Crianças</Label>
-                <Input ref={childrenRef} type="text" value={childrenInput.displayValue} onChange={e => {
-                childrenInput.handleChange(e);
-                const parsed = parseQuantity(e.target.value);
-                onChange({
-                  ...value,
-                  children: parsed
-                });
-              }} onBlur={childrenInput.handleBlur} placeholder="0" />
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Crianças</Label>
+                <Input 
+                  ref={childrenRef} 
+                  type="text" 
+                  value={childrenInput.displayValue} 
+                  onChange={e => {
+                    childrenInput.handleChange(e);
+                    const parsed = parseQuantity(e.target.value);
+                    onChange({ ...value, children: parsed });
+                  }} 
+                  onBlur={childrenInput.handleBlur} 
+                  placeholder="0" 
+                  className="h-11 sm:h-10"
+                />
               </div>
-              <div>
-                <Label>Valor Tx</Label>
-                <Input ref={taxValueRef} type="text" value={taxValueInput.displayValue} onChange={e => {
-                taxValueInput.handleChange(e);
-                const parsed = parseCurrency(e.target.value);
-                onChange({
-                  ...value,
-                  taxValue: parsed
-                });
-              }} onBlur={taxValueInput.handleBlur} placeholder="R$ 0,00" />
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Valor Tx</Label>
+                <Input 
+                  ref={taxValueRef} 
+                  type="text" 
+                  value={taxValueInput.displayValue} 
+                  onChange={e => {
+                    taxValueInput.handleChange(e);
+                    const parsed = parseCurrency(e.target.value);
+                    onChange({ ...value, taxValue: parsed });
+                  }} 
+                  onBlur={taxValueInput.handleBlur} 
+                  placeholder="R$ 0,00" 
+                  className="h-11 sm:h-10"
+                />
               </div>
-              <div>
-                <Label>Cartão
-              </Label>
-                <Input value={value.cardTaxes || ""} onChange={e => onChange({
-                ...value,
-                cardTaxes: e.target.value
-              })} />
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Cartão</Label>
+                <Input 
+                  value={value.cardTaxes || ""} 
+                  onChange={e => onChange({ ...value, cardTaxes: e.target.value })} 
+                  className="h-11 sm:h-10"
+                />
               </div>
             </div>
 
             {/* Origem e Destino */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Origem</Label>
-                <Input value={value.origin || ""} onChange={e => onChange({
-                ...value,
-                origin: e.target.value
-              })} required />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Origem</Label>
+                <Input 
+                  value={value.origin || ""} 
+                  onChange={e => onChange({ ...value, origin: e.target.value })} 
+                  className="h-11 sm:h-10"
+                  required 
+                />
               </div>
-              <div>
-                <Label>Destino</Label>
-                <Input value={value.destination || ""} onChange={e => onChange({
-                ...value,
-                destination: e.target.value
-              })} required />
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Destino</Label>
+                <Input 
+                  value={value.destination || ""} 
+                  onChange={e => onChange({ ...value, destination: e.target.value })} 
+                  className="h-11 sm:h-10"
+                  required 
+                />
               </div>
             </div>
 
             {/* Datas e Localizador */}
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <Label>Data T1</Label>
-                <Input type="date" value={value.trecho1 || ""} onChange={e => onChange({
-                ...value,
-                trecho1: e.target.value
-              })} required />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Data T1</Label>
+                <Input 
+                  type="date" 
+                  value={value.trecho1 || ""} 
+                  onChange={e => onChange({ ...value, trecho1: e.target.value })} 
+                  className="h-11 sm:h-10"
+                  required 
+                />
               </div>
-              <div>
-                <Label>Data T2</Label>
-                <Input type="date" value={value.trecho2 || ""} onChange={e => onChange({
-                ...value,
-                trecho2: e.target.value
-              })} />
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Data T2</Label>
+                <Input 
+                  type="date" 
+                  value={value.trecho2 || ""} 
+                  onChange={e => onChange({ ...value, trecho2: e.target.value })} 
+                  className="h-11 sm:h-10"
+                />
               </div>
-              <div>
-                <Label>Localizador</Label>
-                <Input value={value.locator || ""} onChange={e => onChange({
-                ...value,
-                locator: e.target.value
-              })} placeholder="Ex: ABC123" className="uppercase" />
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Localizador</Label>
+                <Input 
+                  value={value.locator || ""} 
+                  onChange={e => onChange({ ...value, locator: e.target.value })} 
+                  placeholder="Ex: ABC123" 
+                  className="uppercase h-11 sm:h-10" 
+                />
               </div>
             </div>
 
             {/* Seleção do tipo de origem das milhas */}
-            <div className="space-y-3 p-3 bg-accent/50 rounded-md">
+            <div className="space-y-3 p-4 bg-accent/50 rounded-md">
               <Label className="text-sm font-medium">Como obter as milhas?</Label>
-              <div className="flex gap-2">
-                <Button type="button" variant={value.milesSourceType === "estoque" ? "default" : "outline"} onClick={() => onChange({
-                ...value,
-                milesSourceType: "estoque"
-              })} className="flex-1" size="sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <Button 
+                  type="button" 
+                  variant={value.milesSourceType === "estoque" ? "default" : "outline"} 
+                  onClick={() => onChange({ ...value, milesSourceType: "estoque" })} 
+                  className="h-11 sm:h-9 text-sm"
+                  size="sm"
+                >
                   Estoque Atual
                 </Button>
-                <Button type="button" variant={value.milesSourceType === "compra_sob_demanda" ? "default" : "outline"} onClick={() => onChange({
-                ...value,
-                milesSourceType: "compra_sob_demanda"
-              })} className="flex-1" size="sm">
+                <Button 
+                  type="button" 
+                  variant={value.milesSourceType === "compra_sob_demanda" ? "default" : "outline"} 
+                  onClick={() => onChange({ ...value, milesSourceType: "compra_sob_demanda" })} 
+                  className="h-11 sm:h-9 text-sm"
+                  size="sm"
+                >
                   Comprar Agora
                 </Button>
               </div>
               
-              {value.milesSourceType === "compra_sob_demanda" && <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
+              {value.milesSourceType === "compra_sob_demanda" && (
+                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
                   💡 As milhas serão compradas no momento da venda e utilizadas imediatamente.
-                </div>}
+                </div>
+              )}
             </div>
 
             {/* Campos específicos por tipo */}
