@@ -30,6 +30,7 @@ import { SaleDetailsExpanded } from "./SaleDetailsExpanded";
 import { FullSaleEditDialog } from "./FullSaleEditDialog";
 import { DeleteSaleDialog } from "./DeleteSaleDialog";
 import { MobileSalesCard } from "./MobileSalesCard";
+import { MobileSaleDetailsModal } from "./MobileSaleDetailsModal";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -196,6 +197,7 @@ export function SalesHistoryTable({
   const [expandedSales, setExpandedSales] = useState<Set<string>>(new Set());
   const [editingSale, setEditingSale] = useState<any>(null);
   const [deletingSale, setDeletingSale] = useState<any>(null);
+  const [viewingSale, setViewingSale] = useState<any>(null);
   const createInstallments = useCreateInstallments();
 
   // Optimized backfill installments for existing sales
@@ -362,7 +364,7 @@ export function SalesHistoryTable({
                 }}
                 onEdit={() => setEditingSale(sale)}
                 onDelete={() => setDeletingSale(sale)}
-                onView={() => toggleExpanded(sale.id)}
+                onView={() => setViewingSale(sale)}
               />
             ))
           )}
@@ -435,6 +437,13 @@ export function SalesHistoryTable({
           onOpenChange={(open) => !open && setDeletingSale(null)}
         />
       )}
+
+      {/* Modal de detalhes para mobile */}
+      <MobileSaleDetailsModal
+        sale={viewingSale}
+        open={!!viewingSale}
+        onOpenChange={(open) => !open && setViewingSale(null)}
+      />
     </>
   );
 }
