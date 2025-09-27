@@ -71,6 +71,14 @@ const App = () => (
           <Route path="/milhas" element={<Navigate to="/miles" replace />} />
           <Route path="/fornecedores" element={<Navigate to="/suppliers" replace />} />
           
+          {/* Redirect signup/register routes to login */}
+          <Route path="/signup" element={<Navigate to="/login" replace />} />
+          <Route path="/register" element={<Navigate to="/login" replace />} />
+          <Route path="/cadastro" element={<Navigate to="/login" replace />} />
+          <Route path="/auth/signup" element={<Navigate to="/login" replace />} />
+          <Route path="/auth/register" element={<Navigate to="/login" replace />} />
+          <Route path="/auth" element={<Navigate to="/login" replace />} />
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

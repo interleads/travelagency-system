@@ -30,6 +30,27 @@ const AuthPage: React.FC = () => {
     return () => { isMounted = false }
   }, [navigate]);
 
+  // Cleanup any signup/register links from potential cached content
+  useEffect(() => {
+    const cleanupSignupElements = () => {
+      const authCard = document.querySelector('[data-auth-card]');
+      if (authCard) {
+        // Remove any links or buttons with signup-related text
+        const signupTexts = ['Cadastre-se', 'Criar conta', 'Não tem uma conta?', 'Já possui conta? Entrar'];
+        signupTexts.forEach(text => {
+          const elements = Array.from(authCard.querySelectorAll('a, button')).filter(el => 
+            el.textContent?.includes(text)
+          );
+          elements.forEach(el => el.remove());
+        });
+      }
+    };
+    
+    // Run cleanup after component mounts
+    const timeoutId = setTimeout(cleanupSignupElements, 100);
+    return () => clearTimeout(timeoutId);
+  }, []);
+
   // Handle auth state changes (redirect on login)
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_evt, session) => {
@@ -64,7 +85,7 @@ const AuthPage: React.FC = () => {
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-sky-400/10 rounded-full blur-3xl"></div>
       </div>
       
-      <Card className="w-full max-w-md shadow-2xl border-0 bg-white/95 backdrop-blur-sm relative overflow-hidden">
+      <Card className="w-full max-w-md shadow-2xl border-0 bg-white/95 backdrop-blur-sm relative overflow-hidden" data-auth-card>
         {/* Card header decoration */}
         <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-500 to-sky-500"></div>
         
