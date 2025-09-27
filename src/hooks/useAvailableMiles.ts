@@ -56,3 +56,45 @@ export const useAvailableMilesForProgram = (programId: string | null) => {
     enabled: !!programId
   });
 };
+
+export const useNextAvailableBatch = (programId: string | null, requiredQuantity: number) => {
+  return useQuery({
+    queryKey: ["next_available_batch", programId, requiredQuantity],
+    queryFn: async () => {
+      if (!programId || requiredQuantity <= 0) return null;
+      
+      const { data, error } = await supabase
+        .from("miles_inventory")
+        .select("id, remaining_quantity, cost_per_thousand, purchase_date")
+        .eq("program_id", programId)
+        .eq("status", "Ativo")
+        .gt("remaining_quantity", 0)
+        .order("purchase_date", { ascending: true }); // FIFO - mais antigos primeiro
+      
+      if (error) throw error;
+      if (!data || data.length === 0) return null;
+      
+      let remainingRequired = requiredQuantity;
+      let totalCost = 0;
+      
+      for (const batch of data) {
+        if (remainingRequired <= 0) break;
+        
+        const quantityFromBatch = Math.min(remainingRequired, batch.remaining_quantity);
+        const costFromBatch = (quantityFromBatch / 1000) * batch.cost_per_thousand;
+        
+        totalCost += costFromBatch;
+        remainingRequired -= quantityFromBatch;
+      }
+      
+      if (remainingRequired > 0) {
+        // Não há estoque suficiente
+        return null;
+      }
+      
+      // Retorna o custo médio por mil
+      return (totalCost / requiredQuantity) * 1000;
+    },
+    enabled: !!programId && requiredQuantity > 0
+  });
+};

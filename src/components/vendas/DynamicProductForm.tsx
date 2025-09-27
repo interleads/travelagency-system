@@ -12,7 +12,7 @@ import { useMilesPrograms } from '@/hooks/useMilesInventory';
 import { SupplierForm } from "@/components/finance/SupplierForm";
 import { OnDemandMilesPurchaseModal } from "./OnDemandMilesPurchaseModal";
 import { useOnDemandMilesPurchase } from "@/hooks/useOnDemandMilesPurchase";
-import { useAvailableMilesForProgram } from '@/hooks/useAvailableMiles';
+import { useAvailableMilesForProgram, useNextAvailableBatch } from '@/hooks/useAvailableMiles';
 
 // Componente select reutilizável
 const airlines = [
@@ -137,7 +137,12 @@ const DynamicProductForm: React.FC<{
   const { data: milesPrograms = [] } = useMilesPrograms();
   const onDemandMilesPurchase = useOnDemandMilesPurchase();
   const { data: availableMiles = 0 } = useAvailableMilesForProgram(
-    value.milesSourceType === "estoque" ? value.milesProgram : null
+    value.ticketType === "milhas" ? value.milesProgram : null
+  );
+
+  const { data: nextBatchCost } = useNextAvailableBatch(
+    value.ticketType === "milhas" && value.milesSourceType === "estoque" ? value.milesProgram : null,
+    value.qtdMilhas || 0
   );
   
   const [isOnDemandModalOpen, setIsOnDemandModalOpen] = useState(false);
@@ -192,6 +197,24 @@ const DynamicProductForm: React.FC<{
       childrenInput.setValue(value.children || 0);
     }
   }, [value.taxValue, value.price, value.cost, value.custoMil, value.qtdMilhas, value.quantity, value.adults, value.children]);
+
+  // Cálculo automático de custo para estoque atual
+  React.useEffect(() => {
+    if (
+      value.ticketType === "milhas" && 
+      value.milesSourceType === "estoque" && 
+      nextBatchCost && 
+      value.qtdMilhas && 
+      value.qtdMilhas > 0
+    ) {
+      const calculatedCost = nextBatchCost;
+      custoMilInput.setValue(calculatedCost);
+      onChange({
+        ...value,
+        custoMil: calculatedCost
+      });
+    }
+  }, [value.ticketType, value.milesSourceType, nextBatchCost, value.qtdMilhas, onChange]);
 
   // Cálculo do lucro em tempo real usando valores diretos do estado
   const computedProfit = React.useMemo(() => {
@@ -492,7 +515,11 @@ const DynamicProductForm: React.FC<{
                     <Input
                       ref={custoMilRef}
                       type="text"
-                      value={value.milesSourceType === "estoque" ? "Calculado automaticamente" : custoMilInput.displayValue}
+                      value={
+                        value.milesSourceType === "estoque" && nextBatchCost 
+                          ? `R$ ${nextBatchCost.toFixed(2).replace('.', ',')}`
+                          : custoMilInput.displayValue
+                      }
                       onChange={(e) => {
                         if (value.milesSourceType !== "estoque") {
                           custoMilInput.handleChange(e);
