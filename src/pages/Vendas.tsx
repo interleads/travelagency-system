@@ -44,7 +44,7 @@ const Vendas = () => {
           <TabsList className="grid grid-cols-3 w-full md:w-auto">
             <TabsTrigger value="historico" className="flex items-center gap-2">
               <BarChart2 size={16} />
-              Histórico de Vendas
+              Vendas
             </TabsTrigger>
             <TabsTrigger value="crm" className="flex items-center gap-2">
               <Users size={16} />
