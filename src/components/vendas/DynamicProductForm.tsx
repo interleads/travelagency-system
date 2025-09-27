@@ -4,7 +4,6 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-
 import { Trash2, Plus } from "lucide-react";
 import { useCurrencyInput, useQuantityInput, parseCurrency, parseQuantity } from "@/lib/utils";
 import { useSuppliers } from "@/hooks/useSuppliers";
@@ -15,20 +14,8 @@ import { useOnDemandMilesPurchase } from "@/hooks/useOnDemandMilesPurchase";
 import { useAvailableMilesForProgram, useNextAvailableBatch } from '@/hooks/useAvailableMiles';
 
 // Componente select reutilizável
-const airlines = [
-  "LATAM",
-  "GOL",
-  "Azul",
-  "Air France",
-  "TAP",
-  "Emirates",
-  "American Airlines",
-  "United",
-  "Delta"
-];
-
+const airlines = ["LATAM", "GOL", "Azul", "Air France", "TAP", "Emirates", "American Airlines", "United", "Delta"];
 export type ProductType = "passagem" | "hotel" | "veiculo" | "seguro" | "transfer" | "passeios" | "outros";
-
 export interface SaleProduct {
   type?: ProductType;
   name?: string;
@@ -61,9 +48,7 @@ export interface SaleProduct {
 // Função para gerar nome automático do produto
 export const generateProductName = (product: SaleProduct): string => {
   if (!product.type) return "";
-  
   const fornecedorSuffix = product.fornecedor ? ` - ${product.fornecedor}` : "";
-  
   switch (product.type) {
     case "passagem":
       if (product.airline && product.origin && product.destination) {
@@ -98,10 +83,12 @@ export const EmptyProduct: SaleProduct = {
   price: 0,
   cost: 0,
   details: "",
-  fornecedor: "", // Campo fornecedor inicializado vazio
+  fornecedor: "",
+  // Campo fornecedor inicializado vazio
   supplier_id: undefined,
   ticketType: "milhas",
-  milesSourceType: "estoque", // Padrão para estoque
+  milesSourceType: "estoque",
+  // Padrão para estoque
   milesProgram: undefined,
   airline: "",
   adults: 1,
@@ -115,36 +102,52 @@ export const EmptyProduct: SaleProduct = {
   qtdMilhas: 0,
   custoMil: 0,
   profit: 0,
-  locator: "", // Incluir localizador no produto vazio
+  locator: "" // Incluir localizador no produto vazio
 };
-
-const typeOptions = [
-  { value: "passagem", label: "Passagem Aérea" },
-  { value: "hotel", label: "Hotel" },
-  { value: "veiculo", label: "Veículo" },
-  { value: "seguro", label: "Seguro Viagem" },
-  { value: "transfer", label: "Transfer" },
-  { value: "passeios", label: "Passeios" },
-  { value: "outros", label: "Outros" },
-];
-
+const typeOptions = [{
+  value: "passagem",
+  label: "Passagem Aérea"
+}, {
+  value: "hotel",
+  label: "Hotel"
+}, {
+  value: "veiculo",
+  label: "Veículo"
+}, {
+  value: "seguro",
+  label: "Seguro Viagem"
+}, {
+  value: "transfer",
+  label: "Transfer"
+}, {
+  value: "passeios",
+  label: "Passeios"
+}, {
+  value: "outros",
+  label: "Outros"
+}];
 const DynamicProductForm: React.FC<{
   value: SaleProduct;
   onChange: (product: SaleProduct) => void;
   onRemove?: () => void;
-}> = ({ value, onChange, onRemove }) => {
-  const { data: suppliers = [] } = useSuppliers();
-  const { data: milesPrograms = [] } = useMilesPrograms();
+}> = ({
+  value,
+  onChange,
+  onRemove
+}) => {
+  const {
+    data: suppliers = []
+  } = useSuppliers();
+  const {
+    data: milesPrograms = []
+  } = useMilesPrograms();
   const onDemandMilesPurchase = useOnDemandMilesPurchase();
-  const { data: availableMiles = 0 } = useAvailableMilesForProgram(
-    value.ticketType === "milhas" ? value.milesProgram : null
-  );
-
-  const { data: nextBatchCost } = useNextAvailableBatch(
-    value.ticketType === "milhas" && value.milesSourceType === "estoque" ? value.milesProgram : null,
-    value.qtdMilhas || 0
-  );
-  
+  const {
+    data: availableMiles = 0
+  } = useAvailableMilesForProgram(value.ticketType === "milhas" ? value.milesProgram : null);
+  const {
+    data: nextBatchCost
+  } = useNextAvailableBatch(value.ticketType === "milhas" && value.milesSourceType === "estoque" ? value.milesProgram : null, value.qtdMilhas || 0);
   const [isOnDemandModalOpen, setIsOnDemandModalOpen] = useState(false);
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = React.useState(false);
 
@@ -163,7 +166,7 @@ const DynamicProductForm: React.FC<{
   const priceInput = useCurrencyInput(value.price || 0);
   const costInput = useCurrencyInput(value.cost || 0);
   const custoMilInput = useCurrencyInput(value.custoMil || 0);
-  
+
   // Hooks de formatação para campos de quantidade
   const qtdMilhasInput = useQuantityInput(value.qtdMilhas || 0);
   const quantityInput = useQuantityInput(value.quantity || 1);
@@ -200,13 +203,7 @@ const DynamicProductForm: React.FC<{
 
   // Cálculo automático de custo para estoque atual
   React.useEffect(() => {
-    if (
-      value.ticketType === "milhas" && 
-      value.milesSourceType === "estoque" && 
-      nextBatchCost && 
-      value.qtdMilhas && 
-      value.qtdMilhas > 0
-    ) {
+    if (value.ticketType === "milhas" && value.milesSourceType === "estoque" && nextBatchCost && value.qtdMilhas && value.qtdMilhas > 0) {
       const calculatedCost = nextBatchCost;
       custoMilInput.setValue(calculatedCost);
       onChange({
@@ -219,16 +216,15 @@ const DynamicProductForm: React.FC<{
   // Cálculo do lucro em tempo real usando valores diretos do estado
   const computedProfit = React.useMemo(() => {
     const venda = (value.price || 0) * (value.quantity || 1);
-    
     if (value.type === "passagem" && value.ticketType === "milhas") {
       const milhas = value.qtdMilhas || 0;
       const custoMil = value.custoMil || 0;
       const taxas = value.taxValue || 0;
       if (!milhas || !custoMil) return venda - taxas || 0;
-      const custoTotal = (milhas / 1000) * custoMil + taxas;
+      const custoTotal = milhas / 1000 * custoMil + taxas;
       return venda - custoTotal;
     }
-    
+
     // Para passagem tarifada e outros produtos
     const custo = value.cost || 0;
     return venda - custo;
@@ -237,7 +233,10 @@ const DynamicProductForm: React.FC<{
   // Atualizar profit no estado quando computedProfit mudar
   React.useEffect(() => {
     if (Math.abs((value.profit || 0) - computedProfit) > 0.01) {
-      onChange({ ...value, profit: computedProfit });
+      onChange({
+        ...value,
+        profit: computedProfit
+      });
     }
   }, [computedProfit, value, onChange]);
 
@@ -245,7 +244,10 @@ const DynamicProductForm: React.FC<{
   React.useEffect(() => {
     const autoName = generateProductName(value);
     if (autoName && autoName !== value.name) {
-      onChange({ ...value, name: autoName });
+      onChange({
+        ...value,
+        name: autoName
+      });
     }
   }, [value.type, value.airline, value.origin, value.destination, value.categoria, value.cobertura, value.local, value.origem, value.destino, value.fornecedor]);
 
@@ -253,7 +255,7 @@ const DynamicProductForm: React.FC<{
   const handleOnDemandPurchase = async (purchase: any) => {
     try {
       const result = await onDemandMilesPurchase.mutateAsync(purchase);
-      
+
       // Update the product with supplier info and cost
       onChange({
         ...value,
@@ -262,7 +264,6 @@ const DynamicProductForm: React.FC<{
         custoMil: purchase.miles.cost_per_thousand,
         cost: result.totalCost
       });
-      
       setIsOnDemandModalOpen(false);
     } catch (error) {
       console.error('Erro ao realizar compra sob demanda:', error);
@@ -270,41 +271,34 @@ const DynamicProductForm: React.FC<{
   };
 
   // Calculate max cost per thousand based on sale price to ensure profitability
-  const maxCostPerThousand = value.price && value.qtdMilhas 
-    ? ((value.price * 0.8) / value.qtdMilhas) * 1000 // 80% of sale price as max cost
-    : 0;
+  const maxCostPerThousand = value.price && value.qtdMilhas ? value.price * 0.8 / value.qtdMilhas * 1000 // 80% of sale price as max cost
+  : 0;
 
   // Render extra fields REVISADO
   const renderExtraFields = () => {
     switch (value.type) {
       case "passagem":
-        return (
-          <div className="space-y-3">
+        return <div className="space-y-3">
             {/* Tipo da Passagem */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Tipo da Passagem</Label>
-                <select
-                  className="w-full mt-1 border border-input rounded-md h-10 px-3 bg-background"
-                  value={value.ticketType || "milhas"}
-                  onChange={e => onChange({ ...value, ticketType: e.target.value as "milhas" | "tarifada" })}
-                >
+                <select className="w-full mt-1 border border-input rounded-md h-10 px-3 bg-background" value={value.ticketType || "milhas"} onChange={e => onChange({
+                ...value,
+                ticketType: e.target.value as "milhas" | "tarifada"
+              })}>
                   <option value="milhas">Com Milhas</option>
                   <option value="tarifada">Tarifada</option>
                 </select>
               </div>
               <div>
                 <Label>Companhia Aérea</Label>
-                <select
-                  className="w-full mt-1 border border-input rounded-md h-10 px-3 bg-background"
-                  value={value.airline ?? ""}
-                  onChange={e => onChange({ ...value, airline: e.target.value })}
-                  required
-                >
+                <select className="w-full mt-1 border border-input rounded-md h-10 px-3 bg-background" value={value.airline ?? ""} onChange={e => onChange({
+                ...value,
+                airline: e.target.value
+              })} required>
                   <option value="">Selecione</option>
-                  {airlines.map(airline => (
-                    <option key={airline} value={airline}>{airline}</option>
-                  ))}
+                  {airlines.map(airline => <option key={airline} value={airline}>{airline}</option>)}
                 </select>
               </div>
             </div>
@@ -313,53 +307,44 @@ const DynamicProductForm: React.FC<{
             <div className="grid grid-cols-4 gap-3">
               <div>
                 <Label>Adultos</Label>
-                <Input
-                  ref={adultsRef}
-                  type="text"
-                  value={adultsInput.displayValue}
-                  onChange={(e) => {
-                    adultsInput.handleChange(e);
-                    const parsed = parseQuantity(e.target.value);
-                    onChange({ ...value, adults: parsed });
-                  }}
-                  onBlur={adultsInput.handleBlur}
-                  placeholder="1"
-                  required
-                />
+                <Input ref={adultsRef} type="text" value={adultsInput.displayValue} onChange={e => {
+                adultsInput.handleChange(e);
+                const parsed = parseQuantity(e.target.value);
+                onChange({
+                  ...value,
+                  adults: parsed
+                });
+              }} onBlur={adultsInput.handleBlur} placeholder="1" required />
               </div>
               <div>
                 <Label>Crianças</Label>
-                <Input
-                  ref={childrenRef}
-                  type="text"
-                  value={childrenInput.displayValue}
-                  onChange={(e) => {
-                    childrenInput.handleChange(e);
-                    const parsed = parseQuantity(e.target.value);
-                    onChange({ ...value, children: parsed });
-                  }}
-                  onBlur={childrenInput.handleBlur}
-                  placeholder="0"
-                />
+                <Input ref={childrenRef} type="text" value={childrenInput.displayValue} onChange={e => {
+                childrenInput.handleChange(e);
+                const parsed = parseQuantity(e.target.value);
+                onChange({
+                  ...value,
+                  children: parsed
+                });
+              }} onBlur={childrenInput.handleBlur} placeholder="0" />
               </div>
               <div>
-                <Label>Valor das Taxas</Label>
-                <Input 
-                  ref={taxValueRef}
-                  type="text" 
-                  value={taxValueInput.displayValue}
-                  onChange={(e) => {
-                    taxValueInput.handleChange(e);
-                    const parsed = parseCurrency(e.target.value);
-                    onChange({ ...value, taxValue: parsed });
-                  }}
-                  onBlur={taxValueInput.handleBlur}
-                  placeholder="R$ 0,00"
-                />
+                <Label>Valor Tx</Label>
+                <Input ref={taxValueRef} type="text" value={taxValueInput.displayValue} onChange={e => {
+                taxValueInput.handleChange(e);
+                const parsed = parseCurrency(e.target.value);
+                onChange({
+                  ...value,
+                  taxValue: parsed
+                });
+              }} onBlur={taxValueInput.handleBlur} placeholder="R$ 0,00" />
               </div>
               <div>
-                <Label>Cartão das Taxas</Label>
-                <Input value={value.cardTaxes || ""} onChange={e => onChange({ ...value, cardTaxes: e.target.value })} />
+                <Label>Cartão
+              </Label>
+                <Input value={value.cardTaxes || ""} onChange={e => onChange({
+                ...value,
+                cardTaxes: e.target.value
+              })} />
               </div>
             </div>
 
@@ -367,32 +352,42 @@ const DynamicProductForm: React.FC<{
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Origem</Label>
-                <Input value={value.origin || ""} onChange={e => onChange({ ...value, origin: e.target.value })} required />
+                <Input value={value.origin || ""} onChange={e => onChange({
+                ...value,
+                origin: e.target.value
+              })} required />
               </div>
               <div>
                 <Label>Destino</Label>
-                <Input value={value.destination || ""} onChange={e => onChange({ ...value, destination: e.target.value })} required />
+                <Input value={value.destination || ""} onChange={e => onChange({
+                ...value,
+                destination: e.target.value
+              })} required />
               </div>
             </div>
 
             {/* Datas e Localizador */}
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <Label>Data Trecho 1</Label>
-                <Input type="date" value={value.trecho1 || ""} onChange={e => onChange({ ...value, trecho1: e.target.value })} required />
+                <Label>Data T1</Label>
+                <Input type="date" value={value.trecho1 || ""} onChange={e => onChange({
+                ...value,
+                trecho1: e.target.value
+              })} required />
               </div>
               <div>
-                <Label>Data Trecho 2</Label>
-                <Input type="date" value={value.trecho2 || ""} onChange={e => onChange({ ...value, trecho2: e.target.value })} />
+                <Label>Data T2</Label>
+                <Input type="date" value={value.trecho2 || ""} onChange={e => onChange({
+                ...value,
+                trecho2: e.target.value
+              })} />
               </div>
               <div>
                 <Label>Localizador</Label>
-                <Input 
-                  value={value.locator || ""} 
-                  onChange={e => onChange({ ...value, locator: e.target.value })} 
-                  placeholder="Ex: ABC123"
-                  className="uppercase"
-                />
+                <Input value={value.locator || ""} onChange={e => onChange({
+                ...value,
+                locator: e.target.value
+              })} placeholder="Ex: ABC123" className="uppercase" />
               </div>
             </div>
 
@@ -400,213 +395,164 @@ const DynamicProductForm: React.FC<{
             <div className="space-y-3 p-3 bg-accent/50 rounded-md">
               <Label className="text-sm font-medium">Como obter as milhas?</Label>
               <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant={value.milesSourceType === "estoque" ? "default" : "outline"}
-                  onClick={() => onChange({ ...value, milesSourceType: "estoque" })}
-                  className="flex-1"
-                  size="sm"
-                >
+                <Button type="button" variant={value.milesSourceType === "estoque" ? "default" : "outline"} onClick={() => onChange({
+                ...value,
+                milesSourceType: "estoque"
+              })} className="flex-1" size="sm">
                   Estoque Atual
                 </Button>
-                <Button
-                  type="button"
-                  variant={value.milesSourceType === "compra_sob_demanda" ? "default" : "outline"}
-                  onClick={() => onChange({ ...value, milesSourceType: "compra_sob_demanda" })}
-                  className="flex-1"
-                  size="sm"
-                >
+                <Button type="button" variant={value.milesSourceType === "compra_sob_demanda" ? "default" : "outline"} onClick={() => onChange({
+                ...value,
+                milesSourceType: "compra_sob_demanda"
+              })} className="flex-1" size="sm">
                   Comprar Agora
                 </Button>
               </div>
               
-              {value.milesSourceType === "compra_sob_demanda" && (
-                <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
+              {value.milesSourceType === "compra_sob_demanda" && <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
                   💡 As milhas serão compradas no momento da venda e utilizadas imediatamente.
-                </div>
-              )}
+                </div>}
             </div>
 
             {/* Campos específicos por tipo */}
-            {value.ticketType === "milhas" ? (
-              <div className="space-y-3">
-                {value.milesSourceType === "estoque" && (
-                  <div>
+            {value.ticketType === "milhas" ? <div className="space-y-3">
+                {value.milesSourceType === "estoque" && <div>
                     <Label>Programa de Milhas</Label>
-                    <Select
-                      value={value.milesProgram || ""}
-                      onValueChange={(program_id) => onChange({ ...value, milesProgram: program_id })}
-                    >
+                    <Select value={value.milesProgram || ""} onValueChange={program_id => onChange({
+                ...value,
+                milesProgram: program_id
+              })}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione o programa" />
                       </SelectTrigger>
                       <SelectContent>
-                        {milesPrograms?.map((program) => (
-                          <SelectItem key={program.id} value={program.id}>
+                        {milesPrograms?.map(program => <SelectItem key={program.id} value={program.id}>
                             {program.name}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
-                    {value.milesProgram && (
-                      <div className="text-sm text-muted-foreground mt-1">
+                    {value.milesProgram && <div className="text-sm text-muted-foreground mt-1">
                         Saldo disponível: {availableMiles.toLocaleString()} milhas
-                        {value.qtdMilhas && value.qtdMilhas > availableMiles && (
-                          <span className="text-destructive ml-2">
+                        {value.qtdMilhas && value.qtdMilhas > availableMiles && <span className="text-destructive ml-2">
                             ⚠️ Saldo insuficiente!
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
+                          </span>}
+                      </div>}
+                  </div>}
                 
-                {value.milesSourceType === "compra_sob_demanda" && (
-                  <div className="flex gap-2">
+                {value.milesSourceType === "compra_sob_demanda" && <div className="flex gap-2">
                     <div className="flex-1">
                       <Label>Programa de Milhas</Label>
-                      <Select
-                        value={value.milesProgram || ""}
-                        onValueChange={(program_id) => onChange({ ...value, milesProgram: program_id })}
-                      >
+                      <Select value={value.milesProgram || ""} onValueChange={program_id => onChange({
+                  ...value,
+                  milesProgram: program_id
+                })}>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione o programa" />
                         </SelectTrigger>
                         <SelectContent>
-                          {milesPrograms?.map((program) => (
-                            <SelectItem key={program.id} value={program.id}>
+                          {milesPrograms?.map(program => <SelectItem key={program.id} value={program.id}>
                               {program.name}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="flex items-end">
-                      <Button
-                        type="button"
-                        onClick={() => setIsOnDemandModalOpen(true)}
-                        disabled={!value.qtdMilhas || !value.price}
-                        variant="default"
-                        className="h-10"
-                      >
+                      <Button type="button" onClick={() => setIsOnDemandModalOpen(true)} disabled={!value.qtdMilhas || !value.price} variant="default" className="h-10">
                         Configurar Compra
                       </Button>
                     </div>
-                  </div>
-                )}
+                  </div>}
                 
                 <div className="grid grid-cols-3 gap-3">
                   <div>
                     <Label>Qtd Milhas</Label>
-                    <Input
-                      ref={qtdMilhasRef}
-                      type="text"
-                      value={qtdMilhasInput.displayValue}
-                      onChange={(e) => {
-                        qtdMilhasInput.handleChange(e);
-                        const parsed = parseQuantity(e.target.value);
-                        onChange({ ...value, qtdMilhas: parsed });
-                      }}
-                      onBlur={qtdMilhasInput.handleBlur}
-                      placeholder="0"
-                    />
+                    <Input ref={qtdMilhasRef} type="text" value={qtdMilhasInput.displayValue} onChange={e => {
+                  qtdMilhasInput.handleChange(e);
+                  const parsed = parseQuantity(e.target.value);
+                  onChange({
+                    ...value,
+                    qtdMilhas: parsed
+                  });
+                }} onBlur={qtdMilhasInput.handleBlur} placeholder="0" />
                   </div>
                   <div>
                     <Label>Custo por 1k</Label>
-                    <Input
-                      ref={custoMilRef}
-                      type="text"
-                      value={
-                        value.milesSourceType === "estoque" && nextBatchCost 
-                          ? `R$ ${nextBatchCost.toFixed(2).replace('.', ',')}`
-                          : custoMilInput.displayValue
-                      }
-                      onChange={(e) => {
-                        if (value.milesSourceType !== "estoque") {
-                          custoMilInput.handleChange(e);
-                          const parsed = parseCurrency(e.target.value);
-                          onChange({ ...value, custoMil: parsed });
-                        }
-                      }}
-                      onBlur={custoMilInput.handleBlur}
-                      placeholder="R$ 0,00"
-                      disabled={value.milesSourceType === "estoque"}
-                      className={value.milesSourceType === "estoque" ? "bg-muted text-muted-foreground" : ""}
-                    />
-                    {(value.custoMil || 0) > 0 && value.milesSourceType !== "estoque" && (
-                      <div className="text-xs text-muted-foreground mt-1">
-                        Valor interpretado: R$ {(value.custoMil || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 5 })}
-                      </div>
-                    )}
+                    <Input ref={custoMilRef} type="text" value={value.milesSourceType === "estoque" && nextBatchCost ? `R$ ${nextBatchCost.toFixed(2).replace('.', ',')}` : custoMilInput.displayValue} onChange={e => {
+                  if (value.milesSourceType !== "estoque") {
+                    custoMilInput.handleChange(e);
+                    const parsed = parseCurrency(e.target.value);
+                    onChange({
+                      ...value,
+                      custoMil: parsed
+                    });
+                  }
+                }} onBlur={custoMilInput.handleBlur} placeholder="R$ 0,00" disabled={value.milesSourceType === "estoque"} className={value.milesSourceType === "estoque" ? "bg-muted text-muted-foreground" : ""} />
+                    {(value.custoMil || 0) > 0 && value.milesSourceType !== "estoque" && <div className="text-xs text-muted-foreground mt-1">
+                        Valor interpretado: R$ {(value.custoMil || 0).toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 5
+                  })}
+                      </div>}
                   </div>
                   <div className="flex items-end">
                     <div className="w-full">
                       <Label>Lucro</Label>
                       <div className="mt-1 px-3 py-2 bg-muted rounded-md h-10 flex items-center">
                         <span className={`font-medium text-sm ${computedProfit >= 0 ? "text-emerald-600" : "text-red-600"}`}>
-                          R$ {isNaN(computedProfit) ? "0,00" : computedProfit?.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                          R$ {isNaN(computedProfit) ? "0,00" : computedProfit?.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2
+                      })}
                         </span>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3">
+              </div> : <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>Custo da Passagem</Label>
-                  <Input
-                    ref={costRef}
-                    type="text"
-                    value={costInput.displayValue}
-                    onChange={(e) => {
-                      costInput.handleChange(e);
-                      const parsed = parseCurrency(e.target.value);
-                      onChange({ ...value, cost: parsed });
-                    }}
-                    onBlur={costInput.handleBlur}
-                    placeholder="R$ 0,00"
-                  />
+                  <Input ref={costRef} type="text" value={costInput.displayValue} onChange={e => {
+                costInput.handleChange(e);
+                const parsed = parseCurrency(e.target.value);
+                onChange({
+                  ...value,
+                  cost: parsed
+                });
+              }} onBlur={costInput.handleBlur} placeholder="R$ 0,00" />
                 </div>
                 <div className="flex items-end">
                   <div className="w-full">
                     <Label>Lucro</Label>
                     <div className="mt-1 px-3 py-2 bg-muted rounded-md h-10 flex items-center">
                       <span className={`font-medium text-sm ${computedProfit >= 0 ? "text-emerald-600" : "text-red-600"}`}>
-                        R$ {isNaN(computedProfit) ? "0,00" : computedProfit?.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        R$ {isNaN(computedProfit) ? "0,00" : computedProfit?.toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2
+                    })}
                       </span>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              </div>}
 
             {/* Campo Fornecedor para passagens - só para compra sob demanda ou tarifada */}
-            {(value.milesSourceType === "compra_sob_demanda" || value.ticketType === "tarifada") && (
-              <div className="space-y-2">
+            {(value.milesSourceType === "compra_sob_demanda" || value.ticketType === "tarifada") && <div className="space-y-2">
                 <Label>Fornecedor</Label>
                 <div className="flex gap-2">
-                  <Select
-                    value={value.supplier_id || ""}
-                    onValueChange={(supplier_id) => {
-                      const selectedSupplier = suppliers?.find(s => s.id === supplier_id);
-                      onChange({ 
-                        ...value, 
-                        supplier_id: supplier_id === "other" ? undefined : supplier_id,
-                        fornecedor: selectedSupplier?.name || ""
-                      });
-                    }}
-                  >
+                  <Select value={value.supplier_id || ""} onValueChange={supplier_id => {
+                const selectedSupplier = suppliers?.find(s => s.id === supplier_id);
+                onChange({
+                  ...value,
+                  supplier_id: supplier_id === "other" ? undefined : supplier_id,
+                  fornecedor: selectedSupplier?.name || ""
+                });
+              }}>
                     <SelectTrigger className="flex-1">
                       <SelectValue placeholder="Selecione um fornecedor" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="other">Outro (texto livre)</SelectItem>
-                      {suppliers?.map((supplier) => (
-                        <SelectItem key={supplier.id} value={supplier.id}>
+                      {suppliers?.map(supplier => <SelectItem key={supplier.id} value={supplier.id}>
                           {supplier.name}
-                        </SelectItem>
-                      ))}
+                        </SelectItem>)}
                     </SelectContent>
                   </Select>
                   <Dialog open={isSupplierDialogOpen} onOpenChange={setIsSupplierDialogOpen}>
@@ -619,53 +565,40 @@ const DynamicProductForm: React.FC<{
                       <DialogHeader>
                         <DialogTitle>Adicionar Fornecedor</DialogTitle>
                       </DialogHeader>
-                      <SupplierForm 
-                        onSubmit={() => {
-                          setIsSupplierDialogOpen(false);
-                        }}
-                      />
+                      <SupplierForm onSubmit={() => {
+                    setIsSupplierDialogOpen(false);
+                  }} />
                     </DialogContent>
                   </Dialog>
                 </div>
-                {(!value.supplier_id || value.supplier_id === "other") && (
-                  <Input 
-                    value={value.fornecedor || ""} 
-                    onChange={e => onChange({ ...value, fornecedor: e.target.value })} 
-                    placeholder="Ex: CVC, Decolar, etc" 
-                  />
-                )}
-              </div>
-            )}
+                {(!value.supplier_id || value.supplier_id === "other") && <Input value={value.fornecedor || ""} onChange={e => onChange({
+              ...value,
+              fornecedor: e.target.value
+            })} placeholder="Ex: CVC, Decolar, etc" />}
+              </div>}
 
-          </div>
-        );
+          </div>;
       case "hotel":
-        return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        return <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <div className="space-y-2">
               <Label>Fornecedor</Label>
               <div className="flex gap-2">
-                <Select
-                  value={value.supplier_id || ""}
-                  onValueChange={(supplier_id) => {
-                    const selectedSupplier = suppliers?.find(s => s.id === supplier_id);
-                    onChange({ 
-                      ...value, 
-                      supplier_id: supplier_id === "other" ? undefined : supplier_id,
-                      fornecedor: selectedSupplier?.name || ""
-                    });
-                  }}
-                >
+                <Select value={value.supplier_id || ""} onValueChange={supplier_id => {
+                const selectedSupplier = suppliers?.find(s => s.id === supplier_id);
+                onChange({
+                  ...value,
+                  supplier_id: supplier_id === "other" ? undefined : supplier_id,
+                  fornecedor: selectedSupplier?.name || ""
+                });
+              }}>
                   <SelectTrigger className="flex-1">
                     <SelectValue placeholder="Selecione um fornecedor" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="other">Outro (texto livre)</SelectItem>
-                    {suppliers?.map((supplier) => (
-                      <SelectItem key={supplier.id} value={supplier.id}>
+                    {suppliers?.map(supplier => <SelectItem key={supplier.id} value={supplier.id}>
                         {supplier.name}
-                      </SelectItem>
-                    ))}
+                      </SelectItem>)}
                   </SelectContent>
                 </Select>
                 <Dialog open={isSupplierDialogOpen} onOpenChange={setIsSupplierDialogOpen}>
@@ -678,59 +611,53 @@ const DynamicProductForm: React.FC<{
                     <DialogHeader>
                       <DialogTitle>Adicionar Fornecedor</DialogTitle>
                     </DialogHeader>
-                    <SupplierForm 
-                      onSubmit={() => {
-                        setIsSupplierDialogOpen(false);
-                      }}
-                    />
+                    <SupplierForm onSubmit={() => {
+                    setIsSupplierDialogOpen(false);
+                  }} />
                   </DialogContent>
                 </Dialog>
               </div>
-              {(!value.supplier_id || value.supplier_id === "other") && (
-                <Input 
-                  value={value.fornecedor || ""} 
-                  onChange={e => onChange({ ...value, fornecedor: e.target.value })} 
-                  placeholder="Ex: Booking, Expedia, etc" 
-                />
-              )}
+              {(!value.supplier_id || value.supplier_id === "other") && <Input value={value.fornecedor || ""} onChange={e => onChange({
+              ...value,
+              fornecedor: e.target.value
+            })} placeholder="Ex: Booking, Expedia, etc" />}
             </div>
             <div>
               <Label>Check-in</Label>
-              <Input type="date" value={value.checkin || ""} onChange={e => onChange({ ...value, checkin: e.target.value })} />
+              <Input type="date" value={value.checkin || ""} onChange={e => onChange({
+              ...value,
+              checkin: e.target.value
+            })} />
             </div>
             <div>
               <Label>Check-out</Label>
-              <Input type="date" value={value.checkout || ""} onChange={e => onChange({ ...value, checkout: e.target.value })} />
+              <Input type="date" value={value.checkout || ""} onChange={e => onChange({
+              ...value,
+              checkout: e.target.value
+            })} />
             </div>
-          </div>
-        );
+          </div>;
       case "veiculo":
-        return (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+        return <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div className="space-y-2">
               <Label>Fornecedor</Label>
               <div className="flex gap-2">
-                <Select
-                  value={value.supplier_id || ""}
-                  onValueChange={(supplier_id) => {
-                    const selectedSupplier = suppliers?.find(s => s.id === supplier_id);
-                    onChange({ 
-                      ...value, 
-                      supplier_id: supplier_id === "other" ? undefined : supplier_id,
-                      fornecedor: selectedSupplier?.name || ""
-                    });
-                  }}
-                >
+                <Select value={value.supplier_id || ""} onValueChange={supplier_id => {
+                const selectedSupplier = suppliers?.find(s => s.id === supplier_id);
+                onChange({
+                  ...value,
+                  supplier_id: supplier_id === "other" ? undefined : supplier_id,
+                  fornecedor: selectedSupplier?.name || ""
+                });
+              }}>
                   <SelectTrigger className="flex-1">
                     <SelectValue placeholder="Selecione um fornecedor" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="other">Outro (texto livre)</SelectItem>
-                    {suppliers?.map((supplier) => (
-                      <SelectItem key={supplier.id} value={supplier.id}>
+                    {suppliers?.map(supplier => <SelectItem key={supplier.id} value={supplier.id}>
                         {supplier.name}
-                      </SelectItem>
-                    ))}
+                      </SelectItem>)}
                   </SelectContent>
                 </Select>
                 <Dialog open={isSupplierDialogOpen} onOpenChange={setIsSupplierDialogOpen}>
@@ -743,59 +670,53 @@ const DynamicProductForm: React.FC<{
                     <DialogHeader>
                       <DialogTitle>Adicionar Fornecedor</DialogTitle>
                     </DialogHeader>
-                    <SupplierForm 
-                      onSubmit={() => {
-                        setIsSupplierDialogOpen(false);
-                      }}
-                    />
+                    <SupplierForm onSubmit={() => {
+                    setIsSupplierDialogOpen(false);
+                  }} />
                   </DialogContent>
                 </Dialog>
               </div>
-              {(!value.supplier_id || value.supplier_id === "other") && (
-                <Input 
-                  value={value.fornecedor || ""} 
-                  onChange={e => onChange({ ...value, fornecedor: e.target.value })} 
-                  placeholder="Ex: Hertz, Localiza, etc" 
-                />
-              )}
+              {(!value.supplier_id || value.supplier_id === "other") && <Input value={value.fornecedor || ""} onChange={e => onChange({
+              ...value,
+              fornecedor: e.target.value
+            })} placeholder="Ex: Hertz, Localiza, etc" />}
             </div>
             <div>
               <Label>Categoria do Veículo</Label>
-              <Input value={value.categoria || ""} onChange={e => onChange({ ...value, categoria: e.target.value })} />
+              <Input value={value.categoria || ""} onChange={e => onChange({
+              ...value,
+              categoria: e.target.value
+            })} />
             </div>
             <div>
               <Label>Período</Label>
-              <Input value={value.periodo || ""} onChange={e => onChange({ ...value, periodo: e.target.value })} placeholder="Ex: 10/07 a 15/07" />
+              <Input value={value.periodo || ""} onChange={e => onChange({
+              ...value,
+              periodo: e.target.value
+            })} placeholder="Ex: 10/07 a 15/07" />
             </div>
-          </div>
-        );
+          </div>;
       case "seguro":
-        return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        return <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <div className="space-y-2">
               <Label>Fornecedor</Label>
               <div className="flex gap-2">
-                <Select
-                  value={value.supplier_id || ""}
-                  onValueChange={(supplier_id) => {
-                    const selectedSupplier = suppliers?.find(s => s.id === supplier_id);
-                    onChange({ 
-                      ...value, 
-                      supplier_id: supplier_id === "other" ? undefined : supplier_id,
-                      fornecedor: selectedSupplier?.name || ""
-                    });
-                  }}
-                >
+                <Select value={value.supplier_id || ""} onValueChange={supplier_id => {
+                const selectedSupplier = suppliers?.find(s => s.id === supplier_id);
+                onChange({
+                  ...value,
+                  supplier_id: supplier_id === "other" ? undefined : supplier_id,
+                  fornecedor: selectedSupplier?.name || ""
+                });
+              }}>
                   <SelectTrigger className="flex-1">
                     <SelectValue placeholder="Selecione um fornecedor" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="other">Outro (texto livre)</SelectItem>
-                    {suppliers?.map((supplier) => (
-                      <SelectItem key={supplier.id} value={supplier.id}>
+                    {suppliers?.map(supplier => <SelectItem key={supplier.id} value={supplier.id}>
                         {supplier.name}
-                      </SelectItem>
-                    ))}
+                      </SelectItem>)}
                   </SelectContent>
                 </Select>
                 <Dialog open={isSupplierDialogOpen} onOpenChange={setIsSupplierDialogOpen}>
@@ -808,190 +729,187 @@ const DynamicProductForm: React.FC<{
                     <DialogHeader>
                       <DialogTitle>Adicionar Fornecedor</DialogTitle>
                     </DialogHeader>
-                    <SupplierForm 
-                      onSubmit={() => {
-                        setIsSupplierDialogOpen(false);
-                      }}
-                    />
+                    <SupplierForm onSubmit={() => {
+                    setIsSupplierDialogOpen(false);
+                  }} />
                   </DialogContent>
                 </Dialog>
               </div>
-              {(!value.supplier_id || value.supplier_id === "other") && (
-                <Input 
-                  value={value.fornecedor || ""} 
-                  onChange={e => onChange({ ...value, fornecedor: e.target.value })} 
-                  placeholder="Ex: Porto Seguro, Assist Card, etc" 
-                />
-              )}
+              {(!value.supplier_id || value.supplier_id === "other") && <Input value={value.fornecedor || ""} onChange={e => onChange({
+              ...value,
+              fornecedor: e.target.value
+            })} placeholder="Ex: Porto Seguro, Assist Card, etc" />}
             </div>
             <div>
               <Label>Tipo de Cobertura</Label>
-              <Input value={value.cobertura || ""} onChange={e => onChange({ ...value, cobertura: e.target.value })} />
+              <Input value={value.cobertura || ""} onChange={e => onChange({
+              ...value,
+              cobertura: e.target.value
+            })} />
             </div>
-          </div>
-        );
+          </div>;
       case "transfer":
-        return (
-          <div className="grid grid-cols-2 gap-3">
+        return <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Fornecedor</Label>
-              <Input value={value.fornecedor || ""} onChange={e => onChange({ ...value, fornecedor: e.target.value })} placeholder="Ex: Easy Transfer, etc" />
+              <Input value={value.fornecedor || ""} onChange={e => onChange({
+              ...value,
+              fornecedor: e.target.value
+            })} placeholder="Ex: Easy Transfer, etc" />
             </div>
             <div>
               <Label>Origem</Label>
-              <Input value={value.origem || ""} onChange={e => onChange({ ...value, origem: e.target.value })} />
+              <Input value={value.origem || ""} onChange={e => onChange({
+              ...value,
+              origem: e.target.value
+            })} />
             </div>
             <div>
               <Label>Destino</Label>
-              <Input value={value.destino || ""} onChange={e => onChange({ ...value, destino: e.target.value })} />
+              <Input value={value.destino || ""} onChange={e => onChange({
+              ...value,
+              destino: e.target.value
+            })} />
             </div>
             <div>
               <Label>Data/Hora</Label>
-              <Input type="datetime-local" value={value.dataHora || ""} onChange={e => onChange({ ...value, dataHora: e.target.value })} />
+              <Input type="datetime-local" value={value.dataHora || ""} onChange={e => onChange({
+              ...value,
+              dataHora: e.target.value
+            })} />
             </div>
             <div>
               <Label>Tipo de Veículo</Label>
-              <Input value={value.tipoVeiculo || ""} onChange={e => onChange({ ...value, tipoVeiculo: e.target.value })} />
+              <Input value={value.tipoVeiculo || ""} onChange={e => onChange({
+              ...value,
+              tipoVeiculo: e.target.value
+            })} />
             </div>
-          </div>
-        );
+          </div>;
       case "passeios":
-        return (
-          <div className="grid grid-cols-2 gap-3">
+        return <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Fornecedor</Label>
-              <Input value={value.fornecedor || ""} onChange={e => onChange({ ...value, fornecedor: e.target.value })} placeholder="Ex: CityTour, GetYourGuide, etc" />
+              <Input value={value.fornecedor || ""} onChange={e => onChange({
+              ...value,
+              fornecedor: e.target.value
+            })} placeholder="Ex: CityTour, GetYourGuide, etc" />
             </div>
             <div>
               <Label>Local do Passeio</Label>
-              <Input value={value.local || ""} onChange={e => onChange({ ...value, local: e.target.value })} />
+              <Input value={value.local || ""} onChange={e => onChange({
+              ...value,
+              local: e.target.value
+            })} />
             </div>
             <div>
               <Label>Data</Label>
-              <Input type="date" value={value.dataPasseio || ""} onChange={e => onChange({ ...value, dataPasseio: e.target.value })} />
+              <Input type="date" value={value.dataPasseio || ""} onChange={e => onChange({
+              ...value,
+              dataPasseio: e.target.value
+            })} />
             </div>
             <div>
               <Label>Duração</Label>
-              <Input value={value.duracao || ""} onChange={e => onChange({ ...value, duracao: e.target.value })} placeholder="Ex: 4 horas" />
+              <Input value={value.duracao || ""} onChange={e => onChange({
+              ...value,
+              duracao: e.target.value
+            })} placeholder="Ex: 4 horas" />
             </div>
             <div>
               <Label>Nº de Pessoas</Label>
-              <Input type="number" value={value.numeroPessoas || ""} onChange={e => onChange({ ...value, numeroPessoas: e.target.value })} />
+              <Input type="number" value={value.numeroPessoas || ""} onChange={e => onChange({
+              ...value,
+              numeroPessoas: e.target.value
+            })} />
             </div>
-          </div>
-        );
+          </div>;
       case "outros":
-        return (
-          <div>
+        return <div>
             <Label>Fornecedor</Label>
-            <Input value={value.fornecedor || ""} onChange={e => onChange({ ...value, fornecedor: e.target.value })} placeholder="Ex: Fornecedor do produto/serviço" />
-          </div>
-        );
+            <Input value={value.fornecedor || ""} onChange={e => onChange({
+            ...value,
+            fornecedor: e.target.value
+          })} placeholder="Ex: Fornecedor do produto/serviço" />
+          </div>;
       default:
         return null;
     }
   };
-
-  return (
-    <>
+  return <>
       <div className="relative border border-border rounded-lg p-4 mb-4 bg-card">
-      {onRemove && (
-        <Button
-          size="icon"
-          variant="ghost"
-          type="button"
-          onClick={onRemove}
-          className="absolute top-2 right-2 h-8 w-8 text-muted-foreground hover:text-destructive"
-        >
+      {onRemove && <Button size="icon" variant="ghost" type="button" onClick={onRemove} className="absolute top-2 right-2 h-8 w-8 text-muted-foreground hover:text-destructive">
           <Trash2 className="h-4 w-4" />
-        </Button>
-      )}
+        </Button>}
       
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div>
           <Label>Tipo</Label>
-          <select
-            className="w-full mt-1 border border-input rounded-md h-10 px-3 bg-background"
-            value={value.type ?? ""}
-            onChange={e => {
-              const newType = e.target.value === "" ? undefined : (e.target.value as ProductType);
-              onChange({ ...EmptyProduct, ...value, type: newType });
-            }}
-            required
-          >
+          <select className="w-full mt-1 border border-input rounded-md h-10 px-3 bg-background" value={value.type ?? ""} onChange={e => {
+            const newType = e.target.value === "" ? undefined : e.target.value as ProductType;
+            onChange({
+              ...EmptyProduct,
+              ...value,
+              type: newType
+            });
+          }} required>
             <option value="">Selecione</option>
             {typeOptions.map(pt => <option key={pt.value} value={pt.value}>{pt.label}</option>)}
           </select>
         </div>
         <div>
           <Label>Qtd</Label>
-          <Input
-            ref={quantityRef}
-            type="text"
-            value={quantityInput.displayValue}
-            onChange={(e) => {
-              quantityInput.handleChange(e);
-              const parsed = parseQuantity(e.target.value);
-              onChange({ ...value, quantity: parsed });
-            }}
-            onBlur={quantityInput.handleBlur}
-            placeholder="1"
-          />
+          <Input ref={quantityRef} type="text" value={quantityInput.displayValue} onChange={e => {
+            quantityInput.handleChange(e);
+            const parsed = parseQuantity(e.target.value);
+            onChange({
+              ...value,
+              quantity: parsed
+            });
+          }} onBlur={quantityInput.handleBlur} placeholder="1" />
         </div>
         <div>
           <Label>Valor</Label>
-          <Input
-            ref={priceRef}
-            type="text"
-            value={priceInput.displayValue}
-            onChange={(e) => {
-              priceInput.handleChange(e);
-              const parsed = parseCurrency(e.target.value);
-              onChange({ ...value, price: parsed });
-            }}
-            onBlur={priceInput.handleBlur}
-            placeholder="R$ 0,00"
-          />
-          {(value.price || 0) > 0 && (
-            <div className="text-xs text-muted-foreground mt-1">
-              Valor interpretado: R$ {(value.price || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 5 })}
-            </div>
-          )}
+          <Input ref={priceRef} type="text" value={priceInput.displayValue} onChange={e => {
+            priceInput.handleChange(e);
+            const parsed = parseCurrency(e.target.value);
+            onChange({
+              ...value,
+              price: parsed
+            });
+          }} onBlur={priceInput.handleBlur} placeholder="R$ 0,00" />
+          {(value.price || 0) > 0 && <div className="text-xs text-muted-foreground mt-1">
+              Valor interpretado: R$ {(value.price || 0).toLocaleString('pt-BR', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 5
+            })}
+            </div>}
         </div>
         {/* Custo - Oculto para todas as passagens */}
-        {value.type !== "passagem" && (
-          <div>
+        {value.type !== "passagem" && <div>
             <Label>Custo</Label>
-            <Input
-              ref={costRef}
-              type="text"
-              value={costInput.displayValue}
-              onChange={(e) => {
-                costInput.handleChange(e);
-                const parsed = parseCurrency(e.target.value);
-                onChange({ ...value, cost: parsed });
-              }}
-              onBlur={costInput.handleBlur}
-              placeholder="R$ 0,00"
-            />
-          </div>
-        )}
+            <Input ref={costRef} type="text" value={costInput.displayValue} onChange={e => {
+            costInput.handleChange(e);
+            const parsed = parseCurrency(e.target.value);
+            onChange({
+              ...value,
+              cost: parsed
+            });
+          }} onBlur={costInput.handleBlur} placeholder="R$ 0,00" />
+          </div>}
       </div>
       
       {/* Mostrar nome do produto gerado automaticamente */}
-      {value.type && value.name && (
-        <div className="mt-2">
+      {value.type && value.name && <div className="mt-2">
           <div className="px-3 py-2 bg-muted/50 rounded-md border-l-4 border-primary/30">
             <p className="text-sm text-muted-foreground">
               <strong>Produto:</strong> {value.name}
             </p>
           </div>
-        </div>
-      )}
+        </div>}
       
       {/* Lucro - Só mostrar para produtos que não sejam passagem (que já tem preview próprio) */}
-      {value.type !== "passagem" && (
-        <div className="grid grid-cols-2 gap-3 mt-3">
+      {value.type !== "passagem" && <div className="grid grid-cols-2 gap-3 mt-3">
           <div>
             <Label>Lucro do Produto</Label>
             <div className="mt-1 px-3 py-2 bg-muted rounded-md h-10 flex items-center">
@@ -1001,36 +919,23 @@ const DynamicProductForm: React.FC<{
             </div>
           </div>
           <div></div>
-        </div>
-      )}
+        </div>}
         
-        {value.type && (
-          <div className="mt-4">
+        {value.type && <div className="mt-4">
             {renderExtraFields()}
-          </div>
-        )}
+          </div>}
         
         <div className="mt-4">
           <Label>Detalhes/Opcional</Label>
-          <Input
-            value={value.details}
-            onChange={e => onChange({ ...value, details: e.target.value })}
-            placeholder="Ex: Observações (vencimento, fornecedor...)"
-          />
+          <Input value={value.details} onChange={e => onChange({
+          ...value,
+          details: e.target.value
+        })} placeholder="Ex: Observações (vencimento, fornecedor...)" />
         </div>
       </div>
       
       {/* On-Demand Miles Purchase Modal */}
-      <OnDemandMilesPurchaseModal
-        open={isOnDemandModalOpen}
-        onOpenChange={setIsOnDemandModalOpen}
-        onSubmit={handleOnDemandPurchase}
-        requiredMiles={value.qtdMilhas || 0}
-        maxCostPerThousand={maxCostPerThousand}
-        loading={onDemandMilesPurchase.isPending}
-      />
-    </>
-  );
+      <OnDemandMilesPurchaseModal open={isOnDemandModalOpen} onOpenChange={setIsOnDemandModalOpen} onSubmit={handleOnDemandPurchase} requiredMiles={value.qtdMilhas || 0} maxCostPerThousand={maxCostPerThousand} loading={onDemandMilesPurchase.isPending} />
+    </>;
 };
-
 export default DynamicProductForm;
