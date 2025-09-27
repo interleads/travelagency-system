@@ -111,26 +111,26 @@ export default function DashboardFilters() {
       : "Período";
 
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="w-[240px] justify-start text-left font-normal"
+            className="w-full sm:w-[240px] justify-start text-left font-normal"
             aria-label="Selecionar período"
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            <span>{formatted}</span>
+            <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+            <span className="truncate">{formatted}</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="end">
-          <div className="flex flex-col md:flex-row gap-2 p-2">
+          <div className="flex flex-col gap-2 p-2">
             <div className="flex flex-col gap-1 min-w-[140px]">
               {PRESETS.map((preset, idx) => (
                 <Button
                   key={preset.label}
                   variant={idx === selectedPreset ? "default" : "ghost"}
-                  className="justify-start"
+                  className="justify-start text-xs sm:text-sm"
                   onClick={() => handlePresetClick(idx)}
                   tabIndex={0}
                 >
@@ -138,22 +138,22 @@ export default function DashboardFilters() {
                 </Button>
               ))}
             </div>
-            <div className={`p-2 pt-0 md:pt-2 ${custom ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-50"} transition-all`}>
+            <div className={`${custom ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-50"} transition-all`}>
               <Calendar
                 initialFocus
                 mode="range"
                 selected={dateRange}
                 onSelect={handleCustomRange}
-                numberOfMonths={2}
+                numberOfMonths={1}
                 className="p-3 pointer-events-auto"
               />
             </div>
           </div>
         </PopoverContent>
       </Popover>
-      <Button>
+      <Button className="w-full sm:w-auto">
         <Download className="mr-2 h-4 w-4" />
-        Exportar
+        <span className="sm:inline">Exportar</span>
       </Button>
     </div>
   );

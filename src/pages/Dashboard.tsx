@@ -8,12 +8,12 @@ import DailySalesChart from "@/components/dashboard/DailySalesChart";
 const Dashboard = () => {
   return (
     <DashboardDateRangeProvider>
-      <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-        <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Dashboard</h2>
+      <div className="space-y-4 sm:space-y-0 sm:flex sm:flex-col md:flex-row md:items-center md:justify-between gap-2 mb-6">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Dashboard</h2>
         <DashboardFilters />
       </div>
       <DashboardKPICards />
-      <div className="mt-6">
+      <div className="mt-6 sm:mt-8">
         <DailySalesChart />
       </div>
     </DashboardDateRangeProvider>

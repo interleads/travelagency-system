@@ -120,21 +120,21 @@ export default function DashboardKPICards() {
   }
 
   return (
-    <div className="grid gap-6 mb-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4 sm:gap-6 mb-6 sm:mb-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
       {metrics.map((m, i) => (
         <Card
           key={i}
-          className="bg-gradient-to-br shadow-lg border-0 text-white relative overflow-hidden"
+          className="bg-gradient-to-br shadow-lg border-0 text-white relative overflow-hidden min-h-[120px] sm:min-h-[140px]"
           style={{ backgroundImage: `linear-gradient(135deg,var(--tw-gradient-stops))` }}
         >
           <div className={`absolute inset-0 bg-gradient-to-br ${m.bg} opacity-90`} />
-          <CardContent className="relative flex flex-col gap-1 z-10">
-            <div className="flex items-center justify-between mt-6">
-              <span className="text-lg font-medium">{m.label}</span>
-              <m.icon className="w-8 h-8 opacity-75" />
+          <CardContent className="relative flex flex-col gap-1 z-10 p-4 sm:p-6">
+            <div className="flex items-center justify-between mt-2 sm:mt-6">
+              <span className="text-sm sm:text-lg font-medium">{m.label}</span>
+              <m.icon className="w-6 h-6 sm:w-8 sm:h-8 opacity-75" />
             </div>
-            <div className="text-3xl font-bold my-2">{m.value}</div>
-            <span className="text-white/80 text-xs">{m.description}</span>
+            <div className="text-2xl sm:text-3xl font-bold my-1 sm:my-2 break-all">{m.value}</div>
+            <span className="text-white/80 text-xs leading-tight">{m.description}</span>
           </CardContent>
         </Card>
       ))}

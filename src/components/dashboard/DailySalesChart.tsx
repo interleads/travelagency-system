@@ -82,7 +82,7 @@ export default function DailySalesChart() {
   return (
     <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
       <CardContent>
-        <div className="h-72">
+        <div className="h-64 sm:h-72">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData}>
               <defs>
